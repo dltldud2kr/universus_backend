@@ -1,4 +1,4 @@
-package com.example.gazamung.member;
+package com.example.gazamung.member.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class Member implements UserDetails {
     @Id
     @GeneratedValue
-    private String idx;
+    private Long idx;
 
     private String email;
     private String password;
@@ -54,7 +54,7 @@ public class Member implements UserDetails {
         return email;
     }
 
-    public String getIdx() {
+    public Long getIdx() {
         return idx;
     }
 

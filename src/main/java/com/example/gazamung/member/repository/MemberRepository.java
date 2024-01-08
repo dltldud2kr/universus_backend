@@ -1,6 +1,6 @@
 package com.example.gazamung.member.repository;
 
-import com.example.gazamung.member.Member;
+import com.example.gazamung.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, String> {
 
     Optional<Member> findByEmail(String email);
+
+    Optional<Member> findByEmailAndPassword(String email, String password);
 
 
     @Modifying

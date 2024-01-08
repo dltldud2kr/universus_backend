@@ -5,7 +5,7 @@ package com.example.gazamung.auth;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.member.Member;
+import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;

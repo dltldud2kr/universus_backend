@@ -1,7 +1,7 @@
 package com.example.gazamung.member.service;
 
 
-import com.example.gazamung.member.Member;
+import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
