@@ -2,8 +2,11 @@ package com.example.gazamung.member.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
+import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.dto.TokenDto;
+import com.example.gazamung.emailAuth.dto.EmailDto;
+import com.example.gazamung.emailAuth.service.EmailService;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.LoginRequestDto;
@@ -29,6 +32,7 @@ public class MemberController {
 
     private final MemberRepository memberRepository;
     private final MemberService memberService;
+    private final EmailService emailService;
 
 
 
@@ -107,6 +111,32 @@ public class MemberController {
     }
 
 
+    @Operation(summary = "이메일 인증번호 전송 ", description = "" +
+            "이메일 인증번호 전송" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+
+    @PostMapping("/emailSend")
+    public ResultDTO<Object> emailSend(@RequestBody EmailDto dto) throws Exception {
+        try {
+            boolean result = memberService.isMember(dto.getEmail());
+
+            //회원이 있을 시 예외처리
+            if (result){
+                throw new CustomException(CustomExceptionCode.DUPLICATED_MEMBER);
+            }
+            emailService.sendEmailVerification(dto.getEmail());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "인증번호가 정상적으로 발송되었습니다.", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), "메일 발송 중 문제가 발생했습니다.", null);
+        }
+    }
 
 
 

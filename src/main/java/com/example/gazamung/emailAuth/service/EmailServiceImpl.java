@@ -43,7 +43,7 @@ public class EmailServiceImpl implements EmailService {
         // 이메일 내용에 버튼을 추가한 HTML
         String msgg="";
         msgg+= "<div style='margin:20px;'>";
-        msgg+= "<h1> 안녕하세요 플램버스입니다. </h1>";
+        msgg+= "<h1> 안녕하세요 가자멍입니다. </h1>";
         msgg+= "<br>";
         msgg+= "<p>아래 코드를 복사해 입력해주세요<p>";
         msgg+= "<br>";
@@ -59,7 +59,7 @@ public class EmailServiceImpl implements EmailService {
         MimeMessage message = emailSender.createMimeMessage();
 
         message.addRecipients(RecipientType.TO, to);
-        message.setSubject("이메일 인증 테스트");
+        message.setSubject("가자멍 계정 인증");
         message.setText(msgg, "utf-8", "html");
         message.setFrom(new InternetAddress("dltldud2kr@gmail.com", "leesiyoung"));
 
