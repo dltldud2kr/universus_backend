@@ -12,6 +12,7 @@ import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.LoginRequestDto;
 import com.example.gazamung.member.dto.PasswordFoundDto;
+import com.example.gazamung.member.dto.PwChangeDto;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.member.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -220,7 +221,26 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "비밀번호 변경 ", description = "" +
+            " 비밀번호 변경." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @PostMapping("/pwChange")
+    public ResultDTO<Object> pwChange(@RequestBody PwChangeDto dto){
 
+        try {
+            memberService.changePw(dto.getEmail(),dto.getPassword());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "비밀번호 변경 완료", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
 
 
 

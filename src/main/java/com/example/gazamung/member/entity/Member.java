@@ -22,7 +22,8 @@ import java.util.stream.Collectors;
 @Slf4j  // 로그를 남기기 위한 어노테이션
 public class Member implements UserDetails {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ")
+    @SequenceGenerator(name = "MEMBER_SEQ", sequenceName = "member_sequence", allocationSize = 1)
     private Long idx;
 
     private String email;
