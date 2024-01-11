@@ -32,7 +32,7 @@ public class Member implements UserDetails {
     private String userName;
     private String nickname;
     private int role;   // 0 : USER 1 : ADMIN
-    private int platform;
+    private int platform; // 0.가자멍 1. 카카오
     private LocalDateTime regDt;
     private LocalDateTime udtDt;
 
