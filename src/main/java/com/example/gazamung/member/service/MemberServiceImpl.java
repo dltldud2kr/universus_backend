@@ -1,8 +1,11 @@
 package com.example.gazamung.member.service;
 
 import com.example.gazamung._enum.CustomExceptionCode;
+import com.example.gazamung._enum.EmailAuthStatus;
 import com.example.gazamung.auth.JwtTokenProvider;
 import com.example.gazamung.dto.TokenDto;
+import com.example.gazamung.emailAuth.entity.EmailAuth;
+import com.example.gazamung.emailAuth.repository.EmailAuthRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.entity.Member;
@@ -30,6 +33,8 @@ public class MemberServiceImpl implements MemberService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final EmailAuthRepository emailAuthRepository;
 
     /**
      * 1. 로그인 요청으로 들어온 ID, PWD 기반으로 Authentication 객체 생성
@@ -123,6 +128,92 @@ public class MemberServiceImpl implements MemberService {
             //만료된 리프레쉬 토큰.
             throw new CustomException(CustomExceptionCode.EXPIRED_JWT);
         }
+    }
+
+
+    /**
+     * @title 이메일 인증 로직
+     * @param email 회원 이메일x`
+     * @return
+     */
+
+    //1.  member 테이블에 이미 있는 회원인지 확인 .   있으면 duplicated_member 예외처리
+    //2.  이미 인증된 상태 (VERIFIED) 인지 확인. VERIFIED상태라면 VERIFIED_MEMBER 예외처리
+    //3. UNVERIFIED 상태를 찾음. 이 때 유효시간 3분이 지났으면 EmailAuthStatus를 EXPIRED 로 변경 후 EXPIRED_AUTH 예외처리.
+    // 30분이 안 지났으면 EmailAuthStatus를 VERIFIED 상태로 변경해줌.
+
+    /*
+    1. EXPIRED
+    2. VERIFIED
+    3. UNVERIFIED
+    4. INVALID
+     */
+
+    // CustomException 예외 발생시  이 예외가 emailCheck 메서드 내에서 발생하면
+    // 트랜잭션을 롤백시키기 때문에 DB에 변경 사항이 반영되지 않음.
+    // @Transactional(noRollbackFor = CustomException.class)를 사용하여
+    // CustomException 이 발생해도 트랜잭션을 롤백하지 않도록 설정
+    @Transactional(noRollbackFor = CustomException.class)
+    @Override
+    public boolean emailCheck(String email, String verifCode){
+
+
+        // UNVERIFIED  있을 시 만료됐는지 확인 후 인증처리
+        Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email, EmailAuthStatus.UNVERIFIED);
+        if (optionalEmailAuth.isPresent()){
+            EmailAuth emailAuth = optionalEmailAuth.get();
+            LocalDateTime creationTime = emailAuth.getCreated();
+            LocalDateTime expirationTime = creationTime.plusMinutes(3); // 3분 유효시간
+            LocalDateTime now = LocalDateTime.now();
+
+            if (now.isAfter(expirationTime)) {
+                emailAuth.setEmailAuthStatus(EmailAuthStatus.EXPIRED); // 만료
+                updateEmailAuthStatus(emailAuth);
+                throw new CustomException(CustomExceptionCode.EXPIRED_AUTH);
+            } else {
+
+                emailAuth.setEmailAuthStatus(EmailAuthStatus.VERIFIED);
+                updateEmailAuthStatus(emailAuth);
+
+            }
+
+        }
+        // UNVERIFIED 없을 시
+        else {
+
+            throw new CustomException(CustomExceptionCode.INVALID_AUTH);
+        }
+
+        return true;
+    }
+
+    @Transactional
+    public void updateEmailAuthStatus(EmailAuth emailAuth) {
+        emailAuthRepository.save(emailAuth);
+    }
+
+    @Transactional
+    @Override
+    public boolean changePw(String email, String password) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        member.setPassword(password);
+        System.out.println("변경 비번 " + member.getPassword());
+
+        memberRepository.save(member);
+
+
+        return true;
+    }
+
+    @Override
+    public boolean isMember(String email) {
+        Optional<Member> byEmail = memberRepository.findByEmail(email);
+        if (byEmail.isPresent()){
+            return true;
+        }
+        return false;
     }
 
 

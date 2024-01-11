@@ -27,4 +27,28 @@ public interface MemberService {
      * @return
      */
     TokenDto createToken(String memberIdx);
+
+    /**
+     * 이메일 인증확인 (발송된 인증번호와 동일한지 확인)
+     * @param email
+     * @param verifCode
+     * @return
+     */
+    boolean emailCheck(String email, String verifCode);
+
+
+
+    /**
+     * 비밀번호 변경
+     */
+
+    boolean changePw(String email, String password);
+
+    /**
+     * 회원인지 확인
+     * @param email
+     * @return
+     */
+    boolean isMember(String email);
+
 }
