@@ -5,6 +5,7 @@ import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.dto.TokenDto;
+import com.example.gazamung.emailAuth.dto.EmailCheckDto;
 import com.example.gazamung.emailAuth.dto.EmailDto;
 import com.example.gazamung.emailAuth.service.EmailService;
 import com.example.gazamung.exception.CustomException;
@@ -135,6 +136,58 @@ public class MemberController {
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "인증번호가 정상적으로 발송되었습니다.", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), "메일 발송 중 문제가 발생했습니다.", null);
+        }
+    }
+
+    @Operation(summary = "회원 가입 시 이메일 인증 처리", description = "" +
+            "회원 가입 시 이메일 인증 처리." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+
+    // 인증한 이메일의 이메일인증여부를 변경
+    @PostMapping("/email/auth")
+    public ResultDTO<Object> emailCheck(@RequestBody EmailCheckDto dto) {
+        try {
+            boolean result = memberService.isMember(dto.getEmail());
+            if (result == true){
+                throw new CustomException(CustomExceptionCode.DUPLICATED_MEMBER);
+            }
+            memberService.emailCheck(dto.getEmail(),dto.getVerifcode());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "이메일 인증이 정상적으로 되었습니다.", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+    @Operation(summary = "비밀번호 찾기 시 이메일 인증 처리", description = "" +
+            "비밀번호 찾기 시 이메일 인증 처리." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @PostMapping("/pwFind/email/auth")
+    public ResultDTO<Object> findPwEmailCheck(@RequestBody EmailCheckDto dto){
+
+        try {
+            boolean result = memberService.isMember(dto.getEmail());
+            if (result == false){
+                throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
+            }
+            memberService.emailCheck(dto.getEmail(),dto.getVerifcode());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "이메일 인증이 정상적으로 되었습니다.", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
 
