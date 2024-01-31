@@ -194,7 +194,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
-    public TokenDto createToken(String memberIdx) {
+    public TokenDto createToken(Long memberIdx) {
         Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 

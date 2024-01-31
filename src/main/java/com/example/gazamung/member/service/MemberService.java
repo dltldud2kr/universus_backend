@@ -39,7 +39,7 @@ public interface MemberService {
      * @param memberIdx
      * @return
      */
-    TokenDto createToken(String memberIdx);
+    TokenDto createToken(Long memberIdx);
 
     /**
      * 이메일 인증확인 (발송된 인증번호와 동일한지 확인)

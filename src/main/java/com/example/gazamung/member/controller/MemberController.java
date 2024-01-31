@@ -53,7 +53,7 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "토큰 발급 성공"),
     })
     @PostMapping("/auth/token")
-    public ResultDTO<TokenDto> getAccessToken(@RequestBody String memberIdx) {
+    public ResultDTO<TokenDto> getAccessToken(@RequestBody Long memberIdx) {
         try {
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "토큰이 갱신 되었습니다.", memberService.createToken(memberIdx));
         } catch (CustomException e) {

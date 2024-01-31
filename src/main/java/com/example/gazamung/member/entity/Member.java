@@ -34,7 +34,7 @@ public class Member implements UserDetails {
     private String phone;
     private String addressLine1;
     private String addressLine2;
-    private int role;   // 0 : USER 1 : ADMIN
+    private Integer role;   // 0 : USER 1 : ADMIN
     private int platform; // 0.가자멍 1. 카카오
     private LocalDateTime regDt;
     private LocalDateTime udtDt;
