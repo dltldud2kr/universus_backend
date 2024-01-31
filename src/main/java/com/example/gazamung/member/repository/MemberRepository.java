@@ -19,7 +19,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @Query(value = "UPDATE member SET refresh_token = :refreshToken WHERE email = :email", nativeQuery = true)
     void updateRefreshToken(@Param("email") String email, @Param("refreshToken") String refreshToken);
 
-    Optional<Member> findByIdx(String idx);
+//    Optional<Member> findByIdx(String idx);
 
     boolean existsByNickname(String nickname);
 }

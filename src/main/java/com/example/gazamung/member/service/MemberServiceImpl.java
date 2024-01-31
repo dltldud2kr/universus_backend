@@ -96,7 +96,10 @@ public class MemberServiceImpl implements MemberService {
                     .password(password)
                     .refreshToken(null)
                     .role(0)
-                    .platform(0)
+                    .platform(dto.getPlatform())
+                    .phone(dto.getPhone())
+                    .addressLine1(dto.getAddressLine1())
+                    .addressLine2(dto.getAddressLine2())
                     .regDt(LocalDateTime.now())
                     .build();
             memberRepository.save(member);

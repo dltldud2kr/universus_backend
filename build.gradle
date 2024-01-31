@@ -38,6 +38,12 @@ dependencies {
     // smtp gmail email
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    // webSocket
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+
+    //gson
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
 

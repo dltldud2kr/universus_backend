@@ -89,6 +89,8 @@ public class MemberController {
     }
 
 
+
+
     @Operation(summary = "회원가입 요청", description = "" +
             "임시 회원가입을 요청합니다." +
             "테스트 용도로 확인만 해주세요." +

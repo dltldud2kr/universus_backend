@@ -19,18 +19,21 @@ import java.util.stream.Collectors;
 @Builder
 @Getter
 @Setter
-@Slf4j  // 로그를 남기기 위한 어노테이션
+@Slf4j
 public class Member implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MEMBER_SEQ")
     @SequenceGenerator(name = "MEMBER_SEQ", sequenceName = "member_sequence", allocationSize = 1)
-    private Long idx;
+    private Long memberIdx;
 
     private String email;
     private String password;
     private String refreshToken; //리프레쉬 토큰
     private String userName;
     private String nickname;
+    private String phone;
+    private String addressLine1;
+    private String addressLine2;
     private int role;   // 0 : USER 1 : ADMIN
     private int platform; // 0.가자멍 1. 카카오
     private LocalDateTime regDt;
@@ -55,15 +58,14 @@ public class Member implements UserDetails {
         return email;
     }
 
-    public Long getIdx() {
-        return idx;
+    public Long getMemberIdx() {
+        return memberIdx;
     }
 
 
     // idx 카카오 고유번호  (pk값) 을 password 로 둠.
     // password로 둔 이유는 스프링 시큐리티 UserDetails객체를 사용하기 때문
     // 이 객체는 userName과 password를 받아야함.
-    // 우리 프로젝트는 email과 카카오 고유 idx 값만 확인해서 로그인 시키기 때문에 password 대신 idx 를 넣음
     @Override
     public String getPassword() {
         return password;
