@@ -29,6 +29,7 @@ dependencies {
     // swagger
     implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
 
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
     annotationProcessor 'org.projectlombok:lombok'
@@ -41,7 +42,6 @@ dependencies {
     // webSocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
-
     //gson
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
@@ -52,6 +52,10 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:0.11.2")
 
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+
+    // Spring Security의 버전을 명시
+    implementation 'org.springframework.security:spring-security-messaging:5.7.0'
+    implementation 'org.springframework.security:spring-security-web:5.7.0'
 }
 
 tasks.named('test') {

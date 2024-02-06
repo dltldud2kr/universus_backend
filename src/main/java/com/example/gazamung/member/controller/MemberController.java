@@ -80,6 +80,8 @@ public class MemberController {
             String email = loginRequest.getEmail();
             String password = loginRequest.getPassword();
 
+            System.out.println(email + password);
+
             TokenDto tokenDto = memberService.login(email, password);
 
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "로그인 성공", tokenDto);

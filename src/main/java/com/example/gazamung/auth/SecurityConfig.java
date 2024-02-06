@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig  {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
@@ -78,6 +78,9 @@ public class SecurityConfig {
                 .antMatchers("/api/v1/board/**").permitAll()
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/api/v1/**").permitAll()
+                .antMatchers("/chat/**").permitAll()
+                .antMatchers("/chat").permitAll()
+                .antMatchers("/ws/**").permitAll()
                 .antMatchers(PERMIT_URL_ARRAY).permitAll()
                 .anyRequest().authenticated()
                 .and()

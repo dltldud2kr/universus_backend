@@ -27,7 +27,6 @@ public class Message {
     private String memberId;
 
 
-
     @ManyToOne
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
