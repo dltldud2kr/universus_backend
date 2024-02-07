@@ -89,5 +89,11 @@ public class MoimServiceImpl implements MoimService {
         return true;
     }
 
+    @Override
+    public List<MoimDto> list() {
+        List<Moim> list = moimRepository.findAll();
+        return MoimDtoList(list);
+    }
+
 
 }

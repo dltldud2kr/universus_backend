@@ -41,6 +41,16 @@ public class MoimController {
         }
     }
 
+    @GetMapping("/list")    //모임 리스트 조회
+    public List<MoimDto> list(){
+        try{
+            List<MoimDto> list = moimService.list();
+            return list;
+        } catch (Exception e){
+            return (List<MoimDto>) ResultDTO.of(false, ApiResponseCode.INTERNAL_SERVER_ERROR.getCode(), "모임 조회 실패.", null);
+        }
+    }
+
     @DeleteMapping("/delete")   //모임 삭제
     public ResultDTO delete(@RequestParam Long moimId, Long memberIdx){
         try{
