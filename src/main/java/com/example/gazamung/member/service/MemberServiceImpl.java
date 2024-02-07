@@ -54,10 +54,10 @@ public class MemberServiceImpl implements MemberService {
      */
 
     @Transactional
-    public TokenDto login(String email, String password) {
+    public Map<String, Object> login(String email, String password) {
 
         // 로그인 정보로 DB 조회  (아이디, 비밀번호)
-        memberRepository.findByEmailAndPassword(email,password)
+        Member member = memberRepository.findByEmailAndPassword(email,password)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 비밀번호)
@@ -74,13 +74,18 @@ public class MemberServiceImpl implements MemberService {
             log.info(tokenDto.getAccessToken());
         }
 
-        return tokenDto;
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("tokenDto", tokenDto);
+        response.put("memberIdx", member.getMemberIdx());
+
+        return response;
     }
 
 
     @Transactional
     @Override
-    public TokenDto join(JoinRequestDto dto) {
+    public Map<String, Object> join(JoinRequestDto dto) {
         try {
             String email = dto.getEmail();
             String password = dto.getPassword();
@@ -117,7 +122,13 @@ public class MemberServiceImpl implements MemberService {
                 log.info(tokenDto.getAccessToken());
                 log.info("token empty");
             }
-            return tokenDto;
+
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("tokenDto", tokenDto);
+            response.put("memberIdx", member.getMemberIdx());
+
+            return response;
 
 
 
@@ -128,7 +139,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public TokenDto join(String email, String kakaoIdx, String nickname) {
+    public Map<String, Object> join(String email, String kakaoIdx, String nickname) {
         try {
             //해당 이메일이 존재하는지 확인.
             Optional<Member> optionalMember =  memberRepository.findByEmail(email);
@@ -160,7 +171,13 @@ public class MemberServiceImpl implements MemberService {
                 log.info(tokenDto.getAccessToken());
                 log.info("token empty");
             }
-            return tokenDto;
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("tokenDto", tokenDto);
+            response.put("memberIdx", member.getMemberIdx());
+
+            return response;
+
 
 
 
@@ -170,10 +187,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Transactional
-    public TokenDto kakaoLogin(String email, String kakaoIdx) {
+    public Map<String, Object> kakaoLogin(String email, String kakaoIdx) {
         Optional<Member> optionalMember =  memberRepository.findByEmail(email);
 
-        memberRepository.findByEmail(email)
+        Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EMAIL));
 
         //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 멤버 인덱스 정보 포함 )
@@ -190,7 +207,12 @@ public class MemberServiceImpl implements MemberService {
             log.info(tokenDto.getAccessToken());
         }
 
-        return tokenDto;
+        Map<String, Object> response = new HashMap<>();
+        response.put("tokenDto", tokenDto);
+        response.put("memberIdx", member.getMemberIdx());
+
+        return response;
+
     }
 
 

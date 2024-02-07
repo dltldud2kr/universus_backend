@@ -7,5 +7,4 @@ public interface ChatRoomService {
 
     boolean create(ChatRoomDto dto);
 
-    Message saveMessage(Message message);
 }

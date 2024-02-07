@@ -13,17 +13,17 @@ public interface MemberService {
     /**
      * 회원가입
      */
-    TokenDto join(JoinRequestDto dto);
+    Map<String, Object> join(JoinRequestDto dto);
 
     /**
      * 카카오 회원가입
      */
-    TokenDto join(String email, String kakaoIdx, String nickname);
+    Map<String, Object> join(String email, String kakaoIdx, String nickname);
 
     /**
      * 카카오 로그인
      */
-    TokenDto kakaoLogin(String email, String password);
+    Map<String, Object> kakaoLogin(String email, String password);
 
     /**
      * 회원 로그인
@@ -31,7 +31,7 @@ public interface MemberService {
      * @param password
      * @return
      */
-    TokenDto login(String email, String password);
+    Map<String, Object> login(String email, String password);
 
 
     /**

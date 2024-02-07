@@ -29,6 +29,8 @@ public class ChatRoom {
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
     private List<Message> messages;
 
+    private String chatRoomSessionCode;
+
 
 
 
