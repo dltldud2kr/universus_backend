@@ -75,16 +75,16 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
     })
     @PostMapping("/auth/login")
-    public ResultDTO<TokenDto> login(@RequestBody LoginRequestDto loginRequest) {
+    public ResultDTO<Map<String, Object>> login(@RequestBody LoginRequestDto loginRequest) {
         try {
             String email = loginRequest.getEmail();
             String password = loginRequest.getPassword();
 
             System.out.println(email + password);
 
-            TokenDto tokenDto = memberService.login(email, password);
+            Map<String, Object> result = memberService.login(email, password);
 
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "로그인 성공", tokenDto);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "로그인 성공", result);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
@@ -109,7 +109,7 @@ public class MemberController {
     @PostMapping("/auth/join")
     public ResultDTO join(@RequestBody JoinRequestDto joinRequestDto) {
         try {
-            TokenDto result = memberService.join(joinRequestDto);
+            Map<String, Object> result = memberService.join(joinRequestDto);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "회원가입이 완료되었습니다.", result);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
@@ -274,7 +274,7 @@ public class MemberController {
         Optional<Member> member = memberRepository.findByEmail(email);
         if (member.isPresent()) {
             try {
-                TokenDto tokenDto = memberService.kakaoLogin(email, kakaoIdx);
+                Map<String, Object> tokenDto = memberService.kakaoLogin(email, kakaoIdx);
 
                 KakaoJoinRequestDto<Object> response = KakaoJoinRequestDto.of(true, "기존회원",
                         ApiResponseCode.SUCCESS.getCode(), "로그인 성공했음.", tokenDto);
@@ -287,7 +287,7 @@ public class MemberController {
                 return response;
             }
         } else {
-            TokenDto tokenDto = memberService.join(email, kakaoIdx, nickname);
+            Map<String, Object> tokenDto = memberService.join(email, kakaoIdx, nickname);
             KakaoJoinRequestDto<Object> response = KakaoJoinRequestDto.of(true, "신규회원",
                     ApiResponseCode.CREATED.getCode(), "회원가입이 완료되었습니다.", tokenDto);
             response.setUserInfo(result);  // 사용자 정보를 설정합니다.
