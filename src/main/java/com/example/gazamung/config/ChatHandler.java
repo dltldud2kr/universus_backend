@@ -14,65 +14,66 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
 @Component
 @Log4j2
 public class ChatHandler extends TextWebSocketHandler {
 
-    private  List<WebSocketSession> list = new ArrayList<>();
+    private final Map<String, List<WebSocketSession>> chatRooms = new ConcurrentHashMap<>();
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        log.info("payload : " + payload);
+        log.info("payload: " + payload);
 
-        for(WebSocketSession sess: list) {
-            sess.sendMessage(message);
+        // 세션의 URI에서 roomId를 추출합니다.
+        String roomId = extractRoomId(session.getUri());
+
+        // 해당 roomId의 채팅방에 있는 모든 세션에 메시지를 전송합니다.
+        List<WebSocketSession> roomSessions = chatRooms.get(roomId);
+        if (roomSessions != null) {
+            for (WebSocketSession sess : roomSessions) {
+                sess.sendMessage(message);
+            }
         }
     }
 
-    /* Client가 접속 시 호출되는 메서드 */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        // 세션의 URI에서 roomId를 추출합니다.
+        String roomId = extractRoomId(session.getUri());
 
-        //WebSocketSession 리스트에 현재 채팅방 세션을 추가.
-        list.add(session);
+        // 해당 roomId에 대한 채팅방이 없으면 새로 생성합니다.
+        chatRooms.putIfAbsent(roomId, new CopyOnWriteArrayList<>());
 
-        // 세션 ID 를 받는다.
+        // 채팅방에 현재 세션을 추가합니다.
+        List<WebSocketSession> roomSessions = chatRooms.get(roomId);
+        roomSessions.add(session);
 
-
-
-        log.info(session + " 클라이언트 접속");
+        log.info(session + " 클라이언트 접속 (roomId: " + roomId + ")");
     }
-
-    /* Client가 접속 해제 시 호출되는 메서드드 */
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        // 세션의 URI에서 roomId를 추출합니다.
+        String roomId = extractRoomId(session.getUri());
 
-        log.info(session + " 클라이언트 접속 해제");
-        list.remove(session);
-    }
-
-    // 핸들러를 제공하여 핸드셰이크를 수행하는 메서드
-    public WebSocketSession createWebSocketSession() throws URISyntaxException, IOException {
-        try {
-            // 웹소켓 클라이언트 연결을 생성하고 핸들러를 제공합니다.
-            WebSocketClient client = new StandardWebSocketClient();
-            WebSocketSession session = client.doHandshake(new TextWebSocketHandler() {
-                @Override
-                protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-                    // 텍스트 메시지 처리 로직을 작성합니다.
-                }
-            }, "ws://localhost:8080/chat").get();
-
-            return session;
-        } catch (InterruptedException | ExecutionException e) {
-            // 예외 처리 로직을 작성합니다.
-            log.error("Error during websocket handshake: " + e.getMessage());
-            throw new IOException("Error during websocket handshake", e);
+        // 해당 roomId에 대한 채팅방에서 세션을 제거합니다.
+        List<WebSocketSession> roomSessions = chatRooms.get(roomId);
+        if (roomSessions != null) {
+            roomSessions.remove(session);
         }
+
+        log.info(session + " 클라이언트 접속 해제 (roomId: " + roomId + ")");
     }
 
+    private String extractRoomId(URI uri) {
+        String path = uri.getPath();
+        // URI에서 마지막 경로를 roomId로 추출합니다.
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
 }

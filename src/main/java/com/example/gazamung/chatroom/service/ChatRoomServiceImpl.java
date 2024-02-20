@@ -30,9 +30,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
         // 웹소켓 세션 생성
-        WebSocketSession session = createWebSocketSession();
+//        WebSocketSession session = createWebSocketSession();
 
-        String sessionId = session.getId();
+//        String sessionId = session.getId();
 
 
 
@@ -43,13 +43,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     // 웹소켓 세션을 생성하는 메서드
-    private WebSocketSession createWebSocketSession() {
-        try {
-            // ChatHandler를 통해 웹소켓 세션을 생성하여 반환
-            return chatHandler.createWebSocketSession();
-        } catch (Exception e) {
-            log.error("Failed to create WebSocket session", e);
-            return null;
-        }
-    }
+//    private WebSocketSession createWebSocketSession() {
+//        try {
+//            // ChatHandler를 통해 웹소켓 세션을 생성하여 반환
+//            return chatHandler.createWebSocketSession();
+//        } catch (Exception e) {
+//            log.error("Failed to create WebSocket session", e);
+//            return null;
+//        }
+//    }
 }

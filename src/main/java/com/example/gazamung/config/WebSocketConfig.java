@@ -18,6 +18,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
-        registry.addHandler(chatHandler, "ws/chat").setAllowedOrigins("*");
+        // ws://localhost:8080/ws/chat/{roomId} 형식의 엔드포인트를 추가합니다.
+        registry.addHandler(chatHandler, "/ws/chat/{roomId}")
+                .setAllowedOrigins("*");
     }
 }

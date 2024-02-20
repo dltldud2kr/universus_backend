@@ -28,13 +28,13 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
-    @GetMapping("/chat")
-    public String chatGET(){
-
-        log.info("@ChatController, chat GET()");
-
-        return "chat";
-    }
+//    @GetMapping("/chat")
+//    public String chatGET(){
+//
+//        log.info("@ChatController, chat GET()");
+//
+//        return "chat";
+//    }
 
     @PostMapping("/chat/create")
     public String createChatRoom(ChatRoomDto chatRoomDto, Principal principal) {
