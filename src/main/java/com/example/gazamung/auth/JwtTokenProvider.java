@@ -48,9 +48,10 @@ public class JwtTokenProvider {
         long now = (new Date()).getTime();
 
         // Access Token 생성
-        // 1달 동안 유지합니다.
+        // 20일 동안 유지합니다.  ( 25,30 일 설정시 토큰만료 오류 발생 )
 //        Date accessTokenExpiresIn = new Date(now + (5 * 60 * 1000)); //5분
-        Date accessTokenExpiresIn = new Date(now + (30 * 24 * 60 * 60 * 1000));
+        Date accessTokenExpiresIn = new Date(now + (20 * 24 * 60 * 60 * 1000));
+
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
@@ -62,6 +63,8 @@ public class JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 //86400000 1일
                 .setExpiration(new Date(now + (86400000 * 30 * 3))) // 3달간 유지합니다.
+//                .setExpiration(new Date(now + (86400000 * 3))) // 3일간만 유지합니다.
+
                 .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secretKey.getBytes())) // 알고리즘, 시크릿 키
                 .compact();
 

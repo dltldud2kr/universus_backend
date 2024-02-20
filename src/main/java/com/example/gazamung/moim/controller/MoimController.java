@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 
@@ -22,7 +23,7 @@ public class MoimController {
     private final MoimService moimService;
 
     @PostMapping("/create") //모임 생성
-    public ResultDTO create(@RequestBody MoimDto dto){
+    public ResultDTO create(@RequestBody MoimDto dto, Principal principal){
         try{
             return ResultDTO.of(moimService.create(dto), ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", null);
         }catch(CustomException e){

@@ -3,9 +3,7 @@ package com.example.gazamung.moim.entity;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,7 +16,8 @@ import java.time.LocalDateTime;
 public class Moim {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MOIM_SEQ")
+    @SequenceGenerator(name = "MOIM_SEQ", sequenceName = "moim_sequence", allocationSize = 1)
     private Long moimId;
 
     private Long memberIdx;

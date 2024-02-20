@@ -16,6 +16,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 
 @RestController
 @Slf4j
@@ -35,9 +37,14 @@ public class ChatRoomController {
     }
 
     @PostMapping("/chat/create")
-    public String createChatRoom(ChatRoomDto chatRoomDto) {
+    public String createChatRoom(ChatRoomDto chatRoomDto, Principal principal) {
 
-        chatRoomService.create(chatRoomDto);
+        String str = principal.getName();
+
+        System.out.println("principal name : " + str);
+
+
+//        chatRoomService.create(chatRoomDto);
 
         return null;
 
