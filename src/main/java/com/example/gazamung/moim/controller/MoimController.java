@@ -5,6 +5,7 @@ import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.moim.dto.MoimDto;
+import com.example.gazamung.moim.entity.Moim;
 import com.example.gazamung.moim.service.MoimService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,27 @@ public class MoimController {
             return (List<MoimDto>) ResultDTO.of(false, ApiResponseCode.INTERNAL_SERVER_ERROR.getCode(), "모임 조회 실패.", null);
         }
     }
+
+    @GetMapping("/list/category")   //카테고리별 모임 리스트 조회
+    public Object listCategory(@RequestParam Long categoryId){
+        try{
+            List<MoimDto> list = moimService.listCategory(categoryId);
+            return list;
+        } catch (Exception e){
+            return ResultDTO.of(false, ApiResponseCode.INTERNAL_SERVER_ERROR.getCode(), "카테고리별 모임 조회 실패.", null);
+        }
+    }
+
+    @GetMapping("/list/likeCnt")   //카테고리별 모임 리스트 조회
+    public List<MoimDto> listLikeCnt(){
+        try{
+            List<MoimDto> list = moimService.listLikeCnt();
+            return list;
+        } catch (Exception e){
+            return (List<MoimDto>) ResultDTO.of(false, ApiResponseCode.INTERNAL_SERVER_ERROR.getCode(), "모임 조회 실패.", null);
+        }
+    }
+
 
     @DeleteMapping("/delete")   //모임 삭제
     public ResultDTO delete(@RequestParam Long moimId, Long memberIdx){

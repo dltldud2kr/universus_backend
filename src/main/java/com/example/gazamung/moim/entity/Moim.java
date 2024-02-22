@@ -2,6 +2,7 @@ package com.example.gazamung.moim.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -24,8 +25,18 @@ public class Moim {
     private String title;
     private String content;
     private String location;
+    private Long categoryId;
 
     private LocalDateTime regDt;    // 생성일
 
+    @ColumnDefault("0")
+    private Long likeCnt;
 
+    public void incrementLikeCount() {
+        this.likeCnt++;
+    }
+
+    public void decrementLikeCount() {
+        this.likeCnt--;
+    }
 }

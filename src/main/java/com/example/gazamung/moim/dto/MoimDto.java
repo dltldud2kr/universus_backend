@@ -1,5 +1,6 @@
 package com.example.gazamung.moim.dto;
 
+import com.example.gazamung.moim.entity.Moim;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,23 @@ public class MoimDto {
     private String title;
     private String content;
     private String location;
+    private Long categoryId;
 
     private LocalDateTime regDt;    // 생성일
+
+    private Long likeCnt;
+
+    // MoimDto 클래스에 convertToDto 메서드 추가
+    public static MoimDto convertToDto(Moim moim) {
+        return MoimDto.builder()
+                .moimId(moim.getMoimId())
+                .memberIdx(moim.getMemberIdx())
+                .title(moim.getTitle())
+                .content(moim.getContent())
+                .location(moim.getLocation())
+                .categoryId(moim.getCategoryId())
+                .regDt(moim.getRegDt())
+                .build();
+    }
 
 }

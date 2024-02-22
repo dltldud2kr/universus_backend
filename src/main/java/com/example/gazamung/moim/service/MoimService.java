@@ -17,4 +17,8 @@ public interface MoimService {
     boolean update(Long moimId, Long memberIdx, MoimDto dto);
 
     List<MoimDto> list();
+
+    List<MoimDto> listCategory(Long categoryId);
+
+    List<MoimDto> listLikeCnt();
 }
