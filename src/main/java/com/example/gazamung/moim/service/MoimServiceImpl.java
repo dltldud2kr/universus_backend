@@ -6,9 +6,15 @@ import com.example.gazamung.category.repository.CategoryRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
+import com.example.gazamung.membership.entity.Membership;
+import com.example.gazamung.membership.repository.MembershipRepository;
+import com.example.gazamung.moim.controller.MoimController;
 import com.example.gazamung.moim.dto.MoimDto;
 import com.example.gazamung.moim.entity.Moim;
 import com.example.gazamung.moim.repository.MoimRepository;
+import com.example.gazamung.notification.entity.Notification;
+import com.example.gazamung.notification.repository.NotificationRepository;
+import com.example.gazamung.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +35,9 @@ public class MoimServiceImpl implements MoimService {
     private final MoimRepository moimRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
-
+    private final MembershipRepository membershipRepository;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     public boolean create(MoimDto dto) {
         Member member = memberRepository.findById(dto.getMemberIdx())
@@ -132,6 +140,138 @@ public class MoimServiceImpl implements MoimService {
     public List<MoimDto> listLikeCnt() {
         List<Moim> list = moimRepository.findAllOrderByLikeCntDesc();
         return moimDtoList(list);
+    }
+
+    @Override
+    public List<MoimDto> search(String keyword, MoimController.SearchField searchField) {
+        List<Moim> moims = null;
+
+        switch (searchField) {
+            case TITLE: // 제목
+                moims = moimRepository.findByTitleContaining(keyword);
+                break;
+            case CONTENT:   // 내용
+                moims = moimRepository.findByContentContaining(keyword);
+                break;
+            case TITLE_AND_CONTENT: // 제목 + 내용
+                moims = moimRepository.findByTitleContainingOrContentContaining(keyword, keyword);
+                break;
+            case NICKNAME:  // 닉네임
+//                 moims = moimRepository.findByNicknameContaining(keyword);
+                break;
+            default:
+                moims = Collections.emptyList();
+                break;
+        }
+
+        return convertToMoimDtoList(moims);
+    }
+
+
+    private MoimDto convertToMoimDto(Moim moim) {
+        return MoimDto.builder()
+                .moimId(moim.getMoimId())
+                .memberIdx(moim.getMemberIdx())
+                .title(moim.getTitle())
+                .content(moim.getContent())
+                .location(moim.getLocation())
+                .categoryId(moim.getCategoryId())
+                .likeCnt(moim.getLikeCnt())
+                .regDt(moim.getRegDt())
+                .build();
+    }
+
+    private List<MoimDto> convertToMoimDtoList(List<Moim> moimList) {
+        return moimList.stream()
+                .map(this::convertToMoimDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean joinRequest(Long moimId, Long memberIdx) {
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND)); // 모임이 존재하는지 확인
+
+        if (moim.getMemberIdx().equals(memberIdx)) {
+            throw new CustomException(CustomExceptionCode.NOT_FOUND); // 모임장이 모임에 가입하려고 할 때 예외 처리
+        }
+
+        Long currentParticipants = membershipRepository.countByMoimIdAndStatus(moimId, MembershipStatus.APPROVED);
+
+        if (currentParticipants >= moim.getMaximumParticipants()) {
+            throw new CustomException(CustomExceptionCode.NOT_FOUND); // 모임의 최대 참가 인원 수 초과 예외 처리
+        }
+
+        // 가입 요청 처리
+        membershipRepository.save(Membership.builder()
+                .moimId(moimId)
+                .memberIdx(memberIdx)
+                .joinRequestDt(LocalDateTime.now())
+                .status(MembershipStatus.PENDING) // 가입 요청 상태로 설정
+                .build());
+
+        notificationService.sendNotification(moimId, memberIdx);
+
+        return true; // 가입 `요청 성공
+    }
+
+    private void processJoinRequest(Long memberIdx, Long notificationId, MembershipStatus status) {
+        // Notification ID를 사용하여 Notification을 가져옵니다.
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EMAIL));
+
+        // Notification에서 Moim ID를 가져옵니다.
+        Long moimId = notification.getMoimId();
+
+        // Moim ID를 사용하여 Moim을 가져옵니다.
+        Moim moim = moimRepository.findById(moimId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.SERVER_ERROR));
+
+        // Moim의 멤버 인덱스와 주어진 멤버 인덱스가 일치하는지 확인합니다.
+        if (!moim.getMemberIdx().equals(memberIdx)) {
+            throw new CustomException(CustomExceptionCode.DUPLICATED);
+        }
+
+        // 멤버 인덱스를 사용하여 해당 멤버십을 찾습니다.
+        Membership membership = membershipRepository.findByMemberIdx(notification.getMemberIdx());
+
+        if (status == MembershipStatus.APPROVED) {
+            membership.setRegDt(LocalDateTime.now());
+        } else if (status == MembershipStatus.REJECTED) {
+            membership.setJoinRequestRejectedDt(LocalDateTime.now());
+        }
+
+        membership.setStatus(status);
+
+        membershipRepository.save(membership);
+        notificationRepository.deleteById(notificationId);
+    }
+
+    @Override
+    public void approveJoinRequest(Long memberIdx, Long notificationId) {
+        processJoinRequest(memberIdx, notificationId, MembershipStatus.APPROVED);
+    }
+
+    @Override
+    public void rejectJoinRequest(Long memberIdx, Long notificationId) {
+        processJoinRequest(memberIdx, notificationId, MembershipStatus.REJECTED);
+    }
+
+
+    public enum MembershipStatus {
+        APPROVED("승인됨"),
+        PENDING("대기중"),
+        REJECTED("거절됨");
+
+        private final String description;
+
+        MembershipStatus(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 
 }

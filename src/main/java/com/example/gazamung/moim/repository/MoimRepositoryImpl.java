@@ -16,7 +16,6 @@ public class MoimRepositoryImpl implements MoimCustomRepository {
     @Override
     @Transactional
     public void addLikeCount(Moim moim) {
-//        moim.setLikeCount(moim.getLikeCount() + 1);
         moim.incrementLikeCount();
         entityManager.merge(moim);
     }

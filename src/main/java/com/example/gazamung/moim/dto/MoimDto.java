@@ -24,6 +24,9 @@ public class MoimDto {
 
     private LocalDateTime regDt;    // 생성일
 
+    private Long maximumParticipants;   // 총 인원
+    private Long currentParticipants;   // 현재 인원
+
     private Long likeCnt;
 
     // MoimDto 클래스에 convertToDto 메서드 추가

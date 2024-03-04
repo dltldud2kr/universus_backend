@@ -1,5 +1,7 @@
 package com.example.gazamung.moim.service;
 
+import com.example.gazamung.membership.dto.MembershipDto;
+import com.example.gazamung.moim.controller.MoimController;
 import com.example.gazamung.moim.dto.MoimDto;
 import org.springframework.stereotype.Service;
 
@@ -21,4 +23,13 @@ public interface MoimService {
     List<MoimDto> listCategory(Long categoryId);
 
     List<MoimDto> listLikeCnt();
+
+    List<MoimDto> search(String keyword, MoimController.SearchField searchField);
+
+    boolean joinRequest(Long moimId, Long memberIdx);
+
+    void approveJoinRequest(Long memberIdx, Long notificationId);
+
+    void rejectJoinRequest(Long memberIdx, Long notifiactionId);
+
 }

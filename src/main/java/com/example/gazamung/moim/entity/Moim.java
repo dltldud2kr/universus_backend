@@ -29,6 +29,9 @@ public class Moim {
 
     private LocalDateTime regDt;    // 생성일
 
+    private Long maximumParticipants;   // 총 인원
+    private Long currentParticipants;   // 현재 인원
+
     @ColumnDefault("0")
     private Long likeCnt;
 
