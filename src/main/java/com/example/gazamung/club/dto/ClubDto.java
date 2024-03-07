@@ -1,6 +1,6 @@
-package com.example.gazamung.group.dto;
+package com.example.gazamung.club.dto;
 
-import com.example.gazamung.group.entity.Group;
+import com.example.gazamung.club.entity.Club;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Data
 @Builder
-public class GroupDto {
+public class ClubDto {
 
     private Long groupId;
 
@@ -29,16 +29,16 @@ public class GroupDto {
 
     private Long bookmarkCnt;
 
-    public static GroupDto convertToDto(Group group) {
-        return GroupDto.builder()
-                .groupId(group.getGroupId())
-                .memberIdx(group.getMemberIdx())
-                .title(group.getTitle())
-                .content(group.getContent())
-                .location(group.getLocation())
-                .categoryId(group.getCategoryId())
-                .regDt(group.getRegDt())
-                .bookmarkCnt(group.getBookmarkCnt())
+    public static ClubDto convertToDto(Club club) {
+        return ClubDto.builder()
+                .groupId(club.getClubId())
+                .memberIdx(club.getMemberIdx())
+                .title(club.getTitle())
+                .content(club.getContent())
+                .location(club.getLocation())
+                .categoryId(club.getCategoryId())
+                .regDt(club.getRegDt())
+                .bookmarkCnt(club.getBookmarkCnt())
                 .build();
     }
 

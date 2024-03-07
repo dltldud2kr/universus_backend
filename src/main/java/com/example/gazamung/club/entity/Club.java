@@ -1,4 +1,4 @@
-package com.example.gazamung.group.entity;
+package com.example.gazamung.club.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,12 +14,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Slf4j
-public class Group {
+public class Club {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GROUP_SEQ")
-    @SequenceGenerator(name = "GROUP_SEQ", sequenceName = "group_sequence", allocationSize = 1)
-    private Long groupId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CLUB_SEQ")
+    @SequenceGenerator(name = "CLUB_SEQ", sequenceName = "club_sequence", allocationSize = 1)
+    private Long clubId;
 
     private Long memberIdx;
     private String title;

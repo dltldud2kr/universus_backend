@@ -2,9 +2,11 @@ package com.example.gazamung.member.service;
 
 import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.member.dto.JoinRequestDto;
+import com.example.gazamung.member.dto.MemberDto;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -77,4 +79,5 @@ public interface MemberService {
      */
     public Map<String,Object> getUserInfo(String access_token);
 
+    List<MemberDto> getAllMembers();
 }

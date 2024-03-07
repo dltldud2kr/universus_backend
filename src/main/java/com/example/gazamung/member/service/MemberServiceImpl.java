@@ -7,7 +7,9 @@ import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.emailAuth.entity.EmailAuth;
 import com.example.gazamung.emailAuth.repository.EmailAuthRepository;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.mapper.MemberMapper;
 import com.example.gazamung.member.dto.JoinRequestDto;
+import com.example.gazamung.member.dto.MemberDto;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.google.gson.JsonElement;
@@ -28,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,6 +46,8 @@ public class MemberServiceImpl implements MemberService {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final EmailAuthRepository emailAuthRepository;
+
+    private final MemberMapper memberMapper;
 
     /**
      * 1. 로그인 요청으로 들어온 ID, PWD 기반으로 Authentication 객체 생성
@@ -348,6 +353,14 @@ public class MemberServiceImpl implements MemberService {
         }
         return resultMap;
     }
+
+    @Override
+    public List<MemberDto> getAllMembers(){
+        MemberDto parameter = new MemberDto();
+        List<MemberDto> list = memberMapper.selectList(parameter);
+        return list;
+    }
+
 
 
     /**

@@ -9,7 +9,8 @@ import org.springframework.context.annotation.PropertySources;
 @PropertySources({
         @PropertySource("classpath:application-jwt.properties"),
         @PropertySource("classpath:application-smtp.properties"),
-        @PropertySource("classpath:application-database.properties")
+        @PropertySource("classpath:application-database.properties"),
+        @PropertySource("classpath:application-mybatis.properties")
 })
 public class GazamungApplication {
 

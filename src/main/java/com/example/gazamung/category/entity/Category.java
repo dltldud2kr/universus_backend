@@ -1,11 +1,8 @@
 package com.example.gazamung.category.entity;
 
-import com.example.gazamung.group.entity.Group;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @AllArgsConstructor
