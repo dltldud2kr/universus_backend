@@ -13,7 +13,6 @@ import com.example.gazamung.member.dto.*;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.member.service.MemberService;
-import com.example.gazamung.moim.dto.MoimDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -139,8 +137,8 @@ public class MemberController {
             if (result){
                 throw new CustomException(CustomExceptionCode.DUPLICATED_MEMBER);
             }
-            emailService.sendEmailVerification(dto.getEmail());
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "인증번호가 정상적으로 발송되었습니다.", null);
+            String email = emailService.sendEmailVerification(dto.getEmail());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "인증번호가 정상적으로 발송되었습니다.", email);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), "메일 발송 중 문제가 발생했습니다.", null);
         }

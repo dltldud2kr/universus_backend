@@ -20,10 +20,10 @@ public class EmailAuth {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "email_auth_seq")
     @SequenceGenerator(name = "email_auth_seq", sequenceName = "email_auth_seq", allocationSize = 1)
-    private Long id;
+    private Long idx;
 
 
-    private LocalDateTime created;
+    private LocalDateTime regDt;
     private String email;
     private String verifCode;
 

@@ -1,4 +1,4 @@
-package com.example.gazamung.moim.entity;
+package com.example.gazamung.group.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,32 +14,26 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Slf4j
-public class Moim {
+public class Group {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "MOIM_SEQ")
-    @SequenceGenerator(name = "MOIM_SEQ", sequenceName = "moim_sequence", allocationSize = 1)
-    private Long moimId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "GROUP_SEQ")
+    @SequenceGenerator(name = "GROUP_SEQ", sequenceName = "group_sequence", allocationSize = 1)
+    private Long groupId;
 
     private Long memberIdx;
     private String title;
     private String content;
     private String location;
     private Long categoryId;
+    private String image;
 
     private LocalDateTime regDt;    // 생성일
 
-    private Long maximumParticipants;   // 총 인원
+    private Long maximumParticipants;   // 최대 인원
     private Long currentParticipants;   // 현재 인원
 
     @ColumnDefault("0")
-    private Long likeCnt;
+    private Long bookmarkCnt;
 
-    public void incrementLikeCount() {
-        this.likeCnt++;
-    }
-
-    public void decrementLikeCount() {
-        this.likeCnt--;
-    }
 }

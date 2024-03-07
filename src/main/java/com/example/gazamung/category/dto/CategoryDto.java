@@ -14,19 +14,8 @@ import java.util.List;
 @Data
 @Builder
 public class CategoryDto {
+
     private Long categoryId;
     private String categoryName;
-    private List<CategoryDto> children;
-
-    public static CategoryDto convertToDto(Category category) {
-        return CategoryDto.builder()
-                .categoryId(category.getCategoryId())
-                .categoryName(category.getCategoryName())
-                .build();
-    }
-    public void setChildren(List<CategoryDto> children) {
-        this.children = children;
-    }
-
 
 }

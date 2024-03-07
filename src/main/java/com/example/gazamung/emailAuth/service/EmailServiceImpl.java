@@ -92,7 +92,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendEmailVerification(String email) throws Exception {
+    public String sendEmailVerification(String email) throws Exception {
 
 //        if (memberService.getMember(email) != null) {
 //            throw new CustomException(CustomExceptionCode.DUPLICATED_MEMBER);
@@ -112,6 +112,8 @@ public class EmailServiceImpl implements EmailService {
 
         // 이메일 보내는 로직
         emailSender(email);
+
+        return email;
     }
 
     /**
@@ -135,6 +137,9 @@ public class EmailServiceImpl implements EmailService {
      * @param email
      * @throws Exception
      */
+
+
+
     public void emailSender(String email) throws Exception {
 
         // 이메일 보내는 로직
@@ -145,7 +150,7 @@ public class EmailServiceImpl implements EmailService {
             EmailAuth newAuth = EmailAuth.builder()
                     .email(email)
                     .emailAuthStatus(EmailAuthStatus.UNVERIFIED)
-                    .created(LocalDateTime.now())
+                    .regDt(LocalDateTime.now())
                     .verifCode(ePw)
                     .build();
             emailAuthRepository.save(newAuth);

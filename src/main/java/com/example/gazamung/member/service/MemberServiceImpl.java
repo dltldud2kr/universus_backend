@@ -13,7 +13,6 @@ import com.example.gazamung.member.repository.MemberRepository;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -103,8 +102,7 @@ public class MemberServiceImpl implements MemberService {
                     .role(0)
                     .platform(dto.getPlatform())
                     .phone(dto.getPhone())
-                    .addressLine1(dto.getAddressLine1())
-                    .addressLine2(dto.getAddressLine2())
+                    .address(dto.getAddress())
                     .regDt(LocalDateTime.now())
                     .build();
             memberRepository.save(member);
@@ -383,7 +381,7 @@ public class MemberServiceImpl implements MemberService {
         Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email, EmailAuthStatus.UNVERIFIED);
         if (optionalEmailAuth.isPresent()){
             EmailAuth emailAuth = optionalEmailAuth.get();
-            LocalDateTime creationTime = emailAuth.getCreated();
+            LocalDateTime creationTime = emailAuth.getRegDt();
             LocalDateTime expirationTime = creationTime.plusMinutes(3); // 3분 유효시간
             LocalDateTime now = LocalDateTime.now();
 

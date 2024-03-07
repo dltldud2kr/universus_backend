@@ -1,7 +1,6 @@
 package com.example.gazamung.category.service;
 
 import com.example.gazamung._enum.CustomExceptionCode;
-import com.example.gazamung.category.dto.CategoryCreateRequest;
 import com.example.gazamung.category.dto.CategoryDto;
 import com.example.gazamung.category.entity.Category;
 import com.example.gazamung.category.repository.CategoryRepository;
@@ -24,47 +23,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final MemberRepository memberRepository;
 
-    @Override
-    public boolean createCategory(CategoryCreateRequest req) {
-        // 중복된 카테고리 코드 또는 이름이 있는지 확인
-        if (categoryRepository.existsByCategoryCodeOrCategoryName(req.getCategoryCode(), req.getCategoryName())) {
-            throw new CustomException();
-        }
-
-        // 부모 카테고리 정보 가져오기
-        Category parent = Optional.ofNullable(req.getParentId())
-                .map(id -> categoryRepository.findById(id).orElseThrow(CustomException::new))
-                .orElse(null);
-
-        // 새로운 카테고리 생성 및 저장
-        categoryRepository.save(new Category(req.getCategoryCode(), req.getCategoryName(), parent));
-        return true;
-    }
-
-
-    @Override
-    public List<CategoryDto> getCategoryList() {
-        // 최상위 계층의 카테고리 (parent_id == null) 를 불러온다.
-        List<Category> categories = categoryRepository.findAllOrderByParentIdAscNullsFirstCategoryIdAsc();
-        return buildCategoryHierarchy(categories, null);
-    }
-
-
-    private List<CategoryDto> buildCategoryHierarchy(List<Category> categories, Long parentId) {
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-        // 재귀 사용
-        for (Category category : categories) {
-            // 현재 카테고리가 최상위 카테고리인가
-            if ((parentId == null && category.getParent() == null)
-                    // 현재 카테고리의 parent_id가 parent 와 일치하는가
-                    || (category.getParent() != null && category.getParent().getCategoryId().equals(parentId))) {
-                CategoryDto categoryDto = CategoryDto.convertToDto(category);
-                categoryDto.setChildren(buildCategoryHierarchy(categories, category.getCategoryId()));
-                categoryDtos.add(categoryDto);
-            }
-        }
-        return categoryDtos;
-    }
 
 
     @Override
@@ -83,6 +41,33 @@ public class CategoryServiceImpl implements CategoryService {
         } else {
             throw new CustomException(CustomExceptionCode.NOT_FOUND);
         }
+    }
+
+    @Override
+    public List<CategoryDto> getCategoryList() {
+
+        List<Category> categoryList = categoryRepository.findAll();
+
+         return convertToCategoryDtoList(categoryList);
+
+    }
+
+
+    /**
+     * CategoryList 값을 DTO 형태로 변환 메서드  (시영)
+     * @param categoryList
+     * @return
+     */
+    private List<CategoryDto> convertToCategoryDtoList(List<Category> categoryList) {
+        List<CategoryDto> categoryDtoList = new ArrayList<>();
+        for (Category category : categoryList) {
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setCategoryId(category.getCategoryId());
+            categoryDto.setCategoryName(category.getCategoryName());
+            // 여기에 필요한 다른 속성을 추가할 수 있습니다.
+            categoryDtoList.add(categoryDto);
+        }
+        return categoryDtoList;
     }
 
 }

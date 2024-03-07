@@ -1,6 +1,6 @@
 package com.example.gazamung.category.entity;
 
-import com.example.gazamung.moim.entity.Moim;
+import com.example.gazamung.group.entity.Group;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import javax.persistence.*;
@@ -17,39 +17,11 @@ import java.util.List;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CATEGORY_SEQ")
+    @SequenceGenerator(name = "CATEGORY_SEQ", sequenceName = "category_sequence", allocationSize = 1)
     private Long categoryId;
 
     private String categoryName;
 
-    // 필요한가?
-    private String categoryCode;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    private List<Category> children;
-
-    public Category(String categoryCode, String categoryName, Category parent){
-        this.categoryCode = categoryCode;
-        this.categoryName = categoryName;
-        this.parent = parent;
-    }
-
-    public Long getCategoryId() {
-        return this.categoryId;
-    }
-
-
-    public List<Moim> getMoimsInSubcategories() {
-        List<Moim> moims = new ArrayList<>();
-        for (Category child : children) {
-            moims.addAll(child.getMoimsInSubcategories());
-        }
-        moims.addAll(moims);
-        return moims;
-    }
 
 }
