@@ -1,9 +1,10 @@
 package com.example.gazamung.S3;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -24,47 +26,50 @@ public class S3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    // MultipartFile을 전달받아 File로 전환한 후 S3에 업로드
-    public String upload(MultipartFile multipartFile, String dirName) throws IOException { // dirName의 디렉토리가 S3 Bucket 내부에 생성됨
+    private final AmazonS3 amazonS3;
 
-        File uploadFile = convert(multipartFile)
-                .orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File 전환 실패"));
-        return upload(uploadFile, dirName);
-    }
+    public String uploadFile(MultipartFile multipartFile) throws IOException {
+        String fileName = multipartFile.getOriginalFilename();
 
-    private String upload(File uploadFile, String dirName) {
-        String fileName = dirName + "/" + uploadFile.getName();
-        String uploadImageUrl = putS3(uploadFile, fileName);
+        //파일 형식 구하기
+        String ext = fileName.split("\\.")[1];
+        String contentType = "";
 
-        removeNewFile(uploadFile);  // convert()함수로 인해서 로컬에 생성된 File 삭제 (MultipartFile -> File 전환 하며 로컬에 파일 생성됨)
-
-        return uploadImageUrl;      // 업로드된 파일의 S3 URL 주소 반환
-    }
-
-    private String putS3(File uploadFile, String fileName) {
-        amazonS3Client.putObject(
-                new PutObjectRequest(bucket, fileName, uploadFile)
-                        .withCannedAcl(CannedAccessControlList.PublicRead)	// PublicRead 권한으로 업로드 됨
-        );
-        return amazonS3Client.getUrl(bucket, fileName).toString();
-    }
-
-    private void removeNewFile(File targetFile) {
-        if(targetFile.delete()) {
-            log.info("파일이 삭제되었습니다.");
-        }else {
-            log.info("파일이 삭제되지 못했습니다.");
+        //content type을 지정해서 올려주지 않으면 자동으로 "application/octet-stream"으로 고정이 되서 링크 클릭시 웹에서 열리는게 아니라 자동 다운이 시작됨.
+        switch (ext) {
+            case "jpeg":
+                contentType = "image/jpeg";
+                break;
+            case "png":
+                contentType = "image/png";
+                break;
+            case "txt":
+                contentType = "text/plain";
+                break;
+            case "csv":
+                contentType = "text/csv";
+                break;
         }
-    }
 
-    private Optional<File> convert(MultipartFile file) throws  IOException {
-        File convertFile = new File(file.getOriginalFilename()); // 업로드한 파일의 이름
-        if(convertFile.createNewFile()) {
-            try (FileOutputStream fos = new FileOutputStream(convertFile)) {
-                fos.write(file.getBytes());
-            }
-            return Optional.of(convertFile);
+        try {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentType(contentType);
+
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, multipartFile.getInputStream(), metadata)
+                    .withCannedAcl(CannedAccessControlList.PublicRead));
+        } catch (AmazonServiceException e) {
+            e.printStackTrace();
+        } catch (SdkClientException e) {
+            e.printStackTrace();
         }
-        return Optional.empty();
+
+        //object 정보 가져오기
+        ListObjectsV2Result listObjectsV2Result = amazonS3.listObjectsV2(bucket);
+        List<S3ObjectSummary> objectSummaries = listObjectsV2Result.getObjectSummaries();
+
+        for (S3ObjectSummary object: objectSummaries) {
+            System.out.println("object = " + object.toString());
+        }
+        return amazonS3.getUrl(bucket, fileName).toString();
     }
 }

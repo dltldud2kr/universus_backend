@@ -31,6 +31,10 @@ public class Member implements UserDetails {
     private String refreshToken; //리프레쉬 토큰
     private String userName;
     private String nickname;
+    private String areaIntrs;
+    private String birth;
+    private String gender;  // M(남자), F(여자)
+    private int xxxCnt; // 이름 미정
     private String phone;
     private String address;
     private Integer role;   // 0 : USER 1 : ADMIN

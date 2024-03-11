@@ -99,22 +99,22 @@ public class MemberServiceImpl implements MemberService {
             if(optionalMember.isPresent()) {
                 throw new CustomException(CustomExceptionCode.DUPLICATED);
             }
-            List<EmailAuth> emailAuthList = emailAuthRepository.findAllByEmail(email);
-            //해당 이메일이 서버에 존재하는지 확인
-            if(emailAuthList.isEmpty()){
-                throw new CustomException(CustomExceptionCode.NOT_FOUND_EMAIL);
-            }
-            //해당 이메일의 인증 여부 확인
-            if(emailAuthList.get(emailAuthList.size()-1).getEmailAuthStatus() != EmailAuthStatus.VERIFIED){
-                throw new CustomException(CustomExceptionCode.NOT_COMPLETE_AUTH);
-            }
+//            Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED);
+            emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED)
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_COMPLETE_AUTH));
+
 
             Member member = Member.builder()
                     .email(email)
                     .password(password)
                     .refreshToken(null)
                     .role(0)
-                    .platform(dto.getPlatform())
+                    .birth(dto.getBirth())
+                    .gender(dto.getGender())
+                    .nickname(dto.getNickname())
+                    .userName(dto.getUserName())
+                    .areaIntrs(dto.getAreaIntrs())
+                    .platform(0)
                     .phone(dto.getPhone())
                     .address(dto.getAddress())
                     .regDt(LocalDateTime.now())
