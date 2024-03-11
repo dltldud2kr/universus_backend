@@ -6,12 +6,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 @SpringBootApplication
-@PropertySources({
-        @PropertySource("classpath:application-jwt.properties"),
-        @PropertySource("classpath:application-smtp.properties"),
-        @PropertySource("classpath:application-database.properties"),
-        @PropertySource("classpath:application-mybatis.properties")
-})
 public class GazamungApplication {
 
     public static void main(String[] args) {
