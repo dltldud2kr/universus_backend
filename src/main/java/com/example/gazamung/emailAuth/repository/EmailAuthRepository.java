@@ -4,6 +4,7 @@ package com.example.gazamung.emailAuth.repository;//package flambus.flambus_v10.
 import com.example.gazamung._enum.EmailAuthStatus;
 import com.example.gazamung.emailAuth.entity.EmailAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,9 +19,5 @@ public interface EmailAuthRepository extends JpaRepository<EmailAuth, Long> {
     List<EmailAuth> findListByEmailAndEmailAuthStatus(String email, EmailAuthStatus emailAuthStatus);
 
     List<EmailAuth> findAllByEmail(String email);
-
-    EmailAuth findByEmail(String email);
-
-
 
 }

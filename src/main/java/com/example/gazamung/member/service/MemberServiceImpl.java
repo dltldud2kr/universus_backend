@@ -94,12 +94,21 @@ public class MemberServiceImpl implements MemberService {
             String email = dto.getEmail();
             String password = dto.getPassword();
 
-            //해당 이메일이 존재하는지 확인.
+            //해당 이메일로 가입된 회원이 있는지 확인
             Optional<Member> optionalMember =  memberRepository.findByEmail(email);
             if(optionalMember.isPresent()) {
                 throw new CustomException(CustomExceptionCode.DUPLICATED);
             }
-            //해당 이메일이 디비에 존재하는지 확인.
+            List<EmailAuth> emailAuthList = emailAuthRepository.findAllByEmail(email);
+            //해당 이메일이 서버에 존재하는지 확인
+            if(emailAuthList.isEmpty()){
+                throw new CustomException(CustomExceptionCode.NOT_FOUND_EMAIL);
+            }
+            //해당 이메일의 인증 여부 확인
+            if(emailAuthList.get(emailAuthList.size()-1).getEmailAuthStatus() != EmailAuthStatus.VERIFIED){
+                throw new CustomException(CustomExceptionCode.NOT_COMPLETE_AUTH);
+            }
+
             Member member = Member.builder()
                     .email(email)
                     .password(password)
