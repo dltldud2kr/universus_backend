@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
 @Builder
 public class ClubDto {
 
-    private Long groupId;
+    private Long clubId;
 
     private Long memberIdx;
-    private String title;
+    private String clubName;
     private String content;
     private String location;
     private Long categoryId;
@@ -29,17 +29,8 @@ public class ClubDto {
 
     private Long bookmarkCnt;
 
-    public static ClubDto convertToDto(Club club) {
-        return ClubDto.builder()
-                .groupId(club.getClubId())
-                .memberIdx(club.getMemberIdx())
-                .title(club.getTitle())
-                .content(club.getContent())
-                .location(club.getLocation())
-                .categoryId(club.getCategoryId())
-                .regDt(club.getRegDt())
-                .bookmarkCnt(club.getBookmarkCnt())
-                .build();
-    }
+    private Long ageStartLimit;
+    private Long ageEndLimit;
+
 
 }

@@ -22,7 +22,7 @@ public class Club {
     private Long clubId;
 
     private Long memberIdx;
-    private String title;
+    private String clubName;
     private String content;
     private String location;
     private Long categoryId;
@@ -31,9 +31,14 @@ public class Club {
     private LocalDateTime regDt;    // 생성일
 
     private Long maximumParticipants;   // 최대 인원
+
+    @ColumnDefault("1")
     private Long currentParticipants;   // 현재 인원
 
     @ColumnDefault("0")
     private Long bookmarkCnt;
+
+    private Long ageStartLimit;
+    private Long ageEndLimit;
 
 }

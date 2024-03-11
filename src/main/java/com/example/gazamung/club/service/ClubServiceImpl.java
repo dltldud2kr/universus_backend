@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,13 +28,15 @@ public class ClubServiceImpl implements ClubService {
         Member member = memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
-
         Club club = Club.builder()
                 .memberIdx(member.getMemberIdx())
-                .title(dto.getTitle())
+                .clubName(dto.getClubName())
                 .content(dto.getContent())
                 .location(dto.getLocation())
                 .categoryId(dto.getCategoryId())
+                .maximumParticipants(dto.getMaximumParticipants())
+                .ageStartLimit(dto.getAgeStartLimit())
+                .ageEndLimit(dto.getAgeEndLimit())
                 .regDt(LocalDateTime.now())
                 .build();
 
@@ -58,9 +62,49 @@ public class ClubServiceImpl implements ClubService {
 
     }
 
+    @Override
+    public List<ClubDto> list() {
+        List<Club> clubList = clubRepository.findAll();
+        return convertToDto(clubList);
+    }
 
+    public ClubDto info(Long clubId) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
+        return ClubDto.builder()
+                .clubId(club.getClubId())
+                .memberIdx(club.getMemberIdx())
+                .clubName(club.getClubName())
+                .content(club.getContent())
+                .location(club.getLocation())
+                .categoryId(club.getCategoryId())
+                .regDt(club.getRegDt())
+                .maximumParticipants(club.getMaximumParticipants())
+                .currentParticipants(club.getCurrentParticipants())
+                .ageStartLimit(club.getAgeStartLimit())
+                .ageEndLimit(club.getAgeEndLimit())
+                .bookmarkCnt(club.getBookmarkCnt())
+                .build();
+    }
 
-
+    private List<ClubDto> convertToDto(List<Club> clubList) {
+        return clubList.stream()
+                .map(club -> ClubDto.builder()
+                        .clubId(club.getClubId())
+                        .memberIdx(club.getMemberIdx())
+                        .clubName(club.getClubName())
+                        .content(club.getContent())
+                        .location(club.getLocation())
+                        .categoryId(club.getCategoryId())
+                        .regDt(club.getRegDt())
+                        .maximumParticipants(club.getMaximumParticipants())
+                        .currentParticipants(club.getCurrentParticipants())
+                        .ageStartLimit(club.getAgeStartLimit())
+                        .ageEndLimit(club.getAgeEndLimit())
+                        .bookmarkCnt(club.getBookmarkCnt())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
 }
 
