@@ -413,6 +413,11 @@ public class MemberServiceImpl implements MemberService {
                 throw new CustomException(CustomExceptionCode.EXPIRED_AUTH);
             } else {
 
+                if (!verifCode.equals(emailAuth.getVerifCode())){
+                    log.info("verifCode");
+                    throw new CustomException(CustomExceptionCode.INVALID_VERIF_CODE);
+                }
+
                 emailAuth.setEmailAuthStatus(EmailAuthStatus.VERIFIED);
                 updateEmailAuthStatus(emailAuth);
 
