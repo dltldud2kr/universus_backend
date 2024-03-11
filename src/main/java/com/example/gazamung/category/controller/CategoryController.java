@@ -23,6 +23,16 @@ public class CategoryController {
     private final CategoryService categoryService;
 
 
+
+    @PostMapping("/create")
+    public ResultDTO createCategory(@RequestBody String categoryName){
+
+        try {
+            return ResultDTO.of(categoryService.create(categoryName), ApiResponseCode.SUCCESS.getCode(), "카테고리 생성", null);
+        } catch (CustomException e) {
+            return  ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
     @Operation(summary = "카테고리 리스트", description = "" +
             "전체 카테고리 리스트를 반환합니다." +
             "\n### HTTP STATUS 에 따른 요청 결과" +

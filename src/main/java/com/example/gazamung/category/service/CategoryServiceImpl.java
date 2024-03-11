@@ -24,6 +24,15 @@ public class CategoryServiceImpl implements CategoryService {
     private final MemberRepository memberRepository;
 
 
+    @Override
+    public boolean create(String categoryName) {
+
+        Category category = new Category();
+        category.setCategoryName(categoryName);
+
+        categoryRepository.save(category);
+        return true;
+    }
 
     @Override
     public boolean deleteCategory(Long categoryId, Long memberIdx) {
