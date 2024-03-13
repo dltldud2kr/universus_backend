@@ -3,6 +3,7 @@ package com.example.gazamung._enum;
 public enum AttachmentType {
     REVIEW("review"),   //후기
     GENERAL("general"), // 일반
+    MEETING("meeting"), // 정기모임
     CLUB("club");   // 모임
 
     // 추후에 추가될 다른 업로드 타입들

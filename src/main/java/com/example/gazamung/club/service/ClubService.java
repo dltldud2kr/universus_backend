@@ -11,9 +11,24 @@ import java.util.Map;
 
 @Service
 public interface ClubService {
+    /**
+     * 모임 생성
+     * @param dto
+     * @return
+     */
     Map<String, Object> create(ClubRequest.CreateClubRequestDto dto);
 
+    /**
+     * 모임 수정
+     * @param dto
+     */
     void update(ClubRequest.ModifyClubRequestDto dto);
+
+    /**
+     * 모임 삭제
+     * @param moimId
+     * @param memberIdx
+     */
 
     void delete(Long moimId, Long memberIdx);
 

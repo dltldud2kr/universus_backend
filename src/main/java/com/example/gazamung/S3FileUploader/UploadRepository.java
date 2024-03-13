@@ -1,4 +1,4 @@
-package com.example.gazamung.S3;
+package com.example.gazamung.S3FileUploader;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

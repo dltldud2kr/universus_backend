@@ -1,8 +1,8 @@
 package com.example.gazamung.club.service;
 
-import com.example.gazamung.S3.UploadImage;
-import com.example.gazamung.S3.UploadRepository;
-import com.example.gazamung.S3.UploadService;
+import com.example.gazamung.S3FileUploader.UploadImage;
+import com.example.gazamung.S3FileUploader.UploadRepository;
+import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.club.dto.ClubDto;

@@ -1,4 +1,4 @@
-package com.example.gazamung.S3;
+package com.example.gazamung.S3FileUploader;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;

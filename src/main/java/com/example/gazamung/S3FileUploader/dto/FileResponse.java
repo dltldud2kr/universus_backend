@@ -1,4 +1,4 @@
-package com.example.gazamung.S3.dto;
+package com.example.gazamung.S3FileUploader.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
