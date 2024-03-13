@@ -1,17 +1,18 @@
 package com.example.gazamung.club.dto;
 
-import com.example.gazamung.club.entity.Club;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 
+
+@Builder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@Builder
 public class ClubDto {
 
     private Long clubId;
@@ -32,5 +33,6 @@ public class ClubDto {
     private Long ageStartLimit;
     private Long ageEndLimit;
 
+    private MultipartFile clubImage;
 
 }

@@ -27,6 +27,7 @@ public class Club {
     private String location;
     private Long categoryId;
     private String image;
+    private Long representIdx;
 
     private LocalDateTime regDt;    // 생성일
 

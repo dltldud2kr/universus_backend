@@ -2,14 +2,16 @@ package com.example.gazamung.club.service;
 
 
 import com.example.gazamung.club.dto.ClubDto;
+import com.example.gazamung.club.dto.ClubRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Service
 public interface ClubService {
-    boolean create(ClubDto dto);
+    Map<String, Object> create(ClubRequest.CreateClubRequestDto dto);
 
 
     boolean delete(Long moimId, Long memberIdx);

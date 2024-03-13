@@ -2,19 +2,17 @@ package com.example.gazamung.club.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
-import com.example.gazamung._enum.CustomExceptionCode;
+import com.example.gazamung.club.dto.ClubDto;
+import com.example.gazamung.club.dto.ClubRequest;
+import com.example.gazamung.club.service.ClubService;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.club.dto.ClubDto;
-import com.example.gazamung.club.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 
 @Slf4j
@@ -25,10 +23,11 @@ public class ClubController {
 
     private final ClubService clubService;
 
-    @PostMapping("/create")
-    public ResultDTO create(@RequestBody ClubDto dto){
+    @PutMapping("/create")
+    public ResultDTO create(ClubRequest.CreateClubRequestDto dto){
         try{
-            return ResultDTO.of(clubService.create(dto), ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", null);
+            Map<String, Object> result = clubService.create(dto);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", result);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 
@@ -47,8 +46,8 @@ public class ClubController {
     @GetMapping("/list")
     public List<ClubDto> list(){
         try{
-            List<ClubDto> clubDtoList = clubService.list();
-            return  clubDtoList;
+            List<ClubDto> requestDtoList = clubService.list();
+            return requestDtoList;
         } catch (CustomException e) {
             return (List<ClubDto>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 리스트 조회 완료");
         }
