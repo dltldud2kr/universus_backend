@@ -30,6 +30,7 @@ public class Club {
     private Long representIdx;
 
     private LocalDateTime regDt;    // 생성일
+    private LocalDateTime uptDt;
 
     private Long maximumParticipants;   // 최대 인원
 

@@ -48,12 +48,14 @@ public class ClubRequest {
     public static class ModifyClubRequestDto {
 
         private Long memberIdx;
+        private Long clubIdx;
         private String clubName;
         private String content;
         private String location;
         private Long categoryId;
 
         private LocalDateTime regDt;    // 생성일
+        private LocalDateTime uptDt;
 
         private Long maximumParticipants;   // 총 인원
         private Long currentParticipants;   // 현재 인원

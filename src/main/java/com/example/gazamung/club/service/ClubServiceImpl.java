@@ -85,9 +85,66 @@ public class ClubServiceImpl implements ClubService {
 
     }
 
+    /**
+     * @title 모임 수정
+     * @created 24.03.13 이시영
+     * @description 모임 수정요청시 기존 업로드 되었던 S3 업로드 정보를 모두 삭제합니다.
+     * 수정요청에 새로 담겨있는 첨부파일로 새로 업로드하고 DB에 새로 맵핑합니다.
+     * @param dto
+     */
     @Override
     public void update(ClubRequest.ModifyClubRequestDto dto) {
+        try {
+            //수정 요청한 모임을 확인함
+            Club createdClub = clubRepository.findById(dto.getClubIdx()).get();
 
+            //수정을 요청한 사용자와 작성자가 다른 경우 : (본인인지의 대한 유효성 검사)
+            if (dto.getMemberIdx() != createdClub.getMemberIdx()) {
+                throw new CustomException(CustomExceptionCode.ACCESS_DENIED);
+            }
+
+            //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 CLUB 파일을 모두 삭제합니다.
+            //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
+            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, dto.getClubIdx());
+            String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+
+            int removeCount = 0;
+            //업로드된 이미지가 잇는 경우
+            try {
+                if (imageByAttachmentType.size() > 0) {
+                    for (UploadImage file : imageByAttachmentType) {
+                        // 문자열에서 ".com/" 다음의 정보를 추출
+                        int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                        String result = file.getImageUrl().substring(startIndex);
+                        removeTarget[removeCount] = result;
+                        removeCount++;
+                    }
+                    //등록되어있는 파일 정보 삭제 요청.
+                    uploadService.removeS3Files(removeTarget);
+                    //데이터베이스에 맵핑되어있는 정보삭제
+                    uploadService.removeDatabaseByReviewIdx(dto.getClubIdx());
+                }
+            } catch (CustomException e) {
+                throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+            }
+
+            //새롭게 요청온 업로드 이미지를  버킷에 업로드함.
+            uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, createdClub.getClubId());
+
+            //업로드된 이미지 정보를 데이터베이스
+            List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.CLUB, createdClub.getClubId());
+
+            createdClub.setContent(dto.getContent());
+            createdClub.setMemberIdx(dto.getMemberIdx());
+            createdClub.setClubId(dto.getClubIdx());
+            createdClub.setRegDt(createdClub.getRegDt());//생성일은 그대로.
+            createdClub.setUptDt(LocalDateTime.now());
+            createdClub.setRepresentIdx(getRepresentIdx.get(0).getIdx()); //업로드 이미지의 1번째를 리뷰의 대표이미지로 지정함.
+
+            clubRepository.save(createdClub);
+        } catch (CustomException e) {
+            System.err.println("modifyJournal Exception : " + e);
+        }
 
 
     }
