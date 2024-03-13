@@ -45,6 +45,8 @@ public class UploadService {
      * @throws IOException
      * @title 파일 업로드
      */
+
+    //@TODO  회원에 대한 예외처리가 필요한지 확인해보기
     @Transactional
     public List<Map<String, Object>> upload(List<MultipartFile> multipartFile, long memberIdx, AttachmentType attachmentType, long mappedId) {
 

@@ -310,11 +310,6 @@ public class MemberController {
         // 이메일로 멤버 정보 가져오기
         ProfileDto profileDto = memberService.getMemberInfo(memberIdx);
 
-        // 멤버 정보가 없는 경우 예외 처리
-        if (profileDto == null) {
-            throw new CustomException(CustomExceptionCode.NOT_FOUND);
-        }
-
         // 멤버 정보 반환
         return ResponseEntity.ok(profileDto);
 

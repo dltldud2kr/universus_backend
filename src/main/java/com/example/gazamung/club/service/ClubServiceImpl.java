@@ -1,5 +1,6 @@
 package com.example.gazamung.club.service;
 
+import com.example.gazamung.S3.UploadImage;
 import com.example.gazamung.S3.UploadRepository;
 import com.example.gazamung.S3.UploadService;
 import com.example.gazamung._enum.AttachmentType;
@@ -13,14 +14,13 @@ import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,8 +33,15 @@ public class ClubServiceImpl implements ClubService {
     private final UploadService uploadService;
     private final UploadRepository uploadRepository;
 
+
+    /**
+     * @title 모임 생성
+     * @created 24.03.13 이시영
+     * @param dto
+     * @return
+     */
     // @TODO    카테고리 값 엔티티 매핑 추가해야함.  현재 TEST
-    public Map<String, Object>  create(ClubRequest.CreateClubRequestDto dto)   {
+    public Map<String, Object> create(ClubRequest.CreateClubRequestDto dto)   {
 
         Member member = memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
@@ -52,9 +59,10 @@ public class ClubServiceImpl implements ClubService {
                 .regDt(LocalDateTime.now())
                 .build();
 
+        //모임을 먼저 생성하는 이유는 생성된 IDX로 업로드 이미지를 맵핑해주기 위해 1차적으로 먼저 생성
         Club savedClub = clubRepository.save(club);
 
-        //정상적으로 리뷰가 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
+        //정상적으로 모임이 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
         List<Map<String, Object>> uploadedImages = uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, savedClub.getClubId());
 
 
@@ -68,7 +76,7 @@ public class ClubServiceImpl implements ClubService {
         }
 
 
-        // uploadImages와 club 정보를 함께 반환
+        // uploadImages 와 club 정보를 함께 반환
         Map<String, Object> result = new HashMap<>();
         result.put("uploadedImages", uploadedImages);
         result.put("club", club);
@@ -77,21 +85,63 @@ public class ClubServiceImpl implements ClubService {
 
     }
 
-    public boolean delete(Long clubId, Long memberIdx) {
-        Optional<Club> clubOpt = clubRepository.findById(clubId);
+    @Override
+    public void update(ClubRequest.ModifyClubRequestDto dto) {
 
-        if (clubOpt.isPresent()) {
-            Club club = clubOpt.get();
+
+
+    }
+
+
+    /**
+     * @title 모임 삭제
+     * @created 24.03.13 이시영
+     * @description 모임 삭제요청시 기존 업로드 되었던 S3 업로드 정보를 모두 삭제합니다.
+     * @param clubId
+     * @param memberIdx
+     */
+    public void delete(Long clubId, Long memberIdx) {
+
+        try {
+            Club club = clubRepository.findById(clubId)
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
+            // 모임을 DB 에서 삭제.
+            clubRepository.delete(club);
 
             //모임장과 삭제 요청 회원이 동일한지 확인.
             if (club.getMemberIdx().equals(memberIdx)) {
-                clubRepository.delete(club);
-                return true;
-            } else {
-                throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+
+                //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 리뷰 파일을 모두 삭제.
+                //해당 리뷰에 업로드 등록되어있는 이미지를 검색.
+                List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.REVIEW, clubId);
+                String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+
+                int removeCount = 0;
+                //업로드된 이미지가 잇는 경우
+                try {
+                    if (imageByAttachmentType.size() > 0) {
+                        for (UploadImage file : imageByAttachmentType) {
+                            // 문자열에서 ".com/" 다음의 정보를 추출
+                            int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                            String result = file.getImageUrl().substring(startIndex);
+                            removeTarget[removeCount] = result;
+                            removeCount++;
+                        }
+                        //등록되어있는 파일 정보 삭제 요청.
+                        uploadService.removeS3Files(removeTarget);
+                        //데이터베이스에 맵핑되어있는 정보삭제
+                        uploadService.removeDatabaseByReviewIdx(clubId);
+                    }
+                } catch (CustomException e) {
+                    throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+                }
             }
+        } catch (CustomException e) {
+            throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+        } catch (EmptyResultDataAccessException e) {
+            throw new CustomException(CustomExceptionCode.NOT_FOUND);
         }
-        throw new CustomException(CustomExceptionCode.NOT_FOUND);
 
     }
 

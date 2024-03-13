@@ -13,8 +13,9 @@ import java.util.Map;
 public interface ClubService {
     Map<String, Object> create(ClubRequest.CreateClubRequestDto dto);
 
+    void update(ClubRequest.ModifyClubRequestDto dto);
 
-    boolean delete(Long moimId, Long memberIdx);
+    void delete(Long moimId, Long memberIdx);
 
     List<ClubDto> list();
 

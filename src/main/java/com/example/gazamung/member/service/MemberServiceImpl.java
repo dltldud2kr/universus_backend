@@ -106,18 +106,18 @@ public class MemberServiceImpl implements MemberService {
 
 
             Member member = Member.builder()
-                    .email(email)
-                    .password(password)
+                    .email(email)   // 이메일
+                    .password(password) //비밀번호
                     .refreshToken(null)
                     .role(0)
-                    .birth(dto.getBirth())
-                    .gender(dto.getGender())
-                    .nickname(dto.getNickname())
-                    .userName(dto.getUserName())
-                    .areaIntrs(dto.getAreaIntrs())
+                    .birth(dto.getBirth())  // 생년월일
+                    .gender(dto.getGender())    // 성별
+                    .nickname(dto.getNickname())    // 닉네임
+                    .userName(dto.getUserName())    // 사용자 이름
+                    .areaIntrs(dto.getAreaIntrs())  // 관심지역
                     .platform(0)
-                    .phone(dto.getPhone())
-                    .address(dto.getAddress())
+                    .phone(dto.getPhone())  // 휴대폰번호
+                    .address(dto.getAddress())  //주소
                     .regDt(LocalDateTime.now())
                     .build();
             memberRepository.save(member);
