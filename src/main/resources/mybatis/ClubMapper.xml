@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gazamung.mapper.ClubMapper">
+
+    <select id="checkAgeAndMembership" resultType="int">
+        SELECT COUNT(1) FROM club_member cm
+                                 INNER JOIN club c ON cm.club_id = c.club_id
+        WHERE cm.member_idx = #{memberIdx} AND cm.club_id = #{clubId}
+          AND #{age} >= c.age_start_limit AND #{age} &lt; c.age_end_limit
+    </select>
+
+
+    <insert id="insertClubMember" parameterType="com.example.gazamung.club.dto.ClubJoinRequest">
+        INSERT INTO club_member (member_idx, club_id)
+        VALUES (#{memberIdx}, #{clubId})
+    </insert>
+
+</mapper>

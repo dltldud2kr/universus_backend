@@ -2,6 +2,7 @@ package com.example.gazamung.club.service;
 
 
 import com.example.gazamung.club.dto.ClubDto;
+import com.example.gazamung.club.dto.ClubJoinRequest;
 import com.example.gazamung.club.dto.ClubRequest;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +30,10 @@ public interface ClubService {
      * @param moimId
      * @param memberIdx
      */
-
     void delete(Long moimId, Long memberIdx);
+
+
+    boolean clubJoin(ClubJoinRequest request);
 
     List<ClubDto> list();
 

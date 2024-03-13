@@ -29,7 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -479,6 +481,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
+
+    public int calculateAge(String birthDateString) {
+
+        // 생년월일 문자열을 파싱하여 LocalDate 객체로 변환
+        LocalDate birthDate = LocalDate.parse(birthDateString);
+
+        // 현재 날짜
+        LocalDate currentDate = LocalDate.now();
+
+        // 생년월일을 나이로 계산
+        int age = Period.between(birthDate, currentDate).getYears();
+
+        return age;
+    }
 
 
 }

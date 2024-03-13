@@ -3,6 +3,7 @@ package com.example.gazamung.club.controller;
 
 import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.club.dto.ClubDto;
+import com.example.gazamung.club.dto.ClubJoinRequest;
 import com.example.gazamung.club.dto.ClubRequest;
 import com.example.gazamung.club.service.ClubService;
 import com.example.gazamung.dto.ResultDTO;
@@ -42,6 +43,30 @@ public class ClubController {
     public ResultDTO create(ClubRequest.CreateClubRequestDto dto){
         try{
             Map<String, Object> result = clubService.create(dto);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", result);
+        }catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+
+        }
+    }
+
+    @Operation(summary = "모임 가입 ", description = "" +
+            " 모임 가입." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @PostMapping("/join")
+    public ResultDTO join(@RequestBody ClubJoinRequest request){
+        try{
+            System.out.println(request.getClubId());
+            System.out.println(request.getMemberIdx());
+            boolean result = clubService.clubJoin(request);
+
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", result);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);

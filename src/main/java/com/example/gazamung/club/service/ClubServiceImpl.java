@@ -6,12 +6,17 @@ import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.club.dto.ClubDto;
+import com.example.gazamung.club.dto.ClubJoinRequest;
 import com.example.gazamung.club.dto.ClubRequest;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
+import com.example.gazamung.clubMember.ClubMember;
+import com.example.gazamung.clubMember.ClubMemberRepository;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.mapper.ClubMapper;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
+import com.example.gazamung.member.service.MemberServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -31,7 +36,10 @@ public class ClubServiceImpl implements ClubService {
     private final ClubRepository clubRepository;
     private final MemberRepository memberRepository;
     private final UploadService uploadService;
-    private final UploadRepository uploadRepository;
+    private final ClubMemberRepository clubMemberRepository;
+    private final MemberServiceImpl memberServiceImpl;
+    private final ClubMapper clubMapper;
+
 
 
     /**
@@ -84,6 +92,8 @@ public class ClubServiceImpl implements ClubService {
         return result;
 
     }
+
+
 
     /**
      * @title 모임 수정
@@ -198,6 +208,36 @@ public class ClubServiceImpl implements ClubService {
             throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         } catch (EmptyResultDataAccessException e) {
             throw new CustomException(CustomExceptionCode.NOT_FOUND);
+        }
+
+    }
+
+    @Override
+    public boolean clubJoin(ClubJoinRequest request) {
+
+        //회원인지 검사
+        Member member = memberRepository.findById(request.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+
+        int age = memberServiceImpl.calculateAge(member.getBirth());
+
+
+        // 여기서부터 ClubMapper를 사용.
+        // 필요한 값 : Club 테이블에 pk값은 ClubId를  request.getClubId()에서 받은 값이 있는지 조회.
+        // 있으면 위의 변수 age를  ageStartLimit 값 이상 ageEndLimit 값 미만인지 확인.
+        // 맞으면 ClubMember 테이블의 memberIdx컬럼에 request.memberIdx값을 clubId컬럼에는 request.clubId값을
+        // clubRank컬럼에 String값인 MEMBER 를 담아 INSERT
+        // ClubMember 테이블에 회원의 클럽 가입 여부 및 연령 제한을 확인
+        int membershipCount = clubMapper.checkAgeAndMembership(request.getMemberIdx(), request.getClubId(), age);
+
+        // 클럽 가입 가능한 경우
+        if (membershipCount == 0) {
+            clubMapper.insertClubMember(request);
+            return true;
+        }
+        // 이미 클럽에 가입한 경우
+        else {
+            throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         }
 
     }
