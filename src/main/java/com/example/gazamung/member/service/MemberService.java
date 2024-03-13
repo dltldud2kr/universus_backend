@@ -83,5 +83,5 @@ public interface MemberService {
     List<MemberDto> getAllMembers();
 
 
-    ProfileDto getMemberInfo(String accessToken);
+    ProfileDto getMemberInfo(Long memberIdx);
 }

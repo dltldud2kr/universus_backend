@@ -372,9 +372,9 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public ProfileDto getMemberInfo(String accessToken) {
-        if (!accessToken.isEmpty()) {
-            Member member = memberRepository.findByEmail(accessToken)
+    public ProfileDto getMemberInfo(Long memberIdx) {
+
+            Member member = memberRepository.findById(memberIdx)
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
             ProfileDto profileDto = new ProfileDto();
@@ -382,11 +382,10 @@ public class MemberServiceImpl implements MemberService {
             profileDto.setEmail(member.getEmail());
             profileDto.setPlatform(member.getPlatform());
             profileDto.setAreaIntrs(member.getAreaIntrs());
+
             return profileDto;
-        } else {
-            throw new CustomException(CustomExceptionCode.NOT_FOUND);
         }
-    }
+
 
 
     /**

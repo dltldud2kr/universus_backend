@@ -305,18 +305,10 @@ public class MemberController {
     }
 
     @GetMapping("/member/profile")
-    public ResponseEntity<ProfileDto> getMemberInfo(Principal principal){
-        String access_token = "";
-        if (principal == null) {
-            // 사용자가 로그인하지 않은 경우에 대한 처리
-            access_token = "";
-
-        } else {
-            access_token = principal.getName(); // 사용자가 로그인한 경우 이메일 가져오기
-        }
+    public ResponseEntity<ProfileDto> getMemberInfo(@RequestBody Long memberIdx){
 
         // 이메일로 멤버 정보 가져오기
-        ProfileDto profileDto = memberService.getMemberInfo(access_token);
+        ProfileDto profileDto = memberService.getMemberInfo(memberIdx);
 
         // 멤버 정보가 없는 경우 예외 처리
         if (profileDto == null) {

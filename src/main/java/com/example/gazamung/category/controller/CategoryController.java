@@ -22,8 +22,17 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    @Operation(summary = "카테고리 생성", description = "" +
+            "전체 카테고리 생성합니다." +
+            "\n### HTTP STATUS 에 따른 요청 결과" +
+            "\n- 200: 서버요청 정상 성공" +
+            "\n- 403: 회원정보 인증 실패" +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생했습니다." +
+            "\n### Result Code 에 따른 요청 결과" )
 
-
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "카테고리 생성 성공"),
+    })
     @PostMapping("/create")
     public ResultDTO createCategory(@RequestBody String categoryName){
 
@@ -42,7 +51,7 @@ public class CategoryController {
             "\n### Result Code 에 따른 요청 결과" )
 
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "200", description = "리스트 조회 성공"),
     })
     @GetMapping("/list")
     public ResultDTO getCategoryList() {

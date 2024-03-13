@@ -26,12 +26,9 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     public boolean bookMark(Long memberIdx, Long clubId) {
-//
-//        if (!memberRepository.existsById(memberIdx)) {.
-//            throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
-//        }
 
-        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
+        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         clubRepository.findById(clubId).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
         Optional<Bookmark> optionalBookmark = bookmarkRepository.findByMemberIdxAndClubId(memberIdx, clubId);

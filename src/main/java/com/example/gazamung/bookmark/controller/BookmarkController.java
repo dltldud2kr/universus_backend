@@ -16,7 +16,7 @@ public class BookmarkController {
 
     private final BookmarkService bookmarkService;
 
-    @GetMapping("/bookmark")
+    @PostMapping("/bookmark")
     public ResultDTO bookMark(@RequestParam Long memberIdx, @RequestParam Long clubId) {
         try {
             boolean isBookmarked = bookmarkService.bookMark(memberIdx, clubId);
