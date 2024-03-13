@@ -23,6 +23,7 @@ public enum CustomExceptionCode {
     INVALID_AUTH("INVALID_AUTH", "유효하지 않은 인증", HttpStatus.BAD_REQUEST),
     EXPIRED_AUTH("EXPIRED_AUTH", "만료된 인증", HttpStatus.BAD_REQUEST),
     NOT_COMPLETE_AUTH("NOT_COMPLETE_AUTH","인증이 완료되지 않음", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_CLUB("NOT_COMPLETE_CLUB","존재하지 않는 모임입니다.", HttpStatus.BAD_REQUEST),
     INVALID_VERIF_CODE("NOT_COMPLETE_AUTH","유효하지않은 인증번호", HttpStatus.BAD_REQUEST);
 
 

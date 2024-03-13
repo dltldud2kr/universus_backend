@@ -1,5 +1,6 @@
 package com.example.gazamung.dto;
 
+import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.category.dto.CategoryDto;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

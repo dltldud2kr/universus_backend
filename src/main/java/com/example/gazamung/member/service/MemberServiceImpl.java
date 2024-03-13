@@ -10,6 +10,7 @@ import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.mapper.MemberMapper;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.MemberDto;
+import com.example.gazamung.member.dto.ProfileDto;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.google.gson.JsonElement;
@@ -370,6 +371,22 @@ public class MemberServiceImpl implements MemberService {
         return list;
     }
 
+    @Override
+    public ProfileDto getMemberInfo(String accessToken) {
+        if (!accessToken.isEmpty()) {
+            Member member = memberRepository.findByEmail(accessToken)
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+
+            ProfileDto profileDto = new ProfileDto();
+            profileDto.setNickName(member.getNickname());
+            profileDto.setEmail(member.getEmail());
+            profileDto.setPlatform(member.getPlatform());
+            profileDto.setAreaIntrs(member.getAreaIntrs());
+            return profileDto;
+        } else {
+            throw new CustomException(CustomExceptionCode.NOT_FOUND);
+        }
+    }
 
 
     /**

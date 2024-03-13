@@ -52,7 +52,7 @@ public class UploadService {
             List<UploadImage> saveImageDataList = new ArrayList<>();
 
             if (multipartFile.size() <= 0) {
-                new IllegalArgumentException("업로드될 파일이 없습니다.");
+                new IllegalArgumentException("업로드될 파일이 없습니다..");
             }
 
             //MultipartFile로 받은 객체를 File 객체로 변환
