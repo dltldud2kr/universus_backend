@@ -338,4 +338,30 @@ public class MemberController {
         return ResponseEntity.ok(profileDto);
 
     }
+    @PostMapping("/member/updateNickName")     /** 닉네임 변경 **/
+    public ResultDTO updateNickName(@RequestBody updateNickNameDto dto){
+        try{
+            return ResultDTO.of(memberService.updateNickName(dto.getMemberIdx(), dto.getNickname()), ApiResponseCode.SUCCESS.getCode(), "닉네임 변경 완료", null);
+        } catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @PostMapping("/member/updatePw")    /** 비밀번호 변경 **/
+    public ResultDTO updatePw(@RequestBody PwChangeDto dto){
+        try{
+            return ResultDTO.of(memberService.updatePw(dto.getMemberIdx(), dto.getPassword()), ApiResponseCode.SUCCESS.getCode(), "비밀번호 변경 완료", null);
+        } catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @DeleteMapping("/member/withDraw")    /** 회원 탈퇴 **/
+    public ResultDTO withDraw(@RequestParam Long memberIdx, String password){
+        try{
+            return ResultDTO.of(memberService.withDraw(memberIdx, password), ApiResponseCode.SUCCESS.getCode(), "회원 탈퇴 완료", null);
+        } catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
 }
