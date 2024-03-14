@@ -76,7 +76,6 @@ public class ClubServiceImpl implements ClubService {
 
 
         // 업로드된 이미지 중 0번째 이미지를 대표 이미지로 지정
-
         Long representIdx = null;
         if (!uploadedImages.isEmpty()) {
             representIdx = (Long) uploadedImages.get(0).get("idx");
@@ -156,7 +155,6 @@ public class ClubServiceImpl implements ClubService {
         } catch (CustomException e) {
             System.err.println("modifyJournal Exception : " + e);
         }
-
 
     }
 
@@ -259,6 +257,7 @@ public class ClubServiceImpl implements ClubService {
 
         } else {
             throw new CustomException(CustomExceptionCode.INVALID_AGE);
+
         }
 
         return true;

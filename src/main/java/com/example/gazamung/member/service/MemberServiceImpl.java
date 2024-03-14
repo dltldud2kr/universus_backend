@@ -81,13 +81,77 @@ public class MemberServiceImpl implements MemberService {
             log.info(tokenDto.getAccessToken());
         }
 
+        int infoCheck = member.getIsActive();
+
 
         Map<String, Object> response = new HashMap<>();
         response.put("tokenDto", tokenDto);
         response.put("memberIdx", member.getMemberIdx());
+        response.put("infoCheck", infoCheck);
 
         return response;
     }
+
+    @Transactional
+    @Override
+    public Map<String, Object> kakaoJoin(String email, String password) {
+        try {
+
+            //해당 이메일로 가입된 회원이 있는지 확인
+            Optional<Member> optionalMember =  memberRepository.findByEmail(email);
+            if(optionalMember.isPresent()) {
+                throw new CustomException(CustomExceptionCode.DUPLICATED);
+            }
+
+            Member member = Member.builder()
+                    .email(email)   // 이메일
+                    .password(password) //비밀번호
+                    .refreshToken(null)
+                    .role(0)
+//                    .birth(dto.getBirth())  // 생년월일
+//                    .gender(dto.getGender())    // 성별
+//                    .nickname(dto.getNickname())    // 닉네임
+//                    .userName(dto.getUserName())    // 사용자 이름
+//                    .areaIntrs(dto.getAreaIntrs())  // 관심지역
+                    .platform(0)
+                    .isActive(0)
+//                    .phone(dto.getPhone())  // 휴대폰번호
+//                    .address(dto.getAddress())  //주소
+                    .regDt(LocalDateTime.now())
+                    .build();
+            memberRepository.save(member);
+
+            //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 비밀번호 )
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
+
+            //authenticationManagerBuilder를 사용하여 authenticationToken을 이용한 사용자의 인증을 시도합니다.
+            // 여기서 실제로 로그인 발생  ( 성공: Authentication 반환 //   실패 : Exception 발생
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            // 인증이 된 경우 JWT 토큰을 발급  (요청에 대한 인증처리)
+            TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
+            log.info(tokenDto.getAccessToken());
+            if (tokenDto.getAccessToken().isEmpty()){
+                log.info(tokenDto.getAccessToken());
+                log.info("token empty");
+            }
+
+            int infoCheck = member.getIsActive();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("tokenDto", tokenDto);
+            response.put("memberIdx", member.getMemberIdx());
+            response.put("infoCheck", infoCheck);
+
+            return response;
+
+
+
+
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 
 
     @Transactional
@@ -121,6 +185,7 @@ public class MemberServiceImpl implements MemberService {
                     .phone(dto.getPhone())  // 휴대폰번호
                     .address(dto.getAddress())  //주소
                     .regDt(LocalDateTime.now())
+                    .isActive(1)
                     .build();
             memberRepository.save(member);
 
@@ -481,7 +546,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
-// 생년월일을 만 나이로 계산해주는 메서드
+    /**
+     * @title  생년월일을 만 나이로 계산해주는 메서드
+     * @author 이시영
+     * @param birthDateString
+     * @return
+     */
     public int calculateAge(String birthDateString) {
 
         // 생년월일 문자열을 파싱하여 LocalDate 객체로 변환

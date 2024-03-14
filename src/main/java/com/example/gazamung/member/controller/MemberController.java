@@ -65,60 +65,6 @@ public class MemberController {
         }
     }
 
-    @Operation(summary = "로그인 요청", description = "" +
-            "회원 로그인을 요청하고 토큰을 발급합니다." +
-            "\n### HTTP STATUS 에 따른 요청 결과" +
-            "\n- 200: 서버요청 정상 성공" +
-            "\n- 403: 회원정보 인증 실패" +
-            "\n- 500: 서버에서 요청 처리중 문제가 발생했습니다." +
-            "\n### Result Code 에 따른 요청 결과" +
-            "\n- SUCCESS: 로그인 성공 및 정상 토큰 발급" +
-            "\n- NOT_FOUND_EMAIL: 요청한 이메일 가입자가 존재하지 않음")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공"),
-    })
-    @PostMapping("/auth/login")
-    public ResultDTO<Map<String, Object>> login(@RequestBody LoginRequestDto loginRequest) {
-        try {
-            String email = loginRequest.getEmail();
-            String password = loginRequest.getPassword();
-
-            System.out.println(email + password);
-
-            Map<String, Object> result = memberService.login(email, password);
-
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "로그인 성공", result);
-        } catch (CustomException e) {
-            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
-        }
-    }
-
-
-
-
-    @Operation(summary = "회원가입 요청", description = "" +
-            "임시 회원가입을 요청합니다." +
-            "테스트 용도로 확인만 해주세요." +
-            "테스트가 끝나면 token을 반환하지 않게 바꿀 예정." +
-            "\n### HTTP STATUS 에 따른 조회 결과" +
-            "\n- 201: 회원가입 성공 " +
-            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
-            "\n### Result Code 에 따른 요청 결과" +
-            "\n- DUPLICATED: 동일한 이메일이 존재합니다."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-    })
-    @PostMapping("/auth/join")
-    public ResultDTO join(@RequestBody JoinRequestDto joinRequestDto) {
-        try {
-            Map<String, Object> result = memberService.join(joinRequestDto);
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "회원가입이 완료되었습니다.", result);
-        } catch (CustomException e) {
-            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
-        }
-    }
-
 
     @Operation(summary = "이메일 인증번호 전송 ", description = "" +
             "이메일 인증번호 전송" +
@@ -245,6 +191,84 @@ public class MemberController {
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "비밀번호 변경 완료", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "로그인 요청", description = "" +
+            "회원 로그인을 요청하고 토큰을 발급합니다." +
+            "\n### HTTP STATUS 에 따른 요청 결과" +
+            "\n- 200: 서버요청 정상 성공" +
+            "\n- 403: 회원정보 인증 실패" +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생했습니다." +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- SUCCESS: 로그인 성공 및 정상 토큰 발급" +
+            "\n- NOT_FOUND_EMAIL: 요청한 이메일 가입자가 존재하지 않음")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+    })
+    @PostMapping("/auth/login")
+    public ResultDTO<Map<String, Object>> login(@RequestBody LoginRequestDto loginRequest) {
+        try {
+            String email = loginRequest.getEmail();
+            String password = loginRequest.getPassword();
+
+            System.out.println(email + password);
+
+            Map<String, Object> result = memberService.login(email, password);
+
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "로그인 성공", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+    @Operation(summary = "회원가입 요청", description = "" +
+            "임시 회원가입을 요청합니다." +
+            "테스트 용도로 확인만 해주세요." +
+            "테스트가 끝나면 token을 반환하지 않게 바꿀 예정." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 201: 회원가입 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- DUPLICATED: 동일한 이메일이 존재합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "회원가입 성공"),
+    })
+    @PostMapping("/auth/join")
+    public ResultDTO join(@RequestBody JoinRequestDto joinRequestDto) {
+        try {
+            Map<String, Object> result = memberService.join(joinRequestDto);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "회원가입이 완료되었습니다.", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+
+    @PostMapping("/auth/kakao/app")
+    public ResultDTO kakaoFlutterLogin(@RequestBody KakaoFlutterRequest request) {
+
+        String email = request.getEmail();
+        String kakaoIdx = request.getKakaoIdx();
+        // 이메일값으로 멤버가 존재하는지 확인.
+        Optional<Member> member = memberRepository.findByEmail(email);
+        if (member.isPresent()) {
+            try{
+                Map<String,Object> result = memberService.login(email,kakaoIdx);
+                return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "로그인 성공", result);
+            } catch (CustomException e){
+                return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+            }
+        } else {
+            try{
+                Map<String, Object> result = memberService.kakaoJoin(email,kakaoIdx);
+                return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "회원가입이 완료되었습니다.", result);
+            } catch (CustomException e) {
+                return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+            }
         }
     }
 

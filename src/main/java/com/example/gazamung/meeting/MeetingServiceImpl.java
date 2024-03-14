@@ -41,7 +41,6 @@ public class MeetingServiceImpl implements MeetingService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
 
-
         Meeting meeting = Meeting.builder()
                 .memberIdx(member.getMemberIdx())
                 .clubId(request.getClubId())

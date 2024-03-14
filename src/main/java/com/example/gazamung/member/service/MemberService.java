@@ -19,7 +19,12 @@ public interface MemberService {
     Map<String, Object> join(JoinRequestDto dto);
 
     /**
-     * 카카오 회원가입
+     * 카카오 회원가입 (flutter)
+     */
+    Map<String, Object> kakaoJoin(String email, String kakaoIdx);
+
+    /**
+     * 카카오 회원가입 (웹)
      */
     Map<String, Object> join(String email, String kakaoIdx, String nickname);
 

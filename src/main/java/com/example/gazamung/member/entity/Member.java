@@ -39,6 +39,7 @@ public class Member implements UserDetails {
     private String address;
     private Integer role;   // 0 : USER 1 : ADMIN
     private int platform; // 0.가자멍 1. 카카오
+    private Integer isActive;   //카카오 추가 기입 정보 0, 1
     private LocalDateTime regDt;
     private LocalDateTime udtDt;
 

@@ -6,14 +6,14 @@
 
     <select id="ageCheck"  resultType="int">
         SELECT
-        CASE
-        WHEN #{age} >= age_start_limit AND #{age} &lt; age_end_limit THEN 1
-        ELSE 0
-        END AS result
+            CASE
+                WHEN #{age} >= age_start_limit AND #{age} &lt; age_end_limit THEN 1
+                ELSE 0
+                END AS result
         FROM
-        club
+            club
         WHERE
-        club_id = #{clubId}
+            club_id = #{clubId}
     </select>
 
     <select id="countByMemberIdx" resultType="int" >
