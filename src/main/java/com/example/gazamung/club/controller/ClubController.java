@@ -56,6 +56,11 @@ public class ClubController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND: 존재하지 않는 회원입니다." +
+            "\n- NOT_FOUND_CLUB: 존재하지 않는 모임입니다." +
+            "\n- MEMBERSHIP_LIMIT_EXCEEDED: 모임 가입 개수를 초과했습니다." +
+            "\n- ALREADY_REGISTERED_MEMBER: 이미 가입된 회원입니다." +
+            "\n- INVALID_AGE: 가입조건에 충족하지 않은 나이입니다." +
             "\n- ")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
@@ -64,7 +69,7 @@ public class ClubController {
     public ResultDTO join(@RequestBody ClubJoinRequest request){
         try{
             clubService.clubJoin(request);
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", null);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 가입 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 

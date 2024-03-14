@@ -32,6 +32,11 @@ public interface ClubService {
      */
     void delete(Long moimId, Long memberIdx);
 
+    /**
+     * 모임 가입
+     * @param request
+     * @return
+     */
 
     boolean clubJoin(ClubJoinRequest request);
 

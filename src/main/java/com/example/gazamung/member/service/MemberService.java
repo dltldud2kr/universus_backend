@@ -84,4 +84,10 @@ public interface MemberService {
 
 
     ProfileDto getMemberInfo(Long memberIdx);
+
+    boolean updateNickName(Long memberIdx, String nickname);
+
+    boolean updatePw(Long memberIdx, String nickname);
+
+    boolean withDraw(Long memberIdx, String password);
 }

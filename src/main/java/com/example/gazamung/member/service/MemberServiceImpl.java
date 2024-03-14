@@ -388,7 +388,41 @@ public class MemberServiceImpl implements MemberService {
             return profileDto;
         }
 
+    @Override
+    public boolean updateNickName(Long memberIdx, String nickName) {
 
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        if (member.getNickname().equals(nickName)){
+            throw new CustomException(CustomExceptionCode.SAME_NICKNAME);
+        }
+        member.setNickname(nickName);
+        memberRepository.save(member);
+        return true;
+    }
+
+    @Override
+    public boolean updatePw(Long memberIdx, String password) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        member.setPassword(password);
+        memberRepository.save(member);
+        return true;
+    }
+
+    @Override
+    public boolean withDraw(Long memberIdx, String password) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        if (!member.getPassword().equals(password)){
+            throw new CustomException(CustomExceptionCode.DIFFEREND_PASSWORD);
+        }
+        memberRepository.delete(member);
+        return true;
+    }
 
     /**
      * @title 이메일 인증 로직
