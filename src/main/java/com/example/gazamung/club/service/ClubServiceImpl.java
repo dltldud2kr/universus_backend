@@ -240,8 +240,6 @@ public class ClubServiceImpl implements ClubService {
             throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
         }
 
-
-
         // 2000-01-01 를 만 나이로 계산해주는 메서드
         int age = memberServiceImpl.calculateAge(member.getBirth());
 
