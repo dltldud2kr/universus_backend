@@ -15,5 +15,6 @@ public class ClubJoinRequest {
     private Long memberIdx;
     private Long clubId;
     private String clubRank;
+    private int age;
 
 }

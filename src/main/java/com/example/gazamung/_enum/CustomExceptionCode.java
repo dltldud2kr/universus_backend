@@ -17,6 +17,12 @@ public enum CustomExceptionCode {
     DUPLICATED("DUPLICATED","중복된 정보가 존재합니다.", HttpStatus.BAD_REQUEST),
     NOT_ENOUGH_ITEMS("NOT_ENOUGH_ITEMS","선택지 항목이 2개 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
 
+    //클럽
+    INVALID_AGE("INVALID_AGE","가입조건에 충족하지 않은 나이", HttpStatus.BAD_REQUEST),
+    MEMBERSHIP_LIMIT_EXCEEDED("MEMBERSHIP_LIMIT_EXCEEDED", "모임 가입 개수를 초과", HttpStatus.BAD_REQUEST),
+    ALREADY_REGISTERED_MEMBER("ALREADY_REGISTERED_MEMBER", "이미 가입된 회원입니다", HttpStatus.BAD_REQUEST),
+
+
     //메일 인증
     DUPLICATED_MEMBER("DUPLICATED_MEMBER", "이미 존재하는 회원", HttpStatus.BAD_REQUEST),
     VERIFIED_MEMBER("VERIFIED_MEMBER", "이미 인증이 완료된 회원", HttpStatus.BAD_REQUEST),

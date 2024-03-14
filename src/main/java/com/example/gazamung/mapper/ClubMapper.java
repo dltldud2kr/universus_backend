@@ -8,8 +8,11 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface ClubMapper {
 
-    int checkAgeAndMembership(@Param("memberIdx") long memberIdx, @Param("clubId") long clubId, @Param("age") int age);
+    int ageCheck( @Param("clubId") long clubId, @Param("age") int age);
+    int countByMemberIdx( @Param("memberIdx") Long memberIdx);
+
+    int checkClubMembership(@Param("clubId") Long clubId, @Param("memberIdx") Long memberIdx);
 
 
-    void insertClubMember(ClubJoinRequest clubJoinRequest);
+
 }

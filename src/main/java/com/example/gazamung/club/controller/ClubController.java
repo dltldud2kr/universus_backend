@@ -63,11 +63,8 @@ public class ClubController {
     @PostMapping("/join")
     public ResultDTO join(@RequestBody ClubJoinRequest request){
         try{
-            System.out.println(request.getClubId());
-            System.out.println(request.getMemberIdx());
-            boolean result = clubService.clubJoin(request);
-
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", result);
+            clubService.clubJoin(request);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 

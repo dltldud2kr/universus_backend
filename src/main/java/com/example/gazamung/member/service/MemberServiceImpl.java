@@ -481,7 +481,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
-
+// 생년월일을 만 나이로 계산해주는 메서드
     public int calculateAge(String birthDateString) {
 
         // 생년월일 문자열을 파싱하여 LocalDate 객체로 변환

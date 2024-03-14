@@ -3,17 +3,28 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.gazamung.mapper.ClubMapper">
 
-    <select id="checkAgeAndMembership" resultType="int">
-        SELECT COUNT(1) FROM club_member cm
-                                 INNER JOIN club c ON cm.club_id = c.club_id
-        WHERE cm.member_idx = #{memberIdx} AND cm.club_id = #{clubId}
-          AND #{age} >= c.age_start_limit AND #{age} &lt; c.age_end_limit
+
+    <select id="ageCheck"  resultType="int">
+        SELECT
+        CASE
+        WHEN #{age} >= age_start_limit AND #{age} &lt; age_end_limit THEN 1
+        ELSE 0
+        END AS result
+        FROM
+        club
+        WHERE
+        club_id = #{clubId}
     </select>
 
+    <select id="countByMemberIdx" resultType="int" >
+        SELECT COUNT(*) FROM club_member
+        WHERE member_idx = #{memberIdx}
+    </select>
 
-    <insert id="insertClubMember" parameterType="com.example.gazamung.club.dto.ClubJoinRequest">
-        INSERT INTO club_member (member_idx, club_id)
-        VALUES (#{memberIdx}, #{clubId})
-    </insert>
+    <select id="checkClubMembership" resultType="int" >
+        SELECT COUNT(*) FROM club_member
+        WHERE club_id = #{clubId}
+          AND member_idx = #{memberIdx}
+    </select>
 
 </mapper>

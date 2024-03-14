@@ -4,6 +4,7 @@ import com.example.gazamung.S3FileUploader.UploadImage;
 import com.example.gazamung.S3FileUploader.UploadRepository;
 import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
+import com.example.gazamung._enum.ClubRank;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.club.dto.ClubDto;
 import com.example.gazamung.club.dto.ClubJoinRequest;
@@ -215,32 +216,56 @@ public class ClubServiceImpl implements ClubService {
     @Override
     public boolean clubJoin(ClubJoinRequest request) {
 
+        long memberIdx = request.getMemberIdx();
+        long clubId = request.getClubId();
+
         //회원인지 검사
-        Member member = memberRepository.findById(request.getMemberIdx())
+        Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
+        // 존재하는 클럽인지 확인.
+        clubRepository.findById(request.getClubId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
+
+        // 회원이 가입한 모임 개수
+        int count = clubMapper.countByMemberIdx(memberIdx);
+        if(count > 3){
+            throw new CustomException(CustomExceptionCode.MEMBERSHIP_LIMIT_EXCEEDED);
+        }
+
+        // 가입되어있는 회원인지 확인
+        int checkRegMember = clubMapper.checkClubMembership(clubId,memberIdx);
+        if(checkRegMember > 0) {
+            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
+        }
+
+
+
+        // 2000-01-01 를 만 나이로 계산해주는 메서드
         int age = memberServiceImpl.calculateAge(member.getBirth());
 
+        // 나이가 가입조건에 충족하면 1 아니면 0 을 반환
+        int membershipCount = clubMapper.ageCheck(clubId, age);
 
-        // 여기서부터 ClubMapper를 사용.
-        // 필요한 값 : Club 테이블에 pk값은 ClubId를  request.getClubId()에서 받은 값이 있는지 조회.
-        // 있으면 위의 변수 age를  ageStartLimit 값 이상 ageEndLimit 값 미만인지 확인.
-        // 맞으면 ClubMember 테이블의 memberIdx컬럼에 request.memberIdx값을 clubId컬럼에는 request.clubId값을
-        // clubRank컬럼에 String값인 MEMBER 를 담아 INSERT
-        // ClubMember 테이블에 회원의 클럽 가입 여부 및 연령 제한을 확인
-        int membershipCount = clubMapper.checkAgeAndMembership(request.getMemberIdx(), request.getClubId(), age);
+        // 조건 충족시 가입처리.
+        if (membershipCount == 1) {
+            ClubMember clubMember = ClubMember.builder()
+                    .clubId(clubId)
+                    .memberIdx(memberIdx)
+                    .clubRank(ClubRank.MEMBER)
+                    .build();
 
-        // 클럽 가입 가능한 경우
-        if (membershipCount == 0) {
-            clubMapper.insertClubMember(request);
-            return true;
+            clubMemberRepository.save(clubMember);
+
+
+        } else {
+            throw new CustomException(CustomExceptionCode.INVALID_AGE);
         }
-        // 이미 클럽에 가입한 경우
-        else {
-            throw new CustomException(CustomExceptionCode.SERVER_ERROR);
-        }
 
+        return true;
     }
+
 
     @Override
     public List<ClubDto> list() {
