@@ -58,13 +58,6 @@ public class ClubServiceImpl implements ClubService {
         Club club = Club.builder()
                 .memberIdx(member.getMemberIdx())
                 .clubName(dto.getClubName())
-                .content(dto.getContent())
-                .location(dto.getLocation())
-                .categoryId(dto.getCategoryId())
-                .maximumParticipants(dto.getMaximumParticipants())
-                .ageStartLimit(dto.getAgeStartLimit())
-                .ageEndLimit(dto.getAgeEndLimit())
-                .bookmarkCnt(0L)
                 .regDt(LocalDateTime.now())
                 .build();
 
@@ -79,7 +72,6 @@ public class ClubServiceImpl implements ClubService {
         Long representIdx = null;
         if (!uploadedImages.isEmpty()) {
             representIdx = (Long) uploadedImages.get(0).get("idx");
-            club.setRepresentIdx(representIdx);
             clubRepository.save(club); // 대표 이미지 설정 후 다시 저장
         }
 
@@ -144,12 +136,9 @@ public class ClubServiceImpl implements ClubService {
             //업로드된 이미지 정보를 데이터베이스
             List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.CLUB, createdClub.getClubId());
 
-            createdClub.setContent(dto.getContent());
             createdClub.setMemberIdx(dto.getMemberIdx());
             createdClub.setClubId(dto.getClubIdx());
             createdClub.setRegDt(createdClub.getRegDt());//생성일은 그대로.
-            createdClub.setUptDt(LocalDateTime.now());
-            createdClub.setRepresentIdx(getRepresentIdx.get(0).getIdx()); //업로드 이미지의 1번째를 리뷰의 대표이미지로 지정함.
 
             clubRepository.save(createdClub);
         } catch (CustomException e) {
@@ -266,15 +255,7 @@ public class ClubServiceImpl implements ClubService {
                 .clubId(club.getClubId())
                 .memberIdx(club.getMemberIdx())
                 .clubName(club.getClubName())
-                .content(club.getContent())
-                .location(club.getLocation())
-                .categoryId(club.getCategoryId())
                 .regDt(club.getRegDt())
-                .maximumParticipants(club.getMaximumParticipants())
-                .currentParticipants(club.getCurrentParticipants())
-                .ageStartLimit(club.getAgeStartLimit())
-                .ageEndLimit(club.getAgeEndLimit())
-                .bookmarkCnt(club.getBookmarkCnt())
                 .build();
     }
 
@@ -284,15 +265,7 @@ public class ClubServiceImpl implements ClubService {
                         .clubId(club.getClubId())
                         .memberIdx(club.getMemberIdx())
                         .clubName(club.getClubName())
-                        .content(club.getContent())
-                        .location(club.getLocation())
-                        .categoryId(club.getCategoryId())
                         .regDt(club.getRegDt())
-                        .maximumParticipants(club.getMaximumParticipants())
-                        .currentParticipants(club.getCurrentParticipants())
-                        .ageStartLimit(club.getAgeStartLimit())
-                        .ageEndLimit(club.getAgeEndLimit())
-                        .bookmarkCnt(club.getBookmarkCnt())
                         .build())
                 .collect(Collectors.toList());
     }

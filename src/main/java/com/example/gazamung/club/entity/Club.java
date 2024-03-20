@@ -19,28 +19,14 @@ public class Club {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CLUB_SEQ")
     @SequenceGenerator(name = "CLUB_SEQ", sequenceName = "club_sequence", allocationSize = 1)
-    private Long clubId;
+    private Long clubId;            // 모임 ID
 
-    private Long memberIdx;
-    private String clubName;
-    private String content;
-    private String location;
-    private Long categoryId;
-    private String image;
-    private Long representIdx;  // 대표 사진 idx
+    private Long memberIdx;         // 대표자
+    private Long eventId;           // 종목 ID
 
+    private String clubName;        // 모임명
+    private String introduction;    // 모임 소개
     private LocalDateTime regDt;    // 생성일
-    private LocalDateTime uptDt;
-
-    private Long maximumParticipants;   // 최대 인원
-
-    @ColumnDefault("1")
-    private Long currentParticipants;   // 현재 인원
-
-    @ColumnDefault("0")
-    private Long bookmarkCnt;
-
-    private Long ageStartLimit;
-    private Long ageEndLimit;
+    private Long price;             // 비용
 
 }
