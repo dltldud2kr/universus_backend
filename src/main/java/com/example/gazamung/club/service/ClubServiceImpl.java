@@ -226,39 +226,28 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
 
-        // 회원이 가입한 모임 개수
-        int count = clubMapper.countByMemberIdx(memberIdx);
-        if(count > 3){
-            throw new CustomException(CustomExceptionCode.MEMBERSHIP_LIMIT_EXCEEDED);
-        }
+//        // 회원이 가입한 모임 개수
+//        int count = clubMapper.countByMemberIdx(memberIdx);
+//        if(count > 3){
+//            throw new CustomException(CustomExceptionCode.MEMBERSHIP_LIMIT_EXCEEDED);
+//        }
+//
+//        // 가입되어있는 회원인지 확인
+//        int checkRegMember = clubMapper.checkClubMembership(clubId,memberIdx);
+//        if(checkRegMember > 0) {
+//            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
+//        }
 
-        // 가입되어있는 회원인지 확인
-        int checkRegMember = clubMapper.checkClubMembership(clubId,memberIdx);
-        if(checkRegMember > 0) {
-            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
-        }
 
-        // 2000-01-01 를 만 나이로 계산해주는 메서드
-        int age = memberServiceImpl.calculateAge(member.getBirth());
-
-        // 나이가 가입조건에 충족하면 1 아니면 0 을 반환
-        int membershipCount = clubMapper.ageCheck(clubId, age);
 
         // 조건 충족시 가입처리.
-        if (membershipCount == 1) {
             ClubMember clubMember = ClubMember.builder()
                     .clubId(clubId)
                     .memberIdx(memberIdx)
-                    .clubRank(ClubRank.MEMBER)
                     .build();
 
             clubMemberRepository.save(clubMember);
 
-
-        } else {
-            throw new CustomException(CustomExceptionCode.INVALID_AGE);
-
-        }
 
         return true;
     }

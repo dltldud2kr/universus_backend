@@ -2,9 +2,10 @@ package com.example.gazamung.regionFetcher.controller;
 
 
 import com.example.gazamung.regionFetcher.dto.AccessTokenResponse;
+
+import com.example.gazamung.regionFetcher.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Tag(name = "행정구역 API", description = "")
 public class RegionFetcherController {
 
+
     @Operation(summary = "행정구역 api 요청", description = "" +
             "## 행정구역 api 조회" +
             "\n### cd값에 따른 조회 결과" +
@@ -29,9 +31,8 @@ public class RegionFetcherController {
             "\n- 입력 : 구 데이터 반환" +
             "\n ")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "api 접근 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "api 접근 성공"),
     })
-
 
     @GetMapping("/getAccessToken")
     public ApiResponse getData(@RequestParam(required = false) String cd) {
