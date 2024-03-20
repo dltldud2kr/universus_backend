@@ -1,11 +1,10 @@
-package com.example.gazamung.schoolFetcher;
+package com.example.gazamung.universityFetcher;
 
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,18 +17,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/school")
 @CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
 @Tag(name = "학교생성 API", description = "")
-public class SchoolFetcherController {
+public class UniversityFetcherController {
 
-    private final SchoolRepository schoolRepository;
+    private final UniversityRepository universityRepository;
 
     private static final String API_URL = "http://www.career.go.kr/cnet/openapi/getOpenApi.json";
 
@@ -104,8 +100,9 @@ private String fetchSchoolInfoFromAPI(String apiUrl) throws Exception {
             for (JsonElement element : contentArray) {
                 JsonObject school = new JsonObject();
                 school.addProperty("schoolName", element.getAsJsonObject().get("schoolName").getAsString());
-                school.addProperty("totalCount", element.getAsJsonObject().get("totalCount").getAsString());
+//                school.addProperty("totalCount", element.getAsJsonObject().get("totalCount").getAsString());
                 school.addProperty("region", element.getAsJsonObject().get("region").getAsString());
+//                school.addProperty("link", element.getAsJsonObject().get("link").getAsString());
                 extractedArray.add(school);
             }
             jsonObject.getAsJsonObject("dataSearch").add("content", extractedArray);
@@ -129,16 +126,18 @@ private String fetchSchoolInfoFromAPI(String apiUrl) throws Exception {
         for (JsonElement element : contentArray) {
             JsonObject contentObject = element.getAsJsonObject();
             String schoolName = contentObject.get("schoolName").getAsString();
+//            String link = contentObject.get("link").getAsString();
 //            String totalCount = contentObject.get("totalCount").getAsString();
             String region = contentObject.get("region").getAsString();
 
             // 학교 정보 저장
-            School school = new School();
-            school.setSchoolName(schoolName);
+            University university = new University();
+            university.setSchoolName(schoolName);
 //            school.setTotalCount(totalCount);
-            school.setRegionCode(RegionCodeMapper.getRegionCode(region)); // 지역에 해당하는 코드 설정
-            school.setRegion(RegionCodeMapper.getRegion(region));
-            schoolRepository.save(school);
+            university.setRegionCode(RegionCodeMapper.getRegionCode(region)); // 지역에 해당하는 코드 설정
+            university.setRegion(RegionCodeMapper.getRegion(region));
+//            school.setLink(link);
+            universityRepository.save(university);
         }
     }
 }
