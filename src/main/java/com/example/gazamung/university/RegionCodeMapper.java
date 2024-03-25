@@ -1,4 +1,4 @@
-package com.example.gazamung.universityFetcher;
+package com.example.gazamung.university;
 
 import java.util.HashMap;
 import java.util.Map;
