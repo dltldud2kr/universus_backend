@@ -21,21 +21,15 @@ public class ClubRequest {
     @NoArgsConstructor
     public static class CreateClubRequestDto {
 
-        private Long memberIdx;
-        private String clubName;
-        private String content;
-        private String location;
-        private Long categoryId;
+        private Long memberIdx;         // 대표자
+        private Long eventId;           // 종목 ID
 
+        private String clubName;        // 모임명
+        private String introduction;    // 모임 소개
         private LocalDateTime regDt;    // 생성일
+        private Long price;             // 비용
 
-        private Long maximumParticipants;   // 총 인원
-        private Long currentParticipants;   // 현재 인원
-
-        private Long bookmarkCnt;
-
-        private Long ageStartLimit;
-        private Long ageEndLimit;
+        private Long maximumMembers;   // 총 인원
 
         private List<MultipartFile> clubImage;
 
@@ -47,23 +41,16 @@ public class ClubRequest {
     @NoArgsConstructor
     public static class ModifyClubRequestDto {
 
-        private Long memberIdx;
-        private Long clubIdx;
-        private String clubName;
-        private String content;
-        private String location;
-        private Long categoryId;
+        private Long clubId;
+        private Long memberIdx;         // 대표자
+        private Long eventId;           // 종목 ID
 
+        private String clubName;        // 모임명
+        private String introduction;    // 모임 소개
         private LocalDateTime regDt;    // 생성일
-        private LocalDateTime uptDt;
+        private Long price;             // 비용
 
-        private Long maximumParticipants;   // 총 인원
-        private Long currentParticipants;   // 현재 인원
-
-        private Long bookmarkCnt;
-
-        private Long ageStartLimit;
-        private Long ageEndLimit;
+        private Long maximumMembers;   // 총 인원
 
         private List<MultipartFile> clubImage;
 

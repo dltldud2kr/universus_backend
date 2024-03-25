@@ -57,7 +57,11 @@ public class ClubServiceImpl implements ClubService {
 
         Club club = Club.builder()
                 .memberIdx(member.getMemberIdx())
+                .eventId(dto.getEventId())
                 .clubName(dto.getClubName())
+                .introduction(dto.getIntroduction())
+                .price(dto.getPrice())
+                .maximumMembers(dto.getMaximumMembers())
                 .regDt(LocalDateTime.now())
                 .build();
 
@@ -67,14 +71,13 @@ public class ClubServiceImpl implements ClubService {
         //정상적으로 모임이 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
         List<Map<String, Object>> uploadedImages = uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, savedClub.getClubId());
 
-
         // 업로드된 이미지 중 0번째 이미지를 대표 이미지로 지정
         Long representIdx = null;
         if (!uploadedImages.isEmpty()) {
             representIdx = (Long) uploadedImages.get(0).get("idx");
+            club.setRepresentIdx(representIdx);
             clubRepository.save(club); // 대표 이미지 설정 후 다시 저장
         }
-
 
         // uploadImages 와 club 정보를 함께 반환
         Map<String, Object> result = new HashMap<>();
@@ -98,7 +101,7 @@ public class ClubServiceImpl implements ClubService {
     public void update(ClubRequest.ModifyClubRequestDto dto) {
         try {
             //수정 요청한 모임을 확인함
-            Club createdClub = clubRepository.findById(dto.getClubIdx()).get();
+            Club createdClub = clubRepository.findById(dto.getClubId()).get();
 
             //수정을 요청한 사용자와 작성자가 다른 경우 : (본인인지의 대한 유효성 검사)
             if (dto.getMemberIdx() != createdClub.getMemberIdx()) {
@@ -107,7 +110,7 @@ public class ClubServiceImpl implements ClubService {
 
             //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 CLUB 파일을 모두 삭제합니다.
             //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
-            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, dto.getClubIdx());
+            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, dto.getClubId());
             String[] removeTarget = new String[imageByAttachmentType.size() + 1];
 
             int removeCount = 0;
@@ -124,7 +127,7 @@ public class ClubServiceImpl implements ClubService {
                     //등록되어있는 파일 정보 삭제 요청.
                     uploadService.removeS3Files(removeTarget);
                     //데이터베이스에 맵핑되어있는 정보삭제
-                    uploadService.removeDatabaseByReviewIdx(dto.getClubIdx());
+                    uploadService.removeDatabaseByReviewIdx(dto.getClubId());
                 }
             } catch (CustomException e) {
                 throw new CustomException(CustomExceptionCode.SERVER_ERROR);
@@ -137,7 +140,7 @@ public class ClubServiceImpl implements ClubService {
             List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.CLUB, createdClub.getClubId());
 
             createdClub.setMemberIdx(dto.getMemberIdx());
-            createdClub.setClubId(dto.getClubIdx());
+            createdClub.setClubId(dto.getClubId());
             createdClub.setRegDt(createdClub.getRegDt());//생성일은 그대로.
 
             clubRepository.save(createdClub);

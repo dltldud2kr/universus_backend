@@ -30,4 +30,8 @@ public class Club {
     private LocalDateTime regDt;    // 생성일
     private Long price;             // 비용
 
+    private Long representIdx;  // 대표 사진 idx
+
+    private Long maximumMembers;   // 총 인원
+    private Long currentMembers;   // 현재 인원
 }
