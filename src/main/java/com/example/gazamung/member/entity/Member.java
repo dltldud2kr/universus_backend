@@ -26,20 +26,21 @@ public class Member implements UserDetails {
     @SequenceGenerator(name = "MEMBER_SEQ", sequenceName = "member_sequence", allocationSize = 1)
     private Long memberIdx;
 
+    private long univId;    //대학
+    private long deptId;    //학과
+
     private String email;
     private String password;
     private String refreshToken; //리프레쉬 토큰
     private String userName;
     private String nickname;
-    private String areaIntrs;
     private String birth;
     private String gender;  // M(남자), F(여자)
-    private int xxxCnt; // 이름 미정
     private String phone;
     private String address;
     private Integer role;   // 0 : USER 1 : ADMIN
-    private int platform; // 0.가자멍 1. 카카오
-    private Integer isActive;   //카카오 추가 기입 정보 0, 1
+//    private Integer univAuth;   //대학인증여부
+//    private Integer isActive;   //카카오 추가 기입 정보 0, 1
     private LocalDateTime regDt;
     private LocalDateTime udtDt;
 

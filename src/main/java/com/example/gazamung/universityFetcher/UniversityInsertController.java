@@ -27,7 +27,7 @@ import java.io.InputStream;
 public class UniversityInsertController {
 
     private final DataSource dataSource;
-    private final ResourceLoader resourceLoader;
+
 
     @PostMapping("/execute")
     public String executeSqlScript() throws IOException {

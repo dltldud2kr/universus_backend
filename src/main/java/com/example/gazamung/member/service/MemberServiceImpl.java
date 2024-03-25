@@ -81,16 +81,17 @@ public class MemberServiceImpl implements MemberService {
             log.info(tokenDto.getAccessToken());
         }
 
-        int infoCheck = member.getIsActive();
 
 
         Map<String, Object> response = new HashMap<>();
         response.put("tokenDto", tokenDto);
         response.put("memberIdx", member.getMemberIdx());
-        response.put("infoCheck", infoCheck);
 
         return response;
     }
+
+
+    // 최신 카카오 로그인
 
     @Transactional
     @Override
@@ -108,15 +109,6 @@ public class MemberServiceImpl implements MemberService {
                     .password(password) //비밀번호
                     .refreshToken(null)
                     .role(0)
-//                    .birth(dto.getBirth())  // 생년월일
-//                    .gender(dto.getGender())    // 성별
-//                    .nickname(dto.getNickname())    // 닉네임
-//                    .userName(dto.getUserName())    // 사용자 이름
-//                    .areaIntrs(dto.getAreaIntrs())  // 관심지역
-                    .platform(0)
-                    .isActive(0)
-//                    .phone(dto.getPhone())  // 휴대폰번호
-//                    .address(dto.getAddress())  //주소
                     .regDt(LocalDateTime.now())
                     .build();
             memberRepository.save(member);
@@ -135,12 +127,12 @@ public class MemberServiceImpl implements MemberService {
                 log.info("token empty");
             }
 
-            int infoCheck = member.getIsActive();
+//            int infoCheck = member.getIsActive();
 
             Map<String, Object> response = new HashMap<>();
             response.put("tokenDto", tokenDto);
             response.put("memberIdx", member.getMemberIdx());
-            response.put("infoCheck", infoCheck);
+//            response.put("infoCheck", infoCheck);
 
             return response;
 
@@ -180,12 +172,10 @@ public class MemberServiceImpl implements MemberService {
                     .gender(dto.getGender())    // 성별
                     .nickname(dto.getNickname())    // 닉네임
                     .userName(dto.getUserName())    // 사용자 이름
-                    .areaIntrs(dto.getAreaIntrs())  // 관심지역
-                    .platform(0)
+                    .univId(dto.getUnivId())        // 대학교 ID값
                     .phone(dto.getPhone())  // 휴대폰번호
                     .address(dto.getAddress())  //주소
                     .regDt(LocalDateTime.now())
-                    .isActive(1)
                     .build();
             memberRepository.save(member);
 
@@ -217,6 +207,7 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    //예전 카카오 로그인 웹방식
     @Transactional
     @Override
     public Map<String, Object> join(String email, String kakaoIdx, String nickname) {
@@ -234,7 +225,8 @@ public class MemberServiceImpl implements MemberService {
                     .role(0)
                     .nickname(nickname)
                     .regDt(LocalDateTime.now())
-                    .platform(1)
+//                    .univAuth(0)
+
                     .build();
             memberRepository.save(member);
 
@@ -447,8 +439,7 @@ public class MemberServiceImpl implements MemberService {
             ProfileDto profileDto = new ProfileDto();
             profileDto.setNickName(member.getNickname());
             profileDto.setEmail(member.getEmail());
-            profileDto.setPlatform(member.getPlatform());
-            profileDto.setAreaIntrs(member.getAreaIntrs());
+
 
             return profileDto;
         }

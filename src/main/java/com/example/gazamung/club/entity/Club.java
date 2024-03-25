@@ -23,6 +23,7 @@ public class Club {
 
     private Long memberIdx;         // 대표자
     private Long eventId;           // 종목 ID
+    private Long univId;            // 대학 ID
 
     private String clubName;        // 모임명
     private String introduction;    // 모임 소개

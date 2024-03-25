@@ -13,5 +13,5 @@ public class JoinRequestDto {
     private String nickname;    // 닉네임
     private String phone;   // 전화번호
     private String address; // 주소
-    private String areaIntrs;  //관심지역
+    private long univId;    // 대학 id
 }
