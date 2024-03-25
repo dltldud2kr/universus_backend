@@ -159,8 +159,8 @@ public class MemberServiceImpl implements MemberService {
                 throw new CustomException(CustomExceptionCode.DUPLICATED);
             }
 //            Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED);
-            emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED)
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_COMPLETE_AUTH));
+//            emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED)
+//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_COMPLETE_AUTH));
 
 
             Member member = Member.builder()
@@ -169,7 +169,7 @@ public class MemberServiceImpl implements MemberService {
                     .refreshToken(null)
                     .role(0)
                     .birth(dto.getBirth())  // 생년월일
-                    .gender(dto.getGender())    // 성별
+                    .gender(dto.getGender())    // 성별 (M, F)
                     .nickname(dto.getNickname())    // 닉네임
                     .userName(dto.getUserName())    // 사용자 이름
                     .univId(dto.getUnivId())        // 대학교 ID값

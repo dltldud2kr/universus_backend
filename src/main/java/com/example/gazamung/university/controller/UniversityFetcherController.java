@@ -1,6 +1,9 @@
-package com.example.gazamung.university;
+package com.example.gazamung.university.controller;
 
 
+import com.example.gazamung.regionFetcher.RegionCodeMapper;
+import com.example.gazamung.university.repository.UniversityRepository;
+import com.example.gazamung.university.entity.University;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

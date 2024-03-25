@@ -1,4 +1,4 @@
-package com.example.gazamung.university;
+package com.example.gazamung.university.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

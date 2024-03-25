@@ -1,10 +1,14 @@
-package com.example.gazamung.university;
+package com.example.gazamung.university.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.university.entity.University;
 import com.example.gazamung.university.service.UniversityService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -29,6 +32,15 @@ public class UniversityInsertController {
     private final DataSource dataSource;
     private final UniversityService universityService;
 
+    @Operation(summary = "대학 데이터 INSERT ", description = "" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
 
     @PostMapping("/execute")
     public String executeSqlScript() throws IOException {
@@ -40,6 +52,16 @@ public class UniversityInsertController {
         populator.execute(dataSource);
         return "SQL 스크립트가 성공적으로 실행되었습니다.";
     }
+
+    @Operation(summary = "대학 리스트 조회 ", description = "" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
 
     @GetMapping("/list")
     public ResultDTO universityList() {

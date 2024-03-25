@@ -5,11 +5,14 @@ import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.univcert.dto.CertificationCodeRequest;
 import com.example.gazamung.univcert.dto.CertificationRequest;
-import com.example.gazamung.university.University;
-import com.example.gazamung.university.UniversityRepository;
+import com.example.gazamung.university.entity.University;
+import com.example.gazamung.university.repository.UniversityRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +42,15 @@ public class univcertController {
 
     private final RestTemplate restTemplate;
 
+    @Operation(summary = "univcert 대학교 인증번호 발송 ", description = "" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @PostMapping("/certify")
     public ResponseEntity<String> certify(@RequestBody CertificationRequest request) {
         request.setKey(API_KEY);
@@ -53,7 +65,15 @@ public class univcertController {
 
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
-
+    @Operation(summary = "univcert 대학교 인증번호 인증 ", description = "" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @PostMapping("/certifyCode")
     public Map<String, Object> certifyCode(@RequestBody CertificationCodeRequest request) throws JsonProcessingException {
         request.setKey(API_KEY);

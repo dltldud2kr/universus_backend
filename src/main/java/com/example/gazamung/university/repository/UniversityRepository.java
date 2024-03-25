@@ -1,5 +1,6 @@
-package com.example.gazamung.university;
+package com.example.gazamung.university.repository;
 
+import com.example.gazamung.university.entity.University;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

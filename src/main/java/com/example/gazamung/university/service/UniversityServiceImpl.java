@@ -1,7 +1,7 @@
 package com.example.gazamung.university.service;
 
-import com.example.gazamung.university.University;
-import com.example.gazamung.university.UniversityRepository;
+import com.example.gazamung.university.entity.University;
+import com.example.gazamung.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
