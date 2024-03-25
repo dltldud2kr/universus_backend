@@ -21,7 +21,6 @@ public class University {
 
     private String schoolName;
     private String regionCode;
-    private String link;
     private String region;
 
 }

@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name= "email_auth")
 @Data
-public class EmailAuth {
+public class
+EmailAuth {
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    private Long id;
