@@ -14,7 +14,6 @@ import java.util.List;
 @Builder
 public class ClubRequest {
 
-
     @Builder
     @Data
     @AllArgsConstructor
@@ -23,6 +22,7 @@ public class ClubRequest {
 
         private Long memberIdx;         // 대표자
         private Long eventId;           // 종목 ID
+        private Long univId;            // 대학 ID
 
         private String clubName;        // 모임명
         private String introduction;    // 모임 소개
@@ -42,7 +42,9 @@ public class ClubRequest {
     public static class ModifyClubRequestDto {
 
         private Long clubId;
+
         private Long memberIdx;         // 대표자
+        private Long univId;            // 대학 ID
         private Long eventId;           // 종목 ID
 
         private String clubName;        // 모임명

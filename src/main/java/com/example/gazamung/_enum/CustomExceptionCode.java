@@ -31,6 +31,10 @@ public enum CustomExceptionCode {
     MEMBERSHIP_LIMIT_EXCEEDED("MEMBERSHIP_LIMIT_EXCEEDED", "모임 가입 개수를 초과", HttpStatus.BAD_REQUEST),
     ALREADY_REGISTERED_MEMBER("ALREADY_REGISTERED_MEMBER", "이미 가입된 회원입니다", HttpStatus.BAD_REQUEST),
     ACCESS_DENIED("ACCESS_DENIED","관리자 외 접근 거부", HttpStatus.BAD_REQUEST),
+    NOT_MATCHED_UNIVERSITY("NOT_MATCHED_UNIVERSITY","같은 대학이어야합니다.", HttpStatus.BAD_REQUEST),
+    YOU_ARE_MASTER("YOU_ARE_MASTER","본인이 생성한 모임입니다.", HttpStatus.BAD_REQUEST),
+
+
 
     //메일 인증
     DUPLICATED_MEMBER("DUPLICATED_MEMBER", "이미 존재하는 회원", HttpStatus.BAD_REQUEST),

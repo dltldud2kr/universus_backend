@@ -20,4 +20,5 @@ public class Event {
     private Long eventId;      // 종목 ID
 
     private String eventName;   // 종목명
+
 }

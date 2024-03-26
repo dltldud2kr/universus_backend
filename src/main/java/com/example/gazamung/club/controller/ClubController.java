@@ -60,7 +60,8 @@ public class ClubController {
             "\n- NOT_FOUND_CLUB: 존재하지 않는 모임입니다." +
             "\n- MEMBERSHIP_LIMIT_EXCEEDED: 모임 가입 개수를 초과했습니다." +
             "\n- ALREADY_REGISTERED_MEMBER: 이미 가입된 회원입니다." +
-            "\n- INVALID_AGE: 가입조건에 충족하지 않은 나이입니다." +
+            "\n- NOT_MATCHED_UNIVERSITY: 같은 대학이어야 합니다." +
+            "\n- YOU_ARE_MASTER: 본인이 생성한 모임입니다." +
             "\n- ")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
@@ -120,20 +121,40 @@ public class ClubController {
         }
     }
 
+    @Operation(summary = "모임 리스트 조회 ", description = "" +
+            " 모임 리스트 조회." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @GetMapping("/list")
     public List<ClubDto> list(){
         try{
             List<ClubDto> requestDtoList = clubService.list();
             return requestDtoList;
         } catch (CustomException e) {
-            return (List<ClubDto>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 리스트 조회 완료");
+            return (List<ClubDto>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 전체 리스트 조회 완료");
         }
     }
 
+    @Operation(summary = "모임 정보 조회 ", description = "" +
+            " 모임 정보 조회." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @GetMapping("/info")
     public ResultDTO info(@RequestParam Long clubId){
         try {
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 조회 완료.", clubService.info(clubId));
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 정보 조회 완료.", clubService.info(clubId));
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
