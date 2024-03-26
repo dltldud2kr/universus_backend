@@ -27,8 +27,18 @@ public class UnivBattleController {
             return ResultDTO.of(univBattleService.create(request), ApiResponseCode.CREATED.getCode(),"대항전 생성 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
-
         }
+    }
+
+    @PostMapping("/attend")
+    public ResultDTO attendBattle(@RequestBody UnivBattleAttendRequest request){
+
+        try{
+            return ResultDTO.of(univBattleService.attend(request), ApiResponseCode.CREATED.getCode(),"대항전 생성 완료.", null);
+        }catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+
     }
 
 

@@ -26,6 +26,8 @@ public class UnivBattle {
     private Long guestUniv;         // 참가팀 대학교
     private Long winUniv;           // 승리팀 대학교
     private Long eventId;           // 대결 종목
+    private String content;         // 내용
+    private String cost;
 
     private String battleDate;     // 일정
     private String location;        // 장소

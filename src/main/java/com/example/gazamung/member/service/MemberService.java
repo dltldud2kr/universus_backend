@@ -23,15 +23,15 @@ public interface MemberService {
      */
     Map<String, Object> kakaoJoin(String email, String kakaoIdx);
 
-    /**
-     * 카카오 회원가입 (웹)
-     */
-    Map<String, Object> join(String email, String kakaoIdx, String nickname);
-
-    /**
-     * 카카오 로그인
-     */
-    Map<String, Object> kakaoLogin(String email, String password);
+//    /**
+//     * 카카오 회원가입 (웹)
+//     */
+//    Map<String, Object> join(String email, String kakaoIdx, String nickname);
+//
+//    /**
+//     * 카카오 로그인
+//     */
+//    Map<String, Object> kakaoLogin(String email, String password);
 
     /**
      * 회원 로그인

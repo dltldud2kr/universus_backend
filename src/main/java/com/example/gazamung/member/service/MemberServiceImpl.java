@@ -207,85 +207,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    //예전 카카오 로그인 웹방식
-    @Transactional
-    @Override
-    public Map<String, Object> join(String email, String kakaoIdx, String nickname) {
-        try {
-            //해당 이메일이 존재하는지 확인.
-            Optional<Member> optionalMember =  memberRepository.findByEmail(email);
-            if(optionalMember.isPresent()) {
-                throw new CustomException(CustomExceptionCode.DUPLICATED);
-            }
-            //해당 이메일이 디비에 존재하는지 확인.
-            Member member = Member.builder()
-                    .email(email)
-                    .password(kakaoIdx)
-                    .refreshToken(null)
-                    .role(0)
-                    .nickname(nickname)
-                    .regDt(LocalDateTime.now())
-//                    .univAuth(0)
-
-                    .build();
-            memberRepository.save(member);
-
-            //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 카카오고유번호(비밀번호 역할) )
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, kakaoIdx);
-
-            //authenticationManagerBuilder를 사용하여 authenticationToken을 이용한 사용자의 인증을 시도합니다.
-            // 여기서 실제로 로그인 발생  ( 성공: Authentication 반환 //   실패 : Exception 발생
-            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-            // 인증이 된 경우 JWT 토큰을 발급  (요청에 대한 인증처리)
-            TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
-            log.info(tokenDto.getAccessToken());
-            if (tokenDto.getAccessToken().isEmpty()){
-                log.info(tokenDto.getAccessToken());
-                log.info("token empty");
-            }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("tokenDto", tokenDto);
-            response.put("memberIdx", member.getMemberIdx());
-
-            return response;
-
-
-
-
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Transactional
-    public Map<String, Object> kakaoLogin(String email, String kakaoIdx) {
-        Optional<Member> optionalMember =  memberRepository.findByEmail(email);
-
-        Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EMAIL));
-
-        //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 멤버 인덱스 정보 포함 )
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, kakaoIdx);
-
-        //authenticationManagerBuilder를 사용하여 authenticationToken을 이용한 사용자의 인증을 시도합니다.
-        // 여기서 실제로 로그인 발생  ( 성공: Authentication 반환 //   실패 : Exception 발생
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
-        // 인증이 된 경우 JWT 토큰을 발급  (요청에 대한 인증처리)
-        TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
-
-        if (tokenDto.getAccessToken().isEmpty()){
-            log.info(tokenDto.getAccessToken());
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("tokenDto", tokenDto);
-        response.put("memberIdx", member.getMemberIdx());
-
-        return response;
-
-    }
 
 
     public TokenDto createToken(Long memberIdx) {
@@ -474,7 +395,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         if (!member.getPassword().equals(password)){
-            throw new CustomException(CustomExceptionCode.DIFFEREND_PASSWORD);
+            throw new CustomException(CustomExceptionCode.DIFFERENT_PASSWORD);
         }
         memberRepository.delete(member);
         return true;

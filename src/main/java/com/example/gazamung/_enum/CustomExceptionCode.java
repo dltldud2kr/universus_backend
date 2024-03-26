@@ -15,9 +15,15 @@ public enum CustomExceptionCode {
     NOT_FOUND_BOARD("NOT_FOUND","해당 게시글을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST),
     SERVER_ERROR("SERVER_ERROR", "요청중 서버 문제가 발생했습니다.", HttpStatus.BAD_REQUEST),
     DUPLICATED("DUPLICATED","중복된 정보가 존재합니다.", HttpStatus.BAD_REQUEST),
-    SAME_NICKNAME("SAME_NICKNAME","이미 같은 닉네임을 사용중입니다.", HttpStatus.BAD_REQUEST),
-    DIFFEREND_PASSWORD("DIFFEREND_PASSWORD","잘못된 비밀번호입니다.", HttpStatus.BAD_REQUEST),
-    NOT_ENOUGH_ITEMS("NOT_ENOUGH_ITEMS","선택지 항목이 2개 이상이어야 합니다.", HttpStatus.BAD_REQUEST),
+    SAME_NICKNAME("DUPLICATED_NICKNAME","이미 같은 닉네임을 사용중입니다.", HttpStatus.BAD_REQUEST),
+    DIFFERENT_PASSWORD("DIFFERENT_PASSWORD","잘못된 비밀번호입니다.", HttpStatus.BAD_REQUEST),
+
+
+    //대항전
+    NOT_FOUND_BATTLE("NOT_FOUND_BATTLE","존재하지 않는 대항전", HttpStatus.BAD_REQUEST),
+    SAME_UNIVERSITY("SAME_UNIVERSITY","같은 대학교는 참가할 수 없습니다.", HttpStatus.BAD_REQUEST),
+
+
 
 
     //클럽
