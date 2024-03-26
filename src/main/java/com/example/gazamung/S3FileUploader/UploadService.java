@@ -8,12 +8,16 @@ import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.FileType;
 import com.example.gazamung.exception.CustomException;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.services.s3.S3Client;
+
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,6 +31,7 @@ import java.util.*;
 @Service
 public class UploadService {
     private final AmazonS3Client amazonS3Client;
+
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -169,6 +174,7 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
             uploadRepository.deleteByMappedId(mappedIdx);
         } catch(CustomException e) {
             System.out.println("Exception removeDatabaseByReviewIdx : " + e);
+            log.error("Exception removeDatabaseByReviewIdx : " + e);
             throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         }
     }
@@ -182,8 +188,12 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
         try {
             DeleteObjectsRequest dor = new DeleteObjectsRequest(bucket)
                     .withKeys(filePath);
+
             amazonS3Client.deleteObjects(dor);
+            System.out.println("S3 Object 삭제 성공 : " + filePath);
         } catch (AmazonServiceException e) {
+            System.out.println("S3 Object 삭제 실패 : " + e);
+            log.debug("S3 Object 삭제 실패 : ", e);
             System.err.println(e.getErrorMessage());
         }
     }
@@ -286,6 +296,9 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
             }
         }
     }
+
+
+
 
 
 

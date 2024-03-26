@@ -1,8 +1,10 @@
 package com.example.gazamung.club.service;
 
 import com.example.gazamung.S3FileUploader.UploadImage;
+import com.example.gazamung.S3FileUploader.UploadRepository;
 import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
+import com.example.gazamung._enum.ClubRank;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.club.dto.ClubDto;
 import com.example.gazamung.club.dto.ClubJoinRequest;
@@ -20,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -40,21 +41,22 @@ public class ClubServiceImpl implements ClubService {
     private final MemberServiceImpl memberServiceImpl;
     private final ClubMapper clubMapper;
 
+
+
     /**
+     * @title 모임 생성
+     * @created 24.03.13 이시영
      * @param dto
      * @return
-     * @title 모임 생성
-     * @created 24.03.26 이승열
      */
     // @TODO    카테고리 값 엔티티 매핑 추가해야함.  현재 TEST
-    public Map<String, Object> create(ClubRequest.CreateClubRequestDto dto) {
+    public Map<String, Object> create(ClubRequest.CreateClubRequestDto dto)   {
 
         Member member = memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
         Club club = Club.builder()
                 .memberIdx(member.getMemberIdx())
-                .univId((member.getUnivId()))
                 .eventId(dto.getEventId())
                 .clubName(dto.getClubName())
                 .introduction(dto.getIntroduction())
@@ -86,15 +88,16 @@ public class ClubServiceImpl implements ClubService {
 
     }
 
+
+
     /**
-     * @param dto
      * @title 모임 수정
      * @created 24.03.13 이시영
      * @description 모임 수정요청시 기존 업로드 되었던 S3 업로드 정보를 모두 삭제합니다.
      * 수정요청에 새로 담겨있는 첨부파일로 새로 업로드하고 DB에 새로 맵핑합니다.
+     * @param dto
      */
     @Override
-    @Transactional
     public void update(ClubRequest.ModifyClubRequestDto dto) {
         try {
             //수정 요청한 모임을 확인함
@@ -136,11 +139,9 @@ public class ClubServiceImpl implements ClubService {
             //업로드된 이미지 정보를 데이터베이스
             List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.CLUB, createdClub.getClubId());
 
-            createdClub.setEventId(dto.getEventId());
-            createdClub.setClubName(dto.getClubName());
-            createdClub.setIntroduction(dto.getIntroduction());
-            createdClub.setPrice(dto.getPrice());
-            createdClub.setMaximumMembers(dto.getMaximumMembers());
+            createdClub.setMemberIdx(dto.getMemberIdx());
+            createdClub.setClubId(dto.getClubId());
+            createdClub.setRegDt(createdClub.getRegDt());//생성일은 그대로.
 
             clubRepository.save(createdClub);
         } catch (CustomException e) {
@@ -151,11 +152,11 @@ public class ClubServiceImpl implements ClubService {
 
 
     /**
-     * @param clubId
-     * @param memberIdx
      * @title 모임 삭제
      * @created 24.03.13 이시영
      * @description 모임 삭제요청시 기존 업로드 되었던 S3 업로드 정보를 모두 삭제합니다.
+     * @param clubId
+     * @param memberIdx
      */
     public void delete(Long clubId, Long memberIdx) {
 
@@ -208,46 +209,41 @@ public class ClubServiceImpl implements ClubService {
         long memberIdx = request.getMemberIdx();
         long clubId = request.getClubId();
 
-        // 회원 존재 유무 확인
+        //회원인지 검사
         Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
-        // 클럽 존재 유무 확인
-        Club club = clubRepository.findById(request.getClubId())
+        // 존재하는 클럽인지 확인.
+        clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
-        // 같은 학교인지 확인
-        if (member.getUnivId() != club.getUnivId()){
-            throw new CustomException(CustomExceptionCode.NOT_MATCHED_UNIVERSITY);
-        }
 
-        // 모임장이 가입하려는 경우
-        if (memberIdx == club.getMemberIdx()){
-            throw new CustomException(CustomExceptionCode.YOU_ARE_MASTER);
-        }
+//        // 회원이 가입한 모임 개수
+//        int count = clubMapper.countByMemberIdx(memberIdx);
+//        if(count > 3){
+//            throw new CustomException(CustomExceptionCode.MEMBERSHIP_LIMIT_EXCEEDED);
+//        }
+//
+//        // 가입되어있는 회원인지 확인
+//        int checkRegMember = clubMapper.checkClubMembership(clubId,memberIdx);
+//        if(checkRegMember > 0) {
+//            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
+//        }
 
-        // 이미 가입되어있는 회원인지 확인
-        int checkRegMember = clubMapper.checkClubMembership(clubId, memberIdx);
-        if (checkRegMember > 0) {
-            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
-        }
 
-        // 회원이 가입한 모임 개수
-        int count = clubMapper.countByMemberIdx(memberIdx);
-        if (count > 3) {
-            throw new CustomException(CustomExceptionCode.MEMBERSHIP_LIMIT_EXCEEDED);
-        }
 
         // 조건 충족시 가입처리.
-        ClubMember clubMember = ClubMember.builder()
-                .clubId(clubId)
-                .memberIdx(memberIdx)
-                .build();
+            ClubMember clubMember = ClubMember.builder()
+                    .clubId(clubId)
+                    .memberIdx(memberIdx)
+                    .build();
 
-        clubMemberRepository.save(clubMember);
+            clubMemberRepository.save(clubMember);
+
 
         return true;
     }
+
 
     @Override
     public List<ClubDto> list() {
@@ -257,46 +253,24 @@ public class ClubServiceImpl implements ClubService {
 
     public ClubDto info(Long clubId) {
         Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
-        Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
         return ClubDto.builder()
                 .clubId(club.getClubId())
                 .memberIdx(club.getMemberIdx())
-                .eventId(club.getEventId())
-                .univId(club.getUnivId())
                 .clubName(club.getClubName())
-                .introduction(club.getIntroduction())
                 .regDt(club.getRegDt())
-                .price(club.getPrice())
-                .maximumMembers(club.getMaximumMembers())
-                .currentMembers(currentMembers + 1) // 모임장 포함
                 .build();
     }
 
     private List<ClubDto> convertToDto(List<Club> clubList) {
         return clubList.stream()
-                .map(club -> {
-                    Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
-                    return ClubDto.builder()
-                            .clubId(club.getClubId())
-                            .memberIdx(club.getMemberIdx())
-                            .eventId(club.getEventId())
-                            .univId(club.getUnivId())
-                            .clubName(club.getClubName())
-                            .introduction(club.getIntroduction())
-                            .regDt(club.getRegDt())
-                            .price(club.getPrice())
-                            .maximumMembers(club.getMaximumMembers())
-                            .currentMembers(currentMembers + 1) // 모임장 포함
-                            .build();
-                })
+                .map(club -> ClubDto.builder()
+                        .clubId(club.getClubId())
+                        .memberIdx(club.getMemberIdx())
+                        .clubName(club.getClubName())
+                        .regDt(club.getRegDt())
+                        .build())
                 .collect(Collectors.toList());
-    }
-
-    // 현재 멤버 수 계산 메서드
-    private Long calculateCurrentMembers(Long clubId) {
-            return clubMemberRepository.countByClubId(clubId);
-
     }
 
 }

@@ -1,11 +1,8 @@
 package com.example.gazamung.univBattle.service;
 
-import com.example.gazamung.univBattle.UnivBattleAttendRequest;
-import com.example.gazamung.univBattle.UnivBattleCreateRequest;
-import com.example.gazamung.university.entity.University;
+import com.example.gazamung.univBattle.dto.UnivBattleAttendRequest;
+import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public interface UnivBattleService {

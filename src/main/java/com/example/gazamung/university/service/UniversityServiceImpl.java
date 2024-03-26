@@ -21,6 +21,28 @@ public class UniversityServiceImpl implements  UniversityService{
 
         List<University> list = universityRepository.findAll();
 
+
         return list;
     }
+
+
+    /**
+     * @Decription  '대학교' -> '대' 로 학교 이름을 줄여주는 메서드
+     * ex) 가천대학교 ->  가천대
+     * @param universities
+     * @author 이시영
+     * @return
+     */
+    public List<University> findAllWithoutWord(List<University> universities) {
+
+        for (University university : universities) {
+            String schoolName = university.getSchoolName();
+            // "대학교"라는 단어를 제거
+            schoolName = schoolName.replace("학교", "");
+            // 공백을 제거하고 리스트에 다시 설정
+            university.setSchoolName(schoolName.trim());
+        }
+        return universities;
+    }
+
 }

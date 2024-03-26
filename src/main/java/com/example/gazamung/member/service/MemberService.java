@@ -92,7 +92,7 @@ public interface MemberService {
 
     boolean updateNickName(Long memberIdx, String nickname);
 
-    boolean updatePw(Long memberIdx, String nickname);
+    Long updatePw(Long memberIdx, String nickname);
 
     boolean withDraw(Long memberIdx, String password);
 }

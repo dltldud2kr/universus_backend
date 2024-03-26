@@ -380,13 +380,13 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public boolean updatePw(Long memberIdx, String password) {
+    public Long updatePw(Long memberIdx, String password) {
         Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         member.setPassword(password);
         memberRepository.save(member);
-        return true;
+        return memberIdx;
     }
 
     @Override

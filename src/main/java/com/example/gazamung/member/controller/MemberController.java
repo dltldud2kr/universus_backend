@@ -300,8 +300,10 @@ public class MemberController {
 
     @PostMapping("/member/updatePw")    /** 비밀번호 변경 **/
     public ResultDTO updatePw(@RequestBody PwChangeDto dto){
+
         try{
-            return ResultDTO.of(memberService.updatePw(dto.getMemberIdx(), dto.getPassword()), ApiResponseCode.SUCCESS.getCode(), "비밀번호 변경 완료", null);
+            Long result = memberService.updatePw(dto.getMemberIdx(), dto.getPassword());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "비밀번호 변경 완료", result);
         } catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
