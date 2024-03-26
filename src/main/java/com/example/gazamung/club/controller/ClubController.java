@@ -107,6 +107,7 @@ public class ClubController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
+    //.
     @PatchMapping("/modify")
     public ResultDTO modifyClub(ClubRequest.ModifyClubRequestDto dto){
         try{
