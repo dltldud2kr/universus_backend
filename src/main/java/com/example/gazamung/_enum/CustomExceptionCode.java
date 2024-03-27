@@ -24,8 +24,6 @@ public enum CustomExceptionCode {
     SAME_UNIVERSITY("SAME_UNIVERSITY","같은 대학교는 참가할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
 
-
-
     //클럽
     INVALID_AGE("INVALID_AGE","가입조건에 충족하지 않은 나이", HttpStatus.BAD_REQUEST),
     MEMBERSHIP_LIMIT_EXCEEDED("MEMBERSHIP_LIMIT_EXCEEDED", "모임 가입 개수를 초과", HttpStatus.BAD_REQUEST),

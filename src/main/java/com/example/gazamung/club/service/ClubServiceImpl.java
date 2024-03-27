@@ -9,8 +9,8 @@ import com.example.gazamung.club.dto.ClubJoinRequest;
 import com.example.gazamung.club.dto.ClubRequest;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
-import com.example.gazamung.clubMember.ClubMember;
-import com.example.gazamung.clubMember.ClubMemberRepository;
+import com.example.gazamung.clubMember.entity.ClubMember;
+import com.example.gazamung.clubMember.repository.ClubMemberRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.mapper.ClubMapper;
 import com.example.gazamung.member.entity.Member;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -202,6 +203,13 @@ public class ClubServiceImpl implements ClubService {
 
     }
 
+    /**
+     * @param request
+     * @title 모임 가입
+     * @created 24.03.13 이시영
+     * @description 모임 가입
+     */
+
     @Override
     public boolean clubJoin(ClubJoinRequest request) {
 
@@ -249,12 +257,24 @@ public class ClubServiceImpl implements ClubService {
         return true;
     }
 
+    /**
+     * @param
+     * @title 모임 리스트 조회
+     * @created 24.03.27 이승열
+     * @description Entity 객체를 Dto 로 변환하여 리턴합니다.
+     */
     @Override
     public List<ClubDto> list() {
         List<Club> clubList = clubRepository.findAll();
         return convertToDto(clubList);
     }
 
+    /**
+     * @param clubId
+     * @title 모임 정보 조회
+     * @created 24.03.27 이승열
+     * @description Entity 객체를 Dto 로 변환하여 리턴합니다.
+     */
     public ClubDto info(Long clubId) {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
@@ -272,6 +292,32 @@ public class ClubServiceImpl implements ClubService {
                 .currentMembers(currentMembers + 1) // 모임장 포함
                 .build();
     }
+
+    /**
+     * @param request
+     * @title 모임 탈퇴
+     * @created 24.03.28 이승열
+     */
+    @Override
+    public void secession(ClubJoinRequest request) {
+
+        // 회원과 클럽 존재 여부 확인
+        memberRepository.findById(request.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+
+        clubRepository.findById(request.getClubId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
+        // 가입된 회원인지 확인 후 탈퇴
+        Optional<ClubMember> clubMemberOptional = clubMemberRepository.findByClubIdAndMemberIdx(request.getClubId(), request.getMemberIdx());
+        if (clubMemberOptional.isPresent()) {
+            ClubMember clubMember = clubMemberOptional.get();
+            clubMemberRepository.delete(clubMember);
+        } else {
+            throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
+        }
+    }
+
 
     private List<ClubDto> convertToDto(List<Club> clubList) {
         return clubList.stream()
@@ -298,6 +344,5 @@ public class ClubServiceImpl implements ClubService {
             return clubMemberRepository.countByClubId(clubId);
 
     }
-
 }
 

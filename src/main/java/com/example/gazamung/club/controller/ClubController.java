@@ -122,17 +122,7 @@ public class ClubController {
         }
     }
 
-    @Operation(summary = "모임 리스트 조회 ", description = "" +
-            " 모임 리스트 조회." +
-            "\n### HTTP STATUS 에 따른 조회 결과" +
-            "\n- 200: 서버요청 정상 성공 " +
-            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
-            "\n### Result Code 에 따른 요청 결과" +
-            "\n- ")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
-    })
-    @GetMapping("/list")
+    @GetMapping("/list")    /** 모임 리스트 조회 **/
     public List<ClubDto> list(){
         try{
             List<ClubDto> requestDtoList = clubService.list();
@@ -148,6 +138,7 @@ public class ClubController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND: 해당 정보를 찾을 수 없습니다." +
             "\n- ")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
@@ -158,6 +149,30 @@ public class ClubController {
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 정보 조회 완료.", clubService.info(clubId));
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "모임 탈퇴 ", description = "" +
+            " 모임 탈퇴." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND: 해당 정보를 찾을 수 없습니다." +
+            "\n- NOT_FOUND_CLUB: 존재하지 않는 모임입니다." +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @PostMapping("/secession")
+    public ResultDTO secession(@RequestBody ClubJoinRequest request){
+        try{
+            clubService.secession(request);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 탈퇴 완료.", null);
+        }catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+
         }
     }
 }

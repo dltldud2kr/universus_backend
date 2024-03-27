@@ -43,4 +43,6 @@ public interface ClubService {
     List<ClubDto> list();
 
     ClubDto info(Long clubId);
+
+    void secession(ClubJoinRequest request);
 }

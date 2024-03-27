@@ -1,12 +1,9 @@
 package com.example.gazamung.event.controller;
 
 import com.example.gazamung._enum.ApiResponseCode;
-import com.example.gazamung.club.dto.ClubDto;
-import com.example.gazamung.club.dto.ClubRequest;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.event.dto.EventDto;
 import com.example.gazamung.event.dto.ListDto;
-import com.example.gazamung.event.entity.Event;
 import com.example.gazamung.event.service.EventService;
 import com.example.gazamung.exception.CustomException;
 import io.swagger.v3.oas.annotations.Operation;

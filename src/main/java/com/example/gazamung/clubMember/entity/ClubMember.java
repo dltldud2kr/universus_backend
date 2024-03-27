@@ -1,4 +1,4 @@
-package com.example.gazamung.clubMember;
+package com.example.gazamung.clubMember.entity;
 
 import com.example.gazamung._enum.ClubRank;
 import lombok.*;
