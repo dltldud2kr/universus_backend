@@ -7,10 +7,10 @@ import java.util.List;
 @Service
 public interface ChatMessageService {
 
-    void saveChatMessage(int chatRoomType, String chatRoomId, Long memberIdx, String content);
+    ChatMessage saveChatMessage(int chatRoomType, String chatRoomId, Long memberIdx, String content, String nickname);
 
 
-    List<ChatMessage> chatList(Long chatRoomId);
+    List<ChatMessage> chatList(String chatRoomId);
 
 
 }

@@ -25,6 +25,7 @@ public class ChatMessage {
     private int chatRoomType;
     private Long chatRoomId;        // 채팅방 ID
     private Long memberIdx;         // 발신자 ID
+    private String nickname;
     private String content;         // 메세지 내용
     private LocalDateTime regDt;    // 발신 시간
     

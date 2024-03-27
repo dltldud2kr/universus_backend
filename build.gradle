@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     //mongoDB
-//    implementation ('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
+//    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
     // jwt 사용
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
