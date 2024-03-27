@@ -19,7 +19,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
 
         // ws://localhost:8080/ws/chat/{roomId} 형식의 엔드포인트를 추가합니다.
-        registry.addHandler(chatHandler, "/ws/chat/{roomId}")
+        registry.addHandler(chatHandler, "/ws/chat/{roomType}/{roomId}")
                 .setAllowedOrigins("*");
     }
 }

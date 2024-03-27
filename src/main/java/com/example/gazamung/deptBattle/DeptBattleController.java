@@ -1,4 +1,4 @@
-package com.example.gazamung.univBattle.controller;
+package com.example.gazamung.deptBattle;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
@@ -15,28 +15,28 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/univBattle")
+@RequestMapping("/api/v1/deptBattle")
 @CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
-@Tag(name = "대항전(대학 vs 대학) API", description = "")
-public class UnivBattleController {
+@Tag(name = "대항전(과 vs 과) API", description = "")
+public class DeptBattleController {
 
-    private  final UnivBattleService univBattleService;
+    private  final DeptBattleService deptBattleService;
 
     @PostMapping("/create")
-    public ResultDTO createBattle(@RequestBody UnivBattleCreateRequest request) {
+    public ResultDTO createBattle(@RequestBody DeptBattleCreateRequest request) {
 
         try{
-            return ResultDTO.of(univBattleService.create(request), ApiResponseCode.CREATED.getCode(),"대항전 생성 완료.", null);
+            return ResultDTO.of(deptBattleService.create(request), ApiResponseCode.CREATED.getCode(),"대항전 생성 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
 
     @PostMapping("/attend")
-    public ResultDTO attendBattle(@RequestBody UnivBattleAttendRequest request){
+    public ResultDTO attendBattle(@RequestBody DeptBattleAttendRequest request){
 
         try{
-            return ResultDTO.of(univBattleService.attend(request), ApiResponseCode.CREATED.getCode(),"대항전 생성 완료.", null);
+            return ResultDTO.of(deptBattleService.attend(request), ApiResponseCode.CREATED.getCode(),"대항전 생성 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

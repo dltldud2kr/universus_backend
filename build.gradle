@@ -48,7 +48,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4' // 현재 최신 버전일 수 있으니 확인 후 사용하세요.
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.4'
 
 
     // AWS S3
@@ -56,6 +56,11 @@ dependencies {
 
     implementation 'software.amazon.awssdk:s3:2.17.94'
 
+    //jackson
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    //mongoDB
+//    implementation ('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
 
     // jwt 사용
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")

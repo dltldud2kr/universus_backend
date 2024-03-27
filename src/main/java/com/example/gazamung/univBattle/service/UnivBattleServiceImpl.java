@@ -60,6 +60,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
+                .chatRoomType(0)
                 .univBattleId(univBattle.getUnivBattleId())
                 .build();
 

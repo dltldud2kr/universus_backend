@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,14 +20,17 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
 
     @Override
-    public void saveChatMessage(String chatRoomId, Long memberIdx, String content) {
+    public void saveChatMessage(int chatRoomType, String chatRoomId, Long memberIdx, String content) {
         System.out.println("chatroomID : " + chatRoomId);
         Long chatId = Long.valueOf(chatRoomId);
-        chatRoomRepository.findById(chatId)
+
+        // RoomType 과 RoomId를 체크
+        chatRoomRepository.findByChatRoomIdAndChatRoomType(chatId, chatRoomType)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
 
         ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoomType(chatRoomType)
                 .chatRoomId(chatId)
                 .memberIdx(memberIdx)
                 .content(content)
@@ -36,4 +41,13 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
 
     }
+
+    @Override
+    public List<ChatMessage> chatList(Long chatRoomId) {
+
+        return chatMessageRepository.findAllByChatRoomIdOrderByRegDtDesc(chatRoomId);
+    }
+
+
+
 }

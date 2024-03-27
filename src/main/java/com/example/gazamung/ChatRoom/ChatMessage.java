@@ -22,6 +22,7 @@ public class ChatMessage {
     @SequenceGenerator(name = "CHAT_MESSAGE_SEQ", sequenceName = "chat_message_sequence", allocationSize = 1)
     private Long chatMessageId;
 
+    private int chatRoomType;
     private Long chatRoomId;        // 채팅방 ID
     private Long memberIdx;         // 발신자 ID
     private String content;         // 메세지 내용
