@@ -30,6 +30,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final ChatRoomRepository chatRoomRepository;
 
 
+    /**
+     * 대항전 생성
+     * @param request
+     * @return
+     */
     @Override
     public boolean create(UnivBattleCreateRequest request) {
 
@@ -52,7 +57,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .build();
 
         univBattleRepository.save(univBattle);
-
 
         // 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()

@@ -280,7 +280,7 @@ public class MemberController {
     }
 
     @GetMapping("/member/profile")
-    public ResponseEntity<ProfileDto> getMemberInfo(@RequestBody Long memberIdx){
+    public ResponseEntity<ProfileDto> getMemberInfo(@RequestParam Long memberIdx){
 
         // 이메일로 멤버 정보 가져오기
         ProfileDto profileDto = memberService.getMemberInfo(memberIdx);
