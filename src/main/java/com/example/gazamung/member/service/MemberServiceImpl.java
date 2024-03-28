@@ -176,6 +176,7 @@ public class MemberServiceImpl implements MemberService {
                     .role(0)
                     .birth(dto.getBirth())  // 생년월일
                     .gender(dto.getGender())    // 성별 (M, F)
+                    .deptId(dto.getDeptId())        //학과 저장
                     .nickname(dto.getNickname())    // 닉네임
                     .userName(dto.getUserName())    // 사용자 이름
                     .univId(dto.getUnivId())        // 대학교 ID값
