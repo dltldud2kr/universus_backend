@@ -32,6 +32,12 @@ public class UniversityServiceImpl implements  UniversityService{
         return departmentRepository.findAll();
     }
 
+    @Override
+    public List<Department> matchDeptList(Long univId) {
+
+        return departmentRepository.findByUnivId(univId);
+    }
+
 
     /**
      * @Decription  '대학교' -> '대' 로 학교 이름을 줄여주는 메서드

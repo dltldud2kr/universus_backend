@@ -42,11 +42,22 @@ public class DepartmentController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/deptList")
-    public ResultDTO departmentList() {
+    public ResultDTO allDepartmentList() {
 
         try{
             List<Department> list  = universityService.departmentList();
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"학과 리스트 조회 성공", list);
+        }catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+
+        }
+    }
+
+    @GetMapping("/matchDept")
+    public ResultDTO matchDeptList(@RequestParam Long univId) {
+        try{
+            List<Department> list  = universityService.matchDeptList(univId);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"입력 대학 학과 리스트 조회 성공", list);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 

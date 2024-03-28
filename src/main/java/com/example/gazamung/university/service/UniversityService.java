@@ -12,4 +12,6 @@ public interface UniversityService {
     List<University> universityList();
 
     List<Department> departmentList();
+
+    List<Department> matchDeptList(Long univId);
 }
