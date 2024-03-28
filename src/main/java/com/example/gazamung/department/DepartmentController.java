@@ -1,4 +1,4 @@
-package com.example.gazamung.university.controller;
+package com.example.gazamung.department;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
@@ -25,15 +25,14 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/university")
+@RequestMapping("/api/v1/department")
 @CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
 @Tag(name = "대학교, 학과 SQL INSERT 쿼리문 API", description = "")
-public class UniversityInsertController {
+public class DepartmentController {
 
-    private final DataSource dataSource;
     private final UniversityService universityService;
 
-    @Operation(summary = "대학, 학과 데이터 INSERT ", description = "" +
+    @Operation(summary = "학과 리스트 조회 ", description = "" +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
@@ -42,44 +41,15 @@ public class UniversityInsertController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
-
-    @PostMapping("/execute")
-    public String executeSqlScript() throws IOException {
-        // SQL 스크립트 파일 로드
-        Resource universityScript = new ClassPathResource("university.sql");
-
-        // 데이터베이스에 SQL 스크립트 실행
-        ResourceDatabasePopulator populator = new ResourceDatabasePopulator(universityScript);
-        populator.execute(dataSource);
-
-        Resource departmentScript = new ClassPathResource("department.sql");
-
-        // 데이터베이스에 SQL 스크립트 실행
-        ResourceDatabasePopulator populator2 = new ResourceDatabasePopulator(departmentScript);
-        populator2.execute(dataSource);
-        return "SQL 스크립트가 성공적으로 실행되었습니다.";
-    }
-
-    @Operation(summary = "대학 리스트 조회 ", description = "" +
-            "\n### HTTP STATUS 에 따른 조회 결과" +
-            "\n- 200: 서버요청 정상 성공 " +
-            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
-            "\n### Result Code 에 따른 요청 결과" +
-            "\n- ")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
-    })
-
-    @GetMapping("/univList")
-    public ResultDTO universityList() {
+    @GetMapping("/deptList")
+    public ResultDTO departmentList() {
 
         try{
-            List<University> list  = universityService.universityList();
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"대학 리스트 조회 성공", list);
+            List<Department> list  = universityService.departmentList();
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"학과 리스트 조회 성공", list);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 
         }
     }
-
 }

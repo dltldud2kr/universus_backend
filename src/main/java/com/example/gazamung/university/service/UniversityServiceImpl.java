@@ -1,5 +1,7 @@
 package com.example.gazamung.university.service;
 
+import com.example.gazamung.department.entity.Department;
+import com.example.gazamung.department.repository.DepartmentRepository;
 import com.example.gazamung.university.entity.University;
 import com.example.gazamung.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +16,20 @@ import java.util.List;
 public class UniversityServiceImpl implements  UniversityService{
 
     private final UniversityRepository universityRepository;
+    private final DepartmentRepository departmentRepository;
 
 
     @Override
     public List<University> universityList() {
 
-        List<University> list = universityRepository.findAll();
 
+        return universityRepository.findAll();
+    }
 
-        return list;
+    @Override
+    public List<Department> departmentList() {
+
+        return departmentRepository.findAll();
     }
 
 
