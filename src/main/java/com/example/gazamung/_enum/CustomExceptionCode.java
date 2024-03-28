@@ -23,6 +23,10 @@ public enum CustomExceptionCode {
     NOT_FOUND_BATTLE("NOT_FOUND_BATTLE","존재하지 않는 대항전", HttpStatus.BAD_REQUEST),
     SAME_UNIVERSITY("SAME_UNIVERSITY","같은 대학교는 참가할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
+    //채팅
+    INVALID_URI("INVALID_URI","올바른 형식의 URI가 아닙니다.", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_HEADER_DATA("NOT_FOUND_HEADER_DATA","헤더에 memberIdx 데이터 값이 없습니다.", HttpStatus.BAD_REQUEST),
+
 
     //클럽
     INVALID_AGE("INVALID_AGE","가입조건에 충족하지 않은 나이", HttpStatus.BAD_REQUEST),
