@@ -27,8 +27,8 @@ public class Member implements UserDetails {
     @SequenceGenerator(name = "MEMBER_SEQ", sequenceName = "member_sequence", allocationSize = 1)
     private Long memberIdx;
 
-    private long univId;    //대학
-    private long deptId;    //학과
+    private Long univId;    //대학
+    private Long deptId;    //학과
 
     private String email;
     private String password;
