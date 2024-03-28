@@ -17,7 +17,7 @@ public class Department {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DEPARTMENT_SEQ")
     @SequenceGenerator(name = "DEPARTMENT_SEQ", sequenceName = "department_sequence", allocationSize = 1)
-    private Long univBattleId;      // 학과 ID
+    private Long deptId;      // 학과 ID
 
     private Long univId;            // 학교명
     private String deptName;        // 학과명

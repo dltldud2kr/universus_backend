@@ -52,7 +52,7 @@ public class ClubServiceImpl implements ClubService {
     public Map<String, Object> create(ClubRequest.CreateClubRequestDto dto) {
 
         Member member = memberRepository.findById(dto.getMemberIdx())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         Club club = Club.builder()
                 .memberIdx(member.getMemberIdx())
