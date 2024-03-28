@@ -318,7 +318,7 @@ public class MemberController {
     }
 
     @PostMapping("/member/uploadImage") /** 프로필 사진 등록 */
-    public ResultDTO uploadImage(@RequestBody ProfileDto dto) {
+    public ResultDTO uploadImage(@RequestBody UpdateProfileDto dto) {
         try {
             Map<String, Object> result = memberService.uploadImage(dto);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "프로필 사진 업로드가 완료되었습니다.", result);

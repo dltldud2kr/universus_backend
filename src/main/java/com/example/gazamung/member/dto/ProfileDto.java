@@ -1,5 +1,6 @@
 package com.example.gazamung.member.dto;
 
+import com.example.gazamung.S3FileUploader.UploadImage;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,6 @@ public class ProfileDto {
     private Long univId;    //대학
     private Long deptId;    //학과
 
-    private List<MultipartFile> profileImage;
+    private List<UploadImage> profileImage;
 
 }

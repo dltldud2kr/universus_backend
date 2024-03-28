@@ -423,7 +423,7 @@ public class MemberServiceImpl implements MemberService {
 
 
     @Override
-    public Map<String, Object> uploadImage(ProfileDto dto) {
+    public Map<String, Object> uploadImage(UpdateProfileDto dto) {
 
         memberRepository.findById(dto.getMemberIdx()).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
@@ -482,6 +482,7 @@ public class MemberServiceImpl implements MemberService {
     public ProfileDto getMemberInfo(Long memberIdx) {
         return memberRepository.findByMemberIdx(memberIdx)
                 .map(member -> {
+                    List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, memberIdx);
                     ProfileDto profileDto = new ProfileDto();
                     profileDto.setMemberIdx(memberIdx);
                     profileDto.setUserName(member.getUsername());
@@ -490,6 +491,7 @@ public class MemberServiceImpl implements MemberService {
                     profileDto.setDeptId(member.getDeptId());
                     profileDto.setPhone(member.getPhone());
                     profileDto.setOneLineIntro(member.getOneLineIntro());
+                    profileDto.setProfileImage(clubImage);
                     return profileDto;
                 })
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
