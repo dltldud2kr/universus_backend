@@ -1,5 +1,6 @@
 package com.example.gazamung.club.dto;
 
+import com.example.gazamung.S3FileUploader.UploadImage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Builder
@@ -29,6 +31,6 @@ public class ClubDto {
     private Long maximumMembers;   // 총 인원
     private Long currentMembers;   // 현재 인원
 
-    private MultipartFile clubImage;
+    private List<UploadImage> clubImage;
 }
 

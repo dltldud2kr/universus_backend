@@ -1,8 +1,11 @@
 package com.example.gazamung.member.service;
 
+import com.example.gazamung.S3FileUploader.UploadService;
+import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.EmailAuthStatus;
 import com.example.gazamung.auth.JwtTokenProvider;
+import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.emailAuth.entity.EmailAuth;
 import com.example.gazamung.emailAuth.repository.EmailAuthRepository;
@@ -24,7 +27,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.Multipart;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -52,11 +57,14 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberMapper memberMapper;
 
+    private final UploadService uploadService;
+
     /**
      * 1. 로그인 요청으로 들어온 ID, PWD 기반으로 Authentication 객체 생성
      * 2. authenticate() 메서드를 통해 요청된 Member 에 대한 검증이 진행 => loadUserByUsername 메서드를 실행.
      * 해당 메서드는 검증을 위한 유저 객체를 가져오는 부분으로써, 어떤 객체를 검증할 것인지에 대해 직접 구현
      * 3. 검증이 정상적으로 통과되었다면 인증된 Authentication 객체를 기반으로 JWT 토큰을 생성
+     *
      * @author 이시영
      */
 
@@ -64,7 +72,7 @@ public class MemberServiceImpl implements MemberService {
     public Map<String, Object> login(String email, String password) {
 
         // 로그인 정보로 DB 조회  (아이디, 비밀번호)
-        Member member = memberRepository.findByEmailAndPassword(email,password)
+        Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 비밀번호)
@@ -77,10 +85,9 @@ public class MemberServiceImpl implements MemberService {
         // 인증이 된 경우 JWT 토큰을 발급  (요청에 대한 인증처리)
         TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
-        if (tokenDto.getAccessToken().isEmpty()){
+        if (tokenDto.getAccessToken().isEmpty()) {
             log.info(tokenDto.getAccessToken());
         }
-
 
 
         Map<String, Object> response = new HashMap<>();
@@ -99,8 +106,8 @@ public class MemberServiceImpl implements MemberService {
         try {
 
             //해당 이메일로 가입된 회원이 있는지 확인
-            Optional<Member> optionalMember =  memberRepository.findByEmail(email);
-            if(optionalMember.isPresent()) {
+            Optional<Member> optionalMember = memberRepository.findByEmail(email);
+            if (optionalMember.isPresent()) {
                 throw new CustomException(CustomExceptionCode.DUPLICATED);
             }
 
@@ -122,7 +129,7 @@ public class MemberServiceImpl implements MemberService {
             // 인증이 된 경우 JWT 토큰을 발급  (요청에 대한 인증처리)
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
             log.info(tokenDto.getAccessToken());
-            if (tokenDto.getAccessToken().isEmpty()){
+            if (tokenDto.getAccessToken().isEmpty()) {
                 log.info(tokenDto.getAccessToken());
                 log.info("token empty");
             }
@@ -137,13 +144,10 @@ public class MemberServiceImpl implements MemberService {
             return response;
 
 
-
-
         } catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
-
 
 
     @Transactional
@@ -154,8 +158,8 @@ public class MemberServiceImpl implements MemberService {
             String password = dto.getPassword();
 
             //해당 이메일로 가입된 회원이 있는지 확인
-            Optional<Member> optionalMember =  memberRepository.findByEmail(email);
-            if(optionalMember.isPresent()) {
+            Optional<Member> optionalMember = memberRepository.findByEmail(email);
+            if (optionalMember.isPresent()) {
                 throw new CustomException(CustomExceptionCode.DUPLICATED);
             }
 //            Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED);
@@ -188,7 +192,7 @@ public class MemberServiceImpl implements MemberService {
             // 인증이 된 경우 JWT 토큰을 발급  (요청에 대한 인증처리)
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
             log.info(tokenDto.getAccessToken());
-            if (tokenDto.getAccessToken().isEmpty()){
+            if (tokenDto.getAccessToken().isEmpty()) {
                 log.info(tokenDto.getAccessToken());
                 log.info("token empty");
             }
@@ -201,12 +205,10 @@ public class MemberServiceImpl implements MemberService {
             return response;
 
 
-
         } catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
         }
     }
-
 
 
     public TokenDto createToken(Long memberIdx) {
@@ -215,7 +217,7 @@ public class MemberServiceImpl implements MemberService {
 
         if (jwtTokenProvider.validateToken(member.getRefreshToken())) {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member.getUsername(), member.getPassword());
-            System.out.println("authenticationToken : "+authenticationToken);
+            System.out.println("authenticationToken : " + authenticationToken);
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
             return tokenDto;
@@ -294,7 +296,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Map<String, Object> getUserInfo(String access_token) {
-        Map<String,Object> resultMap =new HashMap<>();
+        Map<String, Object> resultMap = new HashMap<>();
         String reqURL = "https://kapi.kakao.com/v2/user/me";
         try {
             URL url = new URL(reqURL);
@@ -323,7 +325,7 @@ public class MemberServiceImpl implements MemberService {
             log.warn("element:: " + element);
             JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonObject();
             JsonObject kakao_account = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
-            log.warn("id:: "+element.getAsJsonObject().get("id").getAsString());
+            log.warn("id:: " + element.getAsJsonObject().get("id").getAsString());
             String id = element.getAsJsonObject().get("id").getAsString();
             String nickname = properties.getAsJsonObject().get("nickname").getAsString();
             String email = kakao_account.getAsJsonObject().get("email").getAsString();
@@ -345,38 +347,10 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public List<MemberDto> getAllMembers(){
+    public List<MemberDto> getAllMembers() {
         MemberDto parameter = new MemberDto();
         List<MemberDto> list = memberMapper.selectList(parameter);
         return list;
-    }
-
-    @Override
-    public ProfileDto getMemberInfo(Long memberIdx) {
-
-            Member member = memberRepository.findById(memberIdx)
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
-
-            ProfileDto profileDto = new ProfileDto();
-            profileDto.setNickName(member.getNickname());
-            profileDto.setEmail(member.getEmail());
-
-
-            return profileDto;
-        }
-
-    @Override
-    public boolean updateNickName(Long memberIdx, String nickName) {
-
-        Member member = memberRepository.findById(memberIdx)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-
-        if (member.getNickname().equals(nickName)){
-            throw new CustomException(CustomExceptionCode.SAME_NICKNAME);
-        }
-        member.setNickname(nickName);
-        memberRepository.save(member);
-        return true;
     }
 
     @Override
@@ -394,17 +368,88 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-        if (!member.getPassword().equals(password)){
+        if (!member.getPassword().equals(password)) {
             throw new CustomException(CustomExceptionCode.DIFFERENT_PASSWORD);
         }
         memberRepository.delete(member);
         return true;
     }
 
+
+
     /**
-     * @title 이메일 인증 로직
+     * @param dto
+     * @title 프로필 수정
+     * @created 24.03.27 이승열
+     * @description 닉네임, 전화번호, 한 줄 소개 동시 처리.
+     *              학과, 프로필 사진 반환 API 는 따로 만들어 추가
+     */
+    @Override
+    public boolean updateProfile(ProfileDto dto) {
+        Member member = memberRepository.findById(dto.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        // 닉네임 중복 검사
+        memberRepository.findByNickname(dto.getNickname()).ifPresent(existingMember -> {
+            throw new CustomException(CustomExceptionCode.DUPLICATED);
+        });
+
+        // 핸드폰 번호 중복 검사
+        memberRepository.findByPhone(dto.getPhone()).ifPresent(existingMember -> {
+            throw new CustomException(CustomExceptionCode.DUPLICATED);
+        });
+
+        // 글자 수 제한
+        if (dto.getOneLineIntro().length() > 100) {
+            throw new CustomException(CustomExceptionCode.CHARACTER_LIMIT);
+        }
+
+        member.setNickname(dto.getNickname());
+        member.setPhone(dto.getPhone());
+        member.setOneLineIntro(dto.getOneLineIntro());
+        memberRepository.save(member);
+        return true;
+    }
+
+    @Override
+    public Map<String, Object> uploadImage(ProfileDto dto) {
+
+        memberRepository.findById(dto.getMemberIdx()).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        List<Map<String, Object>> uploadImage = uploadService.upload(dto.getProfileImage(), dto.getMemberIdx(), AttachmentType.PROFILE, dto.getMemberIdx());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("uploadedImages", uploadImage);
+
+        return result;
+    }
+
+
+    /**
+     * @param memberIdx
+     * @title 회원 프로필 정보 반환
+     * @created 24.03.27 이승열
+    **/
+    public ProfileDto getMemberInfo(Long memberIdx) {
+        return memberRepository.findByMemberIdx(memberIdx)
+                .map(member -> {
+                    ProfileDto profileDto = new ProfileDto();
+                    profileDto.setMemberIdx(memberIdx);
+                    profileDto.setUserName(member.getUsername());
+                    profileDto.setNickname(member.getNickname());
+                    profileDto.setUnivId(member.getUnivId());
+                    profileDto.setDeptId(member.getDeptId());
+                    profileDto.setPhone(member.getPhone());
+                    profileDto.setOneLineIntro(member.getOneLineIntro());
+                    return profileDto;
+                })
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+    }
+
+    /**
      * @param email 회원 이메일x`
      * @return
+     * @title 이메일 인증 로직
      */
 
     //1.  member 테이블에 이미 있는 회원인지 확인 .   있으면 duplicated_member 예외처리
@@ -425,12 +470,12 @@ public class MemberServiceImpl implements MemberService {
     // CustomException 이 발생해도 트랜잭션을 롤백하지 않도록 설정
     @Transactional(noRollbackFor = CustomException.class)
     @Override
-    public boolean emailCheck(String email, String verifCode){
+    public boolean emailCheck(String email, String verifCode) {
 
 
         // UNVERIFIED  있을 시 만료됐는지 확인 후 인증처리
         Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email, EmailAuthStatus.UNVERIFIED);
-        if (optionalEmailAuth.isPresent()){
+        if (optionalEmailAuth.isPresent()) {
             EmailAuth emailAuth = optionalEmailAuth.get();
             LocalDateTime creationTime = emailAuth.getRegDt();
             LocalDateTime expirationTime = creationTime.plusMinutes(3); // 3분 유효시간
@@ -442,7 +487,7 @@ public class MemberServiceImpl implements MemberService {
                 throw new CustomException(CustomExceptionCode.EXPIRED_AUTH);
             } else {
 
-                if (!verifCode.equals(emailAuth.getVerifCode())){
+                if (!verifCode.equals(emailAuth.getVerifCode())) {
                     log.info("verifCode");
                     throw new CustomException(CustomExceptionCode.INVALID_VERIF_CODE);
                 }
@@ -471,7 +516,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean changePw(String email, String password) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         member.setPassword(password);
         System.out.println("변경 비번 " + member.getPassword());
@@ -485,13 +530,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean isMember(String email) {
         Optional<Member> byEmail = memberRepository.findByEmail(email);
-        if (byEmail.isPresent()){
+        if (byEmail.isPresent()) {
             return true;
         }
         return false;
     }
-
-
 
 
 }

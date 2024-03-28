@@ -17,6 +17,7 @@ public enum CustomExceptionCode {
     DUPLICATED("DUPLICATED","중복된 정보가 존재합니다.", HttpStatus.BAD_REQUEST),
     SAME_NICKNAME("DUPLICATED_NICKNAME","이미 같은 닉네임을 사용중입니다.", HttpStatus.BAD_REQUEST),
     DIFFERENT_PASSWORD("DIFFERENT_PASSWORD","잘못된 비밀번호입니다.", HttpStatus.BAD_REQUEST),
+    CHARACTER_LIMIT("CHARACTER_LIMIT", "글자 수 제한", HttpStatus.BAD_REQUEST),
 
 
     //대항전

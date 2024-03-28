@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -278,7 +279,14 @@ public class ClubServiceImpl implements ClubService {
     public ClubDto info(Long clubId) {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
-        Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
+
+        // 클럽에 연결된 이미지 정보 조회
+        List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, clubId);
+
+        // 현재 멤버 수 계산 (모임장 포함)
+        Long currentMembers = calculateCurrentMembers(club.getClubId());
+
+        // 클럽 정보를 Dto로 변환하여 반환
         return ClubDto.builder()
                 .clubId(club.getClubId())
                 .memberIdx(club.getMemberIdx())
@@ -290,8 +298,10 @@ public class ClubServiceImpl implements ClubService {
                 .price(club.getPrice())
                 .maximumMembers(club.getMaximumMembers())
                 .currentMembers(currentMembers + 1) // 모임장 포함
+                .clubImage(clubImage) // 클럽 이미지 정보 추가
                 .build();
     }
+
 
     /**
      * @param request
@@ -320,9 +330,11 @@ public class ClubServiceImpl implements ClubService {
 
 
     private List<ClubDto> convertToDto(List<Club> clubList) {
+
         return clubList.stream()
                 .map(club -> {
                     Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
+                    List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
                     return ClubDto.builder()
                             .clubId(club.getClubId())
                             .memberIdx(club.getMemberIdx())
@@ -334,6 +346,7 @@ public class ClubServiceImpl implements ClubService {
                             .price(club.getPrice())
                             .maximumMembers(club.getMaximumMembers())
                             .currentMembers(currentMembers + 1) // 모임장 포함
+                            .clubImage(clubImage) // 클럽 이미지 정보 추가
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,8 @@ public class Member implements UserDetails {
     private String nickname;
     private String birth;
     private String gender;  // M(남자), F(여자)
+
+    @Pattern(regexp = "^\\d{11}$", message = "11자리 핸드폰 번호를 입력하세요.")
     private String phone;
     private String address;
     private Integer role;   // 0 : USER 1 : ADMIN
@@ -43,6 +46,10 @@ public class Member implements UserDetails {
 //    private Integer isActive;   //카카오 추가 기입 정보 0, 1
     private LocalDateTime regDt;
     private LocalDateTime udtDt;
+
+    private String oneLineIntro;    // 한 줄 소개
+
+    private Long representIdx;  // 대표 사진 idx
 
 
     @ElementCollection(fetch = FetchType.EAGER)

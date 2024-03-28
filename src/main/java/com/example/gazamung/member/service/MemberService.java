@@ -5,7 +5,9 @@ import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.MemberDto;
 import com.example.gazamung.member.dto.ProfileDto;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.Multipart;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -90,9 +92,11 @@ public interface MemberService {
 
     ProfileDto getMemberInfo(Long memberIdx);
 
-    boolean updateNickName(Long memberIdx, String nickname);
-
     Long updatePw(Long memberIdx, String nickname);
 
     boolean withDraw(Long memberIdx, String password);
+
+    boolean updateProfile(ProfileDto dto);
+
+    Map<String, Object> uploadImage(ProfileDto dto);
 }

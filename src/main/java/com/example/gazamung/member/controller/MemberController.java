@@ -21,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.Multipart;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
@@ -38,9 +40,6 @@ public class MemberController {
     private final MemberRepository memberRepository;
     private final MemberService memberService;
     private final EmailService emailService;
-
-
-
 
     @Operation(summary = "Access Token 발급 요청", description = "" +
             "RefreshToken으로 Access Token 발급을 요청합니다." +
@@ -279,20 +278,19 @@ public class MemberController {
         return members;
     }
 
-    @GetMapping("/member/profile")
+    @GetMapping("/member/profile")  /** 프로필 조회 **/
     public ResponseEntity<ProfileDto> getMemberInfo(@RequestParam Long memberIdx){
 
-        // 이메일로 멤버 정보 가져오기
         ProfileDto profileDto = memberService.getMemberInfo(memberIdx);
 
         // 멤버 정보 반환
         return ResponseEntity.ok(profileDto);
 
     }
-    @PostMapping("/member/updateNickName")     /** 닉네임 변경 **/
-    public ResultDTO updateNickName(@RequestBody updateNickNameDto dto){
+    @PostMapping("/member/updateProfile")     /** 프로필 수정 **/
+    public ResultDTO updateProfile(@RequestBody ProfileDto dto){
         try{
-            return ResultDTO.of(memberService.updateNickName(dto.getMemberIdx(), dto.getNickname()), ApiResponseCode.SUCCESS.getCode(), "닉네임 변경 완료", null);
+            return ResultDTO.of(memberService.updateProfile(dto), ApiResponseCode.SUCCESS.getCode(), "프로필 수정 완료", null);
         } catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
@@ -317,4 +315,17 @@ public class MemberController {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
+
+    @PostMapping("/member/uploadImage")
+    public ResultDTO uploadImage(@RequestBody ProfileDto dto) {
+        try {
+            Map<String, Object> result = memberService.uploadImage(dto);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "프로필 사진 업로드가 완료되었습니다.", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+
 }
