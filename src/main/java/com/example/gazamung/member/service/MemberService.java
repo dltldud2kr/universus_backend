@@ -4,6 +4,7 @@ import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.MemberDto;
 import com.example.gazamung.member.dto.ProfileDto;
+import com.example.gazamung.member.dto.UpdateProfileDto;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -99,4 +100,6 @@ public interface MemberService {
     boolean updateProfile(ProfileDto dto);
 
     Map<String, Object> uploadImage(ProfileDto dto);
+
+    void updateImage(UpdateProfileDto dto);
 }

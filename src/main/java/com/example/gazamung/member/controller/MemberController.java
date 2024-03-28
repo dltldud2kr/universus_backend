@@ -3,6 +3,7 @@ package com.example.gazamung.member.controller;
 
 import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung._enum.CustomExceptionCode;
+import com.example.gazamung.club.dto.ClubRequest;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.emailAuth.dto.EmailCheckDto;
@@ -316,11 +317,21 @@ public class MemberController {
         }
     }
 
-    @PostMapping("/member/uploadImage")
+    @PostMapping("/member/uploadImage") /** 프로필 사진 등록 */
     public ResultDTO uploadImage(@RequestBody ProfileDto dto) {
         try {
             Map<String, Object> result = memberService.uploadImage(dto);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "프로필 사진 업로드가 완료되었습니다.", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @PatchMapping("/member/updateImage")    /** 프로필 사진 수정 */
+    public ResultDTO updateImage(UpdateProfileDto dto){
+        try{
+            memberService.updateImage(dto);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "프로필 사진 수정 완료.", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

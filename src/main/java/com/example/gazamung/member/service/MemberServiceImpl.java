@@ -1,5 +1,6 @@
 package com.example.gazamung.member.service;
 
+import com.example.gazamung.S3FileUploader.UploadImage;
 import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
@@ -14,6 +15,7 @@ import com.example.gazamung.mapper.MemberMapper;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.MemberDto;
 import com.example.gazamung.member.dto.ProfileDto;
+import com.example.gazamung.member.dto.UpdateProfileDto;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.google.gson.JsonElement;
@@ -382,7 +384,8 @@ public class MemberServiceImpl implements MemberService {
      * @title 프로필 수정
      * @created 24.03.27 이승열
      * @description 닉네임, 전화번호, 한 줄 소개 동시 처리.
-     *              학과, 프로필 사진 반환 API 는 따로 만들어 추가
+     *              값이 null 이면 기존 값 유지
+     *              학과 API 는 따로 만들어 추가
      */
     @Override
     public boolean updateProfile(ProfileDto dto) {
@@ -390,26 +393,34 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         // 닉네임 중복 검사
-        memberRepository.findByNickname(dto.getNickname()).ifPresent(existingMember -> {
-            throw new CustomException(CustomExceptionCode.DUPLICATED);
-        });
+        if (dto.getNickname() != null && !dto.getNickname().equals(member.getNickname())) {
+            memberRepository.findByNickname(dto.getNickname()).ifPresent(existingMember -> {
+                throw new CustomException(CustomExceptionCode.DUPLICATED);
+            });
+            member.setNickname(dto.getNickname());
+        }
 
         // 핸드폰 번호 중복 검사
-        memberRepository.findByPhone(dto.getPhone()).ifPresent(existingMember -> {
-            throw new CustomException(CustomExceptionCode.DUPLICATED);
-        });
+        if (dto.getPhone() != null && !dto.getPhone().equals(member.getPhone())) {
+            memberRepository.findByPhone(dto.getPhone()).ifPresent(existingMember -> {
+                throw new CustomException(CustomExceptionCode.DUPLICATED);
+            });
+            member.setPhone(dto.getPhone());
+        }
 
         // 글자 수 제한
-        if (dto.getOneLineIntro().length() > 100) {
+        if (dto.getOneLineIntro() != null && dto.getOneLineIntro().length() > 100) {
             throw new CustomException(CustomExceptionCode.CHARACTER_LIMIT);
         }
 
-        member.setNickname(dto.getNickname());
-        member.setPhone(dto.getPhone());
-        member.setOneLineIntro(dto.getOneLineIntro());
+        if (dto.getOneLineIntro() != null) {
+            member.setOneLineIntro(dto.getOneLineIntro());
+        }
+
         memberRepository.save(member);
         return true;
     }
+
 
     @Override
     public Map<String, Object> uploadImage(ProfileDto dto) {
@@ -422,6 +433,44 @@ public class MemberServiceImpl implements MemberService {
         result.put("uploadedImages", uploadImage);
 
         return result;
+    }
+
+    @Override
+    public void updateImage(UpdateProfileDto dto) {
+        try {
+            //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
+            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+            String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+
+            int removeCount = 0;
+            //업로드된 이미지가 잇는 경우
+            try {
+                if (imageByAttachmentType.size() > 0) {
+                    for (UploadImage file : imageByAttachmentType) {
+                        // 문자열에서 ".com/" 다음의 정보를 추출
+                        int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                        String result = file.getImageUrl().substring(startIndex);
+                        removeTarget[removeCount] = result;
+                        removeCount++;
+                    }
+                    //등록되어있는 파일 정보 삭제 요청.
+                    uploadService.removeS3Files(removeTarget);
+                    //데이터베이스에 맵핑되어있는 정보삭제
+                    uploadService.removeDatabaseByReviewIdx(dto.getMemberIdx());
+                }
+            } catch (CustomException e) {
+                throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+            }
+
+            //새롭게 요청온 업로드 이미지를  버킷에 업로드함.
+            uploadService.upload(dto.getProfileImage(), dto.getMemberIdx(), AttachmentType.PROFILE, dto.getMemberIdx());
+
+            //업로드된 이미지 정보를 데이터베이스
+            List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+        }
+        catch (CustomException e) {
+            System.err.println("modifyJournal Exception : " + e);
+        }
     }
 
 
