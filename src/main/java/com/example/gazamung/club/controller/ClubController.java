@@ -14,8 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,9 +42,15 @@ public class ClubController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
+//    @PostMapping(value ="/create",consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+//    public ResultDTO create(@RequestPart("dto") ClubRequest.CreateClubRequestDto dto,
+//                            @RequestPart(value = "clubImage", required = false) List<MultipartFile> clubImage){
     @PostMapping("/create")
     public ResultDTO create(ClubRequest.CreateClubRequestDto dto){
         try{
+
+//            List<MultipartFile> clubImage = new ArrayList<>();
+
             Map<String, Object> result = clubService.create(dto);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 생성 완료.", result);
         }catch(CustomException e){

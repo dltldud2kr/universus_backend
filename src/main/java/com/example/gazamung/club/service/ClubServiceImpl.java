@@ -68,15 +68,19 @@ public class ClubServiceImpl implements ClubService {
         //모임을 먼저 생성하는 이유는 생성된 IDX로 업로드 이미지를 맵핑해주기 위해 1차적으로 먼저 생성
         Club savedClub = clubRepository.save(club);
 
-        //정상적으로 모임이 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
-        List<Map<String, Object>> uploadedImages = uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, savedClub.getClubId());
+        List<Map<String, Object>> uploadedImages = null;
 
-        // 업로드된 이미지 중 0번째 이미지를 대표 이미지로 지정
-        Long representIdx = null;
-        if (!uploadedImages.isEmpty()) {
-            representIdx = (Long) uploadedImages.get(0).get("idx");
-            club.setRepresentIdx(representIdx);
-            clubRepository.save(club); // 대표 이미지 설정 후 다시 저장
+        if (dto.getClubImage() != null && !dto.getClubImage().isEmpty()){
+        //정상적으로 모임이 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
+            uploadedImages = uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, savedClub.getClubId());
+
+            // 업로드된 이미지 중 0번째 이미지를 대표 이미지로 지정
+            Long representIdx = null;
+            if (!uploadedImages.isEmpty()) {
+                representIdx = (Long) uploadedImages.get(0).get("idx");
+                club.setRepresentIdx(representIdx);
+                clubRepository.save(club); // 대표 이미지 설정 후 다시 저장
+            }
         }
 
         // uploadImages 와 club 정보를 함께 반환
@@ -107,36 +111,40 @@ public class ClubServiceImpl implements ClubService {
                 throw new CustomException(CustomExceptionCode.ACCESS_DENIED);
             }
 
-            //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 CLUB 파일을 모두 삭제합니다.
-            //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
-            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, dto.getClubId());
-            String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+            if (dto.getClubImage() != null && !dto.getClubImage().isEmpty()){
+                //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 CLUB 파일을 모두 삭제합니다.
+                //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
+                List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, dto.getClubId());
+                String[] removeTarget = new String[imageByAttachmentType.size() + 1];
 
-            int removeCount = 0;
-            //업로드된 이미지가 잇는 경우
-            try {
-                if (imageByAttachmentType.size() > 0) {
-                    for (UploadImage file : imageByAttachmentType) {
-                        // 문자열에서 ".com/" 다음의 정보를 추출
-                        int startIndex = file.getImageUrl().indexOf(".com/") + 5;
-                        String result = file.getImageUrl().substring(startIndex);
-                        removeTarget[removeCount] = result;
-                        removeCount++;
+                int removeCount = 0;
+
+                //업로드된 이미지가 잇는 경우
+                try {
+                    if (imageByAttachmentType.size() > 0) {
+                        for (UploadImage file : imageByAttachmentType) {
+                            // 문자열에서 ".com/" 다음의 정보를 추출
+                            int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                            String result = file.getImageUrl().substring(startIndex);
+                            removeTarget[removeCount] = result;
+                            removeCount++;
+                        }
+                        //등록되어있는 파일 정보 삭제 요청.
+                        uploadService.removeS3Files(removeTarget);
+                        //데이터베이스에 맵핑되어있는 정보삭제
+                        uploadService.removeDatabaseByReviewIdx(dto.getClubId());
                     }
-                    //등록되어있는 파일 정보 삭제 요청.
-                    uploadService.removeS3Files(removeTarget);
-                    //데이터베이스에 맵핑되어있는 정보삭제
-                    uploadService.removeDatabaseByReviewIdx(dto.getClubId());
+                } catch (CustomException e) {
+                    throw new CustomException(CustomExceptionCode.SERVER_ERROR);
                 }
-            } catch (CustomException e) {
-                throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+
+                //새롭게 요청온 업로드 이미지를  버킷에 업로드함.
+                uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, createdClub.getClubId());
+
+                //업로드된 이미지 정보를 데이터베이스
+                List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.CLUB, createdClub.getClubId());
+
             }
-
-            //새롭게 요청온 업로드 이미지를  버킷에 업로드함.
-            uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, createdClub.getClubId());
-
-            //업로드된 이미지 정보를 데이터베이스
-            List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.CLUB, createdClub.getClubId());
 
             createdClub.setEventId(dto.getEventId());
             createdClub.setClubName(dto.getClubName());
