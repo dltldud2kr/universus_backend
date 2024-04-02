@@ -23,4 +23,7 @@ public class University {
     private String regionCode;
     private String region;
 
+    @Column(name = "logo_img")
+    private String logoImg;
+
 }

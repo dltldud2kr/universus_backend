@@ -6,6 +6,7 @@ import com.example.gazamung.department.entity.Department;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.university.entity.University;
+import com.example.gazamung.university.repository.UniversityRepository;
 import com.example.gazamung.university.service.UniversityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,6 +33,8 @@ public class UniversityInsertController {
 
     private final DataSource dataSource;
     private final UniversityService universityService;
+    private final UniversityRepository universityRepository;
+
 
     @Operation(summary = "대학, 학과 데이터 INSERT ", description = "" +
             "\n### HTTP STATUS 에 따른 조회 결과" +
@@ -73,13 +76,46 @@ public class UniversityInsertController {
     @GetMapping("/univList")
     public ResultDTO universityList() {
 
-        try{
-            List<University> list  = universityService.universityList();
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"대학 리스트 조회 성공", list);
-        }catch(CustomException e){
+        try {
+            List<University> list = universityService.universityList();
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대학 리스트 조회 성공", list);
+        } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 
         }
     }
+
+    @Operation(summary = "대학 로고 업데이트 ", description = "" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+
+    @PostMapping("/logoUpt")
+    public String updateLogoImageUrl() {
+        // 이전 이미지 URL의 프리픽스와 새로운 이미지 URL의 프리픽스
+        String oldImagePrefix = "PNG_";
+        String newImageUrlPrefix = "https://jhuniversus.s3.ap-northeast-2.amazonaws.com/logo/PNG_"; // 변경된 부분
+
+        // University 엔티티 리스트 가져오기
+        List<University> universities = universityRepository.findAll();
+
+        // 각 University 엔티티의 로고 이미지 URL 업데이트
+        for (University university : universities) {
+            String logoImg = university.getLogoImg();
+            if (logoImg != null && logoImg.startsWith(oldImagePrefix)) {
+                university.setLogoImg(newImageUrlPrefix + logoImg.substring(oldImagePrefix.length()));
+            }
+        }
+        // 변경된 내용 저장
+        universityRepository.saveAll(universities);
+
+        return "Successfully updated logo image URLs.";
+    }
+
 
 }
