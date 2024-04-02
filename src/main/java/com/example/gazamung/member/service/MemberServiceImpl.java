@@ -6,12 +6,10 @@ import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.EmailAuthStatus;
 import com.example.gazamung.auth.JwtTokenProvider;
-import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.emailAuth.entity.EmailAuth;
 import com.example.gazamung.emailAuth.repository.EmailAuthRepository;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.mapper.MemberMapper;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.MemberDto;
 import com.example.gazamung.member.dto.ProfileDto;
@@ -29,16 +27,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.mail.Multipart;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +51,6 @@ public class MemberServiceImpl implements MemberService {
 
     private final EmailAuthRepository emailAuthRepository;
 
-    private final MemberMapper memberMapper;
 
     private final UploadService uploadService;
 
@@ -349,12 +342,7 @@ public class MemberServiceImpl implements MemberService {
         return resultMap;
     }
 
-    @Override
-    public List<MemberDto> getAllMembers() {
-        MemberDto parameter = new MemberDto();
-        List<MemberDto> list = memberMapper.selectList(parameter);
-        return list;
-    }
+
 
     @Override
     public Long updatePw(Long memberIdx, String password) {
@@ -437,6 +425,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public void updateImage(UpdateProfileDto dto) {
         try {
             //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.

@@ -273,11 +273,7 @@ public class MemberController {
     }
 
 
-    @GetMapping("/member/all")
-    public List<MemberDto> allMember(){
-        List<MemberDto> members = memberService.getAllMembers();
-        return members;
-    }
+
 
     @GetMapping("/member/profile")  /** 프로필 조회 **/
     public ResponseEntity<ProfileDto> getMemberInfo(@RequestParam Long memberIdx){
@@ -318,7 +314,7 @@ public class MemberController {
     }
 
     @PostMapping("/member/uploadImage") /** 프로필 사진 등록 */
-    public ResultDTO uploadImage(@RequestBody UpdateProfileDto dto) {
+    public ResultDTO uploadImage(UpdateProfileDto dto) {
         try {
             Map<String, Object> result = memberService.uploadImage(dto);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "프로필 사진 업로드가 완료되었습니다.", result);

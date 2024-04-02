@@ -16,6 +16,9 @@
             club_id = #{clubId}
     </select>
 
+
+
+
     <select id="countByMemberIdx" resultType="int" >
         SELECT COUNT(*) FROM club_member
         WHERE member_idx = #{memberIdx}

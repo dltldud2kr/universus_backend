@@ -212,59 +212,6 @@ public class ClubServiceImpl implements ClubService {
 
     }
 
-    /**
-     * @param request
-     * @title 모임 가입
-     * @created 24.03.13 이시영
-     * @description 모임 가입
-     */
-
-    @Override
-    public boolean clubJoin(ClubJoinRequest request) {
-
-        long memberIdx = request.getMemberIdx();
-        long clubId = request.getClubId();
-
-        // 회원 존재 유무 확인
-        Member member = memberRepository.findById(memberIdx)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
-
-        // 클럽 존재 유무 확인
-        Club club = clubRepository.findById(request.getClubId())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
-
-        // 같은 학교인지 확인
-        if (member.getUnivId() != club.getUnivId()){
-            throw new CustomException(CustomExceptionCode.NOT_MATCHED_UNIVERSITY);
-        }
-
-        // 모임장이 가입하려는 경우
-        if (memberIdx == club.getMemberIdx()){
-            throw new CustomException(CustomExceptionCode.YOU_ARE_MASTER);
-        }
-
-        // 이미 가입되어있는 회원인지 확인
-        int checkRegMember = clubMapper.checkClubMembership(clubId, memberIdx);
-        if (checkRegMember > 0) {
-            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
-        }
-
-        // 회원이 가입한 모임 개수
-        int count = clubMapper.countByMemberIdx(memberIdx);
-        if (count > 3) {
-            throw new CustomException(CustomExceptionCode.MEMBERSHIP_LIMIT_EXCEEDED);
-        }
-
-        // 조건 충족시 가입처리.
-        ClubMember clubMember = ClubMember.builder()
-                .clubId(clubId)
-                .memberIdx(memberIdx)
-                .build();
-
-        clubMemberRepository.save(clubMember);
-
-        return true;
-    }
 
     /**
      * @param

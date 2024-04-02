@@ -89,7 +89,6 @@ public interface MemberService {
      */
     public Map<String,Object> getUserInfo(String access_token);
 
-    List<MemberDto> getAllMembers();
 
 
     ProfileDto getMemberInfo(Long memberIdx);

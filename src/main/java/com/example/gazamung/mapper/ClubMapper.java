@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Param;
 public interface ClubMapper {
 
     int ageCheck( @Param("clubId") long clubId, @Param("age") int age);
+
+
     int countByMemberIdx( @Param("memberIdx") Long memberIdx);
 
     int checkClubMembership(@Param("clubId") Long clubId, @Param("memberIdx") Long memberIdx);

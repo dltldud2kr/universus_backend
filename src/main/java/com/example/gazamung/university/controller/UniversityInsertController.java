@@ -85,7 +85,7 @@ public class UniversityInsertController {
         }
     }
 
-    @Operation(summary = "대학 로고 업데이트 ", description = "" +
+    @Operation(summary = "대학 로고 UPDATE ", description = "" +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +

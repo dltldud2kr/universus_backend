@@ -78,7 +78,6 @@ public class ClubController {
     @PostMapping("/join")
     public ResultDTO join(@RequestBody ClubJoinRequest request){
         try{
-            clubService.clubJoin(request);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 가입 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);

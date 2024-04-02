@@ -14,5 +14,6 @@ public class ClubJoinRequest {
 
     private Long memberIdx;
     private Long clubId;
+    private int age;
 
 }

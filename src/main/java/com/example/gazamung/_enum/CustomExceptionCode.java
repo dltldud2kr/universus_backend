@@ -30,7 +30,7 @@ public enum CustomExceptionCode {
 
 
     //클럽
-    INVALID_AGE("INVALID_AGE","가입조건에 충족하지 않은 나이", HttpStatus.BAD_REQUEST),
+    AGE_LIMIT_EXCEEDED("AGE_LIMIT_EXCEEDED","가입조건에 충족하지 않은 나이", HttpStatus.BAD_REQUEST),
     MEMBERSHIP_LIMIT_EXCEEDED("MEMBERSHIP_LIMIT_EXCEEDED", "모임 가입 개수를 초과", HttpStatus.BAD_REQUEST),
     ALREADY_REGISTERED_MEMBER("ALREADY_REGISTERED_MEMBER", "이미 가입된 회원입니다", HttpStatus.BAD_REQUEST),
     ACCESS_DENIED("ACCESS_DENIED","관리자 외 접근 거부", HttpStatus.BAD_REQUEST),
