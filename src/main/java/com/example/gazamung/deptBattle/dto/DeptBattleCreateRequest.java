@@ -1,4 +1,4 @@
-package com.example.gazamung.deptBattle;
+package com.example.gazamung.deptBattle.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

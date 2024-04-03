@@ -23,6 +23,10 @@ public enum CustomExceptionCode {
     //대항전
     NOT_FOUND_BATTLE("NOT_FOUND_BATTLE","존재하지 않는 대항전", HttpStatus.BAD_REQUEST),
     SAME_UNIVERSITY("SAME_UNIVERSITY","같은 대학교는 참가할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    EXCEEDED_TOTAL_CAPACITY("EXCEEDED_CAPACITY","대항전 총 참가 인원이 초과하였습니다.", HttpStatus.BAD_REQUEST),
+    EXCEEDED_UNIV_CAPACITY("EXCEEDED_UNIV_CAPACITY","대항전 대학별 참가 인원이 초과하였습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_INVITE_CODE("INVALID_INVITE_CODE","참가 코드가 유효하지 않습니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_ATTENDED("ALREADY_ATTENDED","이미 참가한 회원입니다.", HttpStatus.BAD_REQUEST),
 
     //채팅
     INVALID_URI("INVALID_URI","올바른 형식의 URI가 아닙니다.", HttpStatus.BAD_REQUEST),

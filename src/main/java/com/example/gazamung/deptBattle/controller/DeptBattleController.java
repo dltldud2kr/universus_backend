@@ -1,12 +1,12 @@
-package com.example.gazamung.deptBattle;
+package com.example.gazamung.deptBattle.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
+import com.example.gazamung.deptBattle.dto.DeptBattleAttendRequest;
+import com.example.gazamung.deptBattle.dto.DeptBattleCreateRequest;
+import com.example.gazamung.deptBattle.service.DeptBattleService;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.univBattle.dto.UnivBattleAttendRequest;
-import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
-import com.example.gazamung.univBattle.service.UnivBattleService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

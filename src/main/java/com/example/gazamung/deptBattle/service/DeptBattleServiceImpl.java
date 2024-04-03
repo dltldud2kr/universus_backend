@@ -1,28 +1,21 @@
-package com.example.gazamung.deptBattle.repository;
+package com.example.gazamung.deptBattle.service;
 
-import com.example.gazamung.ChatRoom.ChatRoom;
 import com.example.gazamung.ChatRoom.ChatRoomRepository;
 import com.example.gazamung._enum.CustomExceptionCode;
-import com.example.gazamung.deptBattle.DeptBattleAttendRequest;
-import com.example.gazamung.deptBattle.DeptBattleCreateRequest;
-import com.example.gazamung.deptBattle.DeptBattleService;
+import com.example.gazamung._enum.Status;
+import com.example.gazamung.deptBattle.dto.DeptBattleAttendRequest;
+import com.example.gazamung.deptBattle.dto.DeptBattleCreateRequest;
+import com.example.gazamung.deptBattle.repository.DeptBattleRepository;
 import com.example.gazamung.deptBattle.entity.DeptBattle;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
-import com.example.gazamung.univBattle.dto.UnivBattleAttendRequest;
-import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
-import com.example.gazamung.univBattle.entity.UnivBattle;
-import com.example.gazamung.univBattle.repository.UnivBattleRepository;
-import com.example.gazamung.univBattle.service.UnivBattleService;
 import com.example.gazamung.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Service
 @Slf4j
@@ -51,7 +44,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 .battleDate(request.getBattleDate())
                 .location(request.getLocation())
                 .content(request.getContent())
-                .status(0)
+                .status(Status.WAITING)
                 .cost(request.getCost())
                 .regDt(LocalDateTime.now())
                 .build();

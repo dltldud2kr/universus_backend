@@ -1,5 +1,6 @@
 package com.example.gazamung.deptBattle.entity;
 
+import com.example.gazamung._enum.Status;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,10 +32,15 @@ public class DeptBattle {
 
     private String battleDate;     // 일정
     private String location;        // 장소
-    private int status;            // 상태 _ 0: 종료 , 1: 진행중
+
+    @Enumerated(EnumType.STRING)
+    private Status status;            // 상태
+
     private int hostScore;         // 주최팀 점수
     private int guestScore;        // 참가팀 점수
     private LocalDateTime regDt;    // 생성일
     private LocalDateTime endDt;    // 종료일
     private String invitationCode;  // 초대 코드
+
+
 }

@@ -1,7 +1,7 @@
-package com.example.gazamung.deptBattle;
+package com.example.gazamung.deptBattle.service;
 
-import com.example.gazamung.univBattle.dto.UnivBattleAttendRequest;
-import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
+import com.example.gazamung.deptBattle.dto.DeptBattleAttendRequest;
+import com.example.gazamung.deptBattle.dto.DeptBattleCreateRequest;
 import org.springframework.stereotype.Service;
 
 @Service

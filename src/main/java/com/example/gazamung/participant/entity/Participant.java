@@ -20,6 +20,8 @@ public class Participant {
     private Long participantId;      // 참가자 ID
 
     private Long memberIdx;         // 회원
+    private Long univId;
+    private Long deptId;
     private Long univBattleId;      // 대결 (학교)
     private Long deptBattleId;      // 대결 (학과)
 }

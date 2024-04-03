@@ -1,4 +1,4 @@
-package com.example.gazamung.univBattle.dto;
+package com.example.gazamung.deptBattle.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnivBattleAttendRequest {
+public class DeptBattleAttendRequest {
 
-    private long univBattleId;   // 해당 대항전 ID 값
+    private long deptBattleId;   // 해당 대항전 ID 값
     private long guestLeader ;   // 대표자 memberIdx
 
 }
