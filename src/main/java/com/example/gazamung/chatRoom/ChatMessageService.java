@@ -1,4 +1,4 @@
-package com.example.gazamung.ChatRoom;
+package com.example.gazamung.chatRoom;
 
 import org.springframework.stereotype.Service;
 

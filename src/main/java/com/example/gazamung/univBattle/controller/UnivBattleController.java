@@ -2,11 +2,13 @@ package com.example.gazamung.univBattle.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
+import com.example.gazamung._enum.Status;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.univBattle.dto.AttendRequest;
 import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
 import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
+import com.example.gazamung.univBattle.entity.UnivBattle;
 import com.example.gazamung.univBattle.service.UnivBattleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +17,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -31,8 +35,7 @@ public class UnivBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
-            "\n- ")
+            "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -54,8 +57,7 @@ public class UnivBattleController {
             "\n### Result Code 에 따른 요청 결과" +
             "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
             "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
-            "\n- SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." +
-            "\n- ")
+            "\n- SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -79,8 +81,7 @@ public class UnivBattleController {
             "\n- EXCEEDED_TOTAL_CAPACITY: 대항전 총 참가 인원이 초과하였습니다." +
             "\n- EXCEEDED_UNIV_CAPACITY: 대항전 대학별 참가 인원이 초과하였습니다." +
             "\n- INVALID_INVITE_CODE: 참가 코드가 유효하지 않습니다." +
-            "\n- ALREADY_ATTENDED: 이미 참가한 회원입니다." +
-            "\n- ")
+            "\n- ALREADY_ATTENDED: 이미 참가한 회원입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -89,6 +90,30 @@ public class UnivBattleController {
 
         try {
             return ResultDTO.of(univBattleService.attend(request), ApiResponseCode.CREATED.getCode(), "대항전 참가 완료.", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+    @Operation(summary = "대항전 리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- 0 (ALL): 전체 리스트" +
+            "\n- 1 (WAITING): 대기중 리스트" +
+            "\n- 2 (IN_PROGRESS): 진행중 리스트" +
+            "\n- 3 (COMPLETED): 종료 리스트" )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/list")
+    public ResultDTO battleList(@RequestParam(required = false)int status ){
+
+        List<UnivBattle> univBattleList = univBattleService.list(status);
+        try {
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대항전리스트 조회 성공.", univBattleList);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

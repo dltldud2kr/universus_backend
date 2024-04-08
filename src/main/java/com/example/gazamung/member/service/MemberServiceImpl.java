@@ -511,8 +511,12 @@ public class MemberServiceImpl implements MemberService {
     // CustomException 이 발생해도 트랜잭션을 롤백하지 않도록 설정
     @Transactional(noRollbackFor = CustomException.class)
     @Override
-    public boolean emailCheck(String email, String verifCode) {
+    public Long emailCheck(String email, String verifCode) {
 
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EMAIL));
+
+        long memberIdx = member.getMemberIdx();
 
         // UNVERIFIED  있을 시 만료됐는지 확인 후 인증처리
         Optional<EmailAuth> optionalEmailAuth = emailAuthRepository.findByEmailAndEmailAuthStatus(email, EmailAuthStatus.UNVERIFIED);
@@ -532,20 +536,16 @@ public class MemberServiceImpl implements MemberService {
                     log.info("verifCode");
                     throw new CustomException(CustomExceptionCode.INVALID_VERIF_CODE);
                 }
-
+                // 이메일 인증 상태를 VERIFIED로 변경
                 emailAuth.setEmailAuthStatus(EmailAuthStatus.VERIFIED);
                 updateEmailAuthStatus(emailAuth);
-
             }
-
         }
         // UNVERIFIED 없을 시
         else {
-
             throw new CustomException(CustomExceptionCode.INVALID_AUTH);
         }
-
-        return true;
+        return memberIdx;
     }
 
     @Transactional

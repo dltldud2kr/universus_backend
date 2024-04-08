@@ -19,6 +19,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
 @Tag(name = "종목 카테고리 API", description = "")
 @RequestMapping("/api/v1/event")
 public class EventController {

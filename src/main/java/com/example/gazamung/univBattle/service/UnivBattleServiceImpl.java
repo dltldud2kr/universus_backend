@@ -1,9 +1,9 @@
 package com.example.gazamung.univBattle.service;
 
-import com.example.gazamung.ChatRoom.ChatRoom;
-import com.example.gazamung.ChatRoom.ChatRoomRepository;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.Status;
+import com.example.gazamung.chatRoom.ChatRoom;
+import com.example.gazamung.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -54,10 +55,12 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .eventId(request.getEventId())
                 .hostUniv(univId)
                 .battleDate(request.getBattleDate())
-                .location(request.getLocation())
+                .lat(request.getLat())
+                .lng(request.getLng())
+                .place(request.getPlace())
                 .content(request.getContent())
                 .totalParticipants(request.getTotalParticipants())
-                .status(Status.WAITING)
+                .status(Status.RECRUIT)
                 .cost(request.getCost())
                 .regDt(LocalDateTime.now())
                 .build();
@@ -111,6 +114,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         univBattle.setGuestLeader(request.getGuestLeader());
         univBattle.setGuestUniv(guestUniv);
+//        univBattle.setStatus(Status.WAITING);
 
         // 초대코드 생성
         univBattle.setInvitationCode(generateRandomString(8));
@@ -172,6 +176,26 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         participantRepository.save(participant);
 
         return true;
+    }
+
+    @Override
+    public List<UnivBattle> list(int status) {
+
+        switch (status) {
+            case 0:
+                return univBattleRepository.findAll();
+            case 1:
+                return univBattleRepository.findByStatus(Status.RECRUIT);
+            case 2:
+                return univBattleRepository.findByStatus(Status.WAITING);
+            case 3:
+                return univBattleRepository.findByStatus(Status.IN_PROGRESS);
+            case 4:
+                return univBattleRepository.findByStatus(Status.COMPLETED);
+            default:
+                throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+        }
+
     }
 
 

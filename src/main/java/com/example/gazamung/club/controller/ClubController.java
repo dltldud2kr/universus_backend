@@ -27,6 +27,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "모임 API", description = "")
+@CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
 @RequestMapping("/api/v1/club")
 public class ClubController {
 

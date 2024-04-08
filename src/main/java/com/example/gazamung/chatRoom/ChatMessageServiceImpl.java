@@ -1,9 +1,8 @@
-package com.example.gazamung.ChatRoom;
+package com.example.gazamung.chatRoom;
 
 
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

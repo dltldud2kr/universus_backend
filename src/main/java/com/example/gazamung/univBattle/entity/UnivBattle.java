@@ -31,10 +31,14 @@ public class UnivBattle {
     private String cost;
 
     private String battleDate;     // 일정
-    private String location;        // 장소
+
+    private String lat;             // 위도
+    private String lng;             // 경도
+    private String place;           // 위치
+
 
     @Enumerated(EnumType.STRING)
-    private Status status;            // 상태
+    private Status status;           // 상태 -> 진행중 , 대기중, 모집중 , 종료
 
     private Long hostScore;         // 주최팀 점수
     private Long guestScore;        // 참가팀 점수

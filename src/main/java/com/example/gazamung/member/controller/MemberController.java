@@ -35,6 +35,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1")
+@CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
 @Tag(name = "회원 API", description = "")
 public class MemberController {
 
@@ -112,7 +113,7 @@ public class MemberController {
             if (result == true){
                 throw new CustomException(CustomExceptionCode.DUPLICATED_MEMBER);
             }
-            memberService.emailCheck(dto.getEmail(),dto.getVerifcode());
+             memberService.emailCheck(dto.getEmail(),dto.getVerifcode());
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "이메일 인증이 정상적으로 되었습니다.", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
@@ -166,8 +167,8 @@ public class MemberController {
             if (result == false){
                 throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
             }
-            memberService.emailCheck(dto.getEmail(),dto.getVerifcode());
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "이메일 인증이 정상적으로 되었습니다.", null);
+            long memberIdx = memberService.emailCheck(dto.getEmail(),dto.getVerifcode());
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "이메일 인증이 정상적으로 되었습니다.", memberIdx);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

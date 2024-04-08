@@ -1,7 +1,7 @@
 package com.example.gazamung.config;
 
-import com.example.gazamung.ChatRoom.ChatMessage;
-import com.example.gazamung.ChatRoom.ChatMessageService;
+import com.example.gazamung.chatRoom.ChatMessage;
+import com.example.gazamung.chatRoom.ChatMessageService;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.repository.MemberRepository;

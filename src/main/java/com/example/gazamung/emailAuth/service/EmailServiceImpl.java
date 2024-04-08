@@ -41,25 +41,23 @@ public class EmailServiceImpl implements EmailService {
 
         ePw = createKey();
         // 이메일 내용에 버튼을 추가한 HTML
-        String msgg="";
-        msgg+= "<div style='margin:20px;'>";
-        msgg+= "<h1> 안녕하세요 가자멍입니다. </h1>";
-        msgg+= "<br>";
-        msgg+= "<p>아래 코드를 복사해 입력해주세요<p>";
-        msgg+= "<br>";
-        msgg+= "<p>감사합니다.<p>";
-        msgg+= "<br>";
-        msgg+= "<div align='center' style='border:1px solid black; font-family:verdana';>";
-        msgg+= "<h3 style='color:blue;'>회원가입 인증 코드입니다.</h3>";
-        msgg+= "<div style='font-size:130%'>";
-        msgg+= "CODE : <strong>";
-        msgg+= ePw+"</strong><div><br/> ";
-        msgg+= "</div>";
+
+        // HTML 이메일 템플릿
+        String msgg = "<html><head></head><body style='font-family: Arial, sans-serif;'>";
+        msgg += "<div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #007bff; border-radius: 5px;'>";
+        msgg += "<h1 style='color: #007bff; text-align: center;'>가자멍 계정 인증</h1>";
+        msgg += "<p style='text-align: center;'>안녕하세요, Universe 입니다.</p>";
+        msgg += "<p style='text-align: center;'>아래 코드를 복사하여 인증해주세요.</p>";
+        msgg += "<div style='text-align: center; margin-top: 20px;'>";
+        msgg += "<div style='display: inline-block; background-color: #007bff; color: #fff; padding: 10px 20px; border-radius: 5px; font-size: 18px;'>" + ePw + "</div>";
+        msgg += "</div>";
+        msgg += "<p style='text-align: center; margin-top: 20px;'>감사합니다.</p>";
+        msgg += "</div></body></html>";
 
         MimeMessage message = emailSender.createMimeMessage();
 
         message.addRecipients(RecipientType.TO, to);
-        message.setSubject("가자멍 계정 인증");
+        message.setSubject("Universe 계정 인증");
         message.setText(msgg, "utf-8", "html");
         message.setFrom(new InternetAddress("dltldud2kr@gmail.com", "leesiyoung"));
 

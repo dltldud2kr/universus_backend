@@ -1,11 +1,10 @@
-package com.example.gazamung.ChatRoom;
+package com.example.gazamung.chatRoom;
 
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity

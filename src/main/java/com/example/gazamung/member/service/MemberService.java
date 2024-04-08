@@ -59,7 +59,7 @@ public interface MemberService {
      * @param verifCode
      * @return
      */
-    boolean emailCheck(String email, String verifCode);
+    Long emailCheck(String email, String verifCode);
 
 
 

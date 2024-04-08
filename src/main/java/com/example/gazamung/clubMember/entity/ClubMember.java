@@ -1,6 +1,5 @@
 package com.example.gazamung.clubMember.entity;
 
-import com.example.gazamung._enum.ClubRank;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
