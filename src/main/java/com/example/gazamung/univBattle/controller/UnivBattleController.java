@@ -122,10 +122,12 @@ public class UnivBattleController {
 
     @GetMapping("/info")
     public ResultDTO<Map<String, Object>> univBattleInfo(@RequestParam long univBattleId){
-
-
-
-        return null;
+        try {
+            Map<String, Object> result = univBattleService.info(univBattleId);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "대항전 정보", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
     }
 
 
