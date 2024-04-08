@@ -19,5 +19,5 @@ public class UnivBattleCreateRequest {
     private String battleDate;      // 일정
     private String content;         // 내용
     private String cost;            // 비용
-    private int totalParticipants;  // 참가 제한인원
+    private int teamPtcLimit;  // 참가 제한인원
 }

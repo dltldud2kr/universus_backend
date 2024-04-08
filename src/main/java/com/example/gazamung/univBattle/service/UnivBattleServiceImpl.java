@@ -4,6 +4,7 @@ import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.Status;
 import com.example.gazamung.chatRoom.ChatRoom;
 import com.example.gazamung.chatRoom.ChatRoomRepository;
+import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -22,7 +23,9 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -59,7 +62,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .lng(request.getLng())
                 .place(request.getPlace())
                 .content(request.getContent())
-                .totalParticipants(request.getTotalParticipants())
+                .teamPtcLimit(request.getTeamPtcLimit())
                 .status(Status.RECRUIT)
                 .cost(request.getCost())
                 .regDt(LocalDateTime.now())
@@ -97,6 +100,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         UnivBattle univBattle = univBattleRepository.findById(request.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        //이미 참가팀 대표가 있는지 확인
+        if (univBattle.getGuestLeader() != null){
+            throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+        }
 
         // 참가자 정보 조회
         Member guest = memberRepository.findById(request.getGuestLeader())
@@ -152,13 +160,13 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 참가인원 초과 여부 체크
         int totalParticipant = participantRepository.countByUnivBattleId(univBattle.getUnivBattleId());
-        if (totalParticipant >= univBattle.getTotalParticipants()) {
+        if (totalParticipant >= univBattle.getTeamPtcLimit() * 2) {
             throw new CustomException(CustomExceptionCode.EXCEEDED_TOTAL_CAPACITY);
         }
 
         // 대학별 인원 초과 여부 체크
         int univTotalParticipant = participantRepository.countByUnivBattleIdAndUnivId(univBattle.getUnivBattleId(), member.getUnivId());
-        if (univTotalParticipant >= univBattle.getTotalParticipants() / 2) {
+        if (univTotalParticipant >= univBattle.getTeamPtcLimit()) {
             throw new CustomException(CustomExceptionCode.EXCEEDED_UNIV_CAPACITY);
         }
 
@@ -196,6 +204,33 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         }
 
+    }
+
+    @Override
+    public Map<String, Object> info(long univBattleId) {
+
+        UnivBattle univBattle = univBattleRepository.findById(univBattleId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+
+        int hostPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getHostUniv());
+        int guestPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getGuestUniv());
+
+
+        List<Participant> HostparticipantList = participantRepository.findAllByUnivId(univBattle.getHostUniv());
+        List<Participant> GuestparticipantList = participantRepository.findAllByUnivId(univBattle.getGuestUniv());
+
+
+        // 응답용 Map 생성 및 값 추가
+        Map<String, Object> response = new HashMap<>();
+        response.put("univBattle", univBattle);
+        response.put("HostparticipantList", HostparticipantList);
+        response.put("GuestparticipantList", GuestparticipantList);
+        response.put("hostParticipantCount", hostPtc);
+        response.put("guestParticipantCount", guestPtc);
+
+
+        return response;
     }
 
 

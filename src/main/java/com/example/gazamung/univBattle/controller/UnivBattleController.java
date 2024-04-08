@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -119,6 +120,13 @@ public class UnivBattleController {
         }
     }
 
+    @GetMapping("/info")
+    public ResultDTO<Map<String, Object>> univBattleInfo(@RequestParam long univBattleId){
+
+
+
+        return null;
+    }
 
 
 }

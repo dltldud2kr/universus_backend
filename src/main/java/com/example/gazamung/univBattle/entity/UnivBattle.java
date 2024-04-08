@@ -42,7 +42,7 @@ public class UnivBattle {
 
     private Long hostScore;         // 주최팀 점수
     private Long guestScore;        // 참가팀 점수
-    private int totalParticipants;   //참가인원
+    private int teamPtcLimit;   // 팀당 제한 인원
     private LocalDateTime regDt;    // 생성일
     private LocalDateTime endDt;    // 종료일
     private String invitationCode;  // 초대 코드
