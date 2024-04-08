@@ -20,8 +20,10 @@ public class ProfileDto {
 
     private String oneLineIntro;    // 한 줄 소개
 
-    private Long univId;    //대학
-    private Long deptId;    //학과
+    private String schoolName;  // 대학명
+    private String deptName;        // 학과명
+
+    private String logoImg;
 
     private List<UploadImage> profileImage;
 

@@ -6,6 +6,8 @@ import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.EmailAuthStatus;
 import com.example.gazamung.auth.JwtTokenProvider;
+import com.example.gazamung.department.entity.Department;
+import com.example.gazamung.department.repository.DepartmentRepository;
 import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.emailAuth.entity.EmailAuth;
 import com.example.gazamung.emailAuth.repository.EmailAuthRepository;
@@ -16,6 +18,8 @@ import com.example.gazamung.member.dto.ProfileDto;
 import com.example.gazamung.member.dto.UpdateProfileDto;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
+import com.example.gazamung.university.entity.University;
+import com.example.gazamung.university.repository.UniversityRepository;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -54,6 +58,9 @@ public class MemberServiceImpl implements MemberService {
 
     private final UploadService uploadService;
 
+    private final UniversityRepository universityRepository;
+
+    private final DepartmentRepository departmentRepository;
     /**
      * 1. 로그인 요청으로 들어온 ID, PWD 기반으로 Authentication 객체 생성
      * 2. authenticate() 메서드를 통해 요청된 Member 에 대한 검증이 진행 => loadUserByUsername 메서드를 실행.
@@ -473,15 +480,19 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findByMemberIdx(memberIdx)
                 .map(member -> {
                     List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, memberIdx);
+                    University university = universityRepository.findById(member.getUnivId())
+                            .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
                     ProfileDto profileDto = new ProfileDto();
                     profileDto.setMemberIdx(memberIdx);
                     profileDto.setUserName(member.getUsername());
                     profileDto.setNickname(member.getNickname());
-                    profileDto.setUnivId(member.getUnivId());
-                    profileDto.setDeptId(member.getDeptId());
+                    profileDto.setSchoolName(university.getSchoolName());
+                    profileDto.setDeptName(departmentRepository.findById(member.getDeptId())
+                            .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND)).getDeptName());
                     profileDto.setPhone(member.getPhone());
                     profileDto.setOneLineIntro(member.getOneLineIntro());
                     profileDto.setProfileImage(clubImage);
+                    profileDto.setLogoImg(university.getLogoImg());
                     return profileDto;
                 })
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));

@@ -20,6 +20,8 @@ public class UnivBoard {
     @SequenceGenerator(name = "UNIVBOARD_SEQ", sequenceName = "univboard_sequence", allocationSize = 1)
     private Long univBoardId;      // 게시판 ID
 
+    private Long memberIdx;
+
     private Long categoryId;        // 카테고리 ID
     private Long univId;            // 대학교
     private Long deptId;            // 학과
@@ -28,4 +30,7 @@ public class UnivBoard {
     private String title;
     private String content;
     private LocalDateTime regDt;    // 생성일
+    private LocalDateTime udtDt;    // 수정일
+
+    private Long representIdx;  // 대표 사진 idx
 }
