@@ -15,17 +15,16 @@ import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
 import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import com.example.gazamung.univBattle.repository.UnivBattleRepository;
+import com.example.gazamung.university.entity.University;
 import com.example.gazamung.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -45,10 +44,13 @@ public class UnivBattleServiceImpl implements UnivBattleService {
      * @return
      */
     @Override
+    @Transactional
     public boolean create(UnivBattleCreateRequest request) {
 
         Member member = memberRepository.findById(request.getHostLeader())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+
 
         long univId = member.getUnivId();
 
@@ -70,6 +72,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         UnivBattle result = univBattleRepository.save(univBattle);
 
+
+        University university = universityRepository.findById(univId)
+                .orElseThrow(() ->new CustomException(CustomExceptionCode.NOT_FOUND));
+
+        // 주최팀 학교 로고 업데이트
+        result.setHostUnivLogo(university.getLogoImg());
+        univBattleRepository.save(result);
+
         //대항전 참가자 테이블에 생성자 추가
         Participant participant = Participant.builder()
                 .memberIdx(member.getMemberIdx())
@@ -85,7 +95,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .build();
 
         chatRoomRepository.save(chatRoom);
-
         return true;
 
     }
@@ -120,9 +129,16 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new CustomException(CustomExceptionCode.SAME_UNIVERSITY);
         }
 
+        // Guest 팀 정보 업데이트
         univBattle.setGuestLeader(request.getGuestLeader());
         univBattle.setGuestUniv(guestUniv);
-//        univBattle.setStatus(Status.WAITING);
+
+        // 상태를 "대기중" 으로 바꿈
+        univBattle.setStatus(Status.WAITING);
+
+        // 참가팀 로고 업데이트
+        Optional<University> findHostUniv = universityRepository.findById(guestUniv);
+        univBattle.setGuestUnivLogo(findHostUniv.get().getLogoImg());
 
         // 초대코드 생성
         univBattle.setInvitationCode(generateRandomString(8));
@@ -189,9 +205,12 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     @Override
     public List<UnivBattle> list(int status) {
 
+        Map<String, Object> response = new HashMap<>();
+
+
         switch (status) {
             case 0:
-                return univBattleRepository.findAll();
+                return  univBattleRepository.findAll();
             case 1:
                 return univBattleRepository.findByStatus(Status.RECRUIT);
             case 2:
@@ -200,6 +219,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 return univBattleRepository.findByStatus(Status.IN_PROGRESS);
             case 4:
                 return univBattleRepository.findByStatus(Status.COMPLETED);
+
             default:
                 throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         }
