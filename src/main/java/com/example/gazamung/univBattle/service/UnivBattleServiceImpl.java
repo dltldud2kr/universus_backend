@@ -237,8 +237,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         int guestPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getGuestUniv());
 
 
-        List<Participant> HostparticipantList = participantRepository.findAllByUnivId(univBattle.getHostUniv());
-        List<Participant> GuestparticipantList = participantRepository.findAllByUnivId(univBattle.getGuestUniv());
+        List<Participant> HostparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getHostUniv(),univBattleId);
+        List<Participant> GuestparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getGuestUniv(),univBattleId);
 
 
         // 응답용 Map 생성 및 값 추가

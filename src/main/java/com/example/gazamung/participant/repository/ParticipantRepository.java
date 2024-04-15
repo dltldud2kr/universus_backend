@@ -16,7 +16,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     int countByUnivBattleId(Long univBattleId);
 
     // 대학별 참가인원 리스트
-    List<Participant> findAllByUnivId(Long univId);
+    List<Participant> findAllByUnivIdAndUnivBattleId(Long univId, Long univBattleId);
 
     // 회원 ID와 대항전 ID로 참가자 존재 여부 확인
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Participant p WHERE p.memberIdx = :memberIdx AND p.univBattleId = :univBattleId")
