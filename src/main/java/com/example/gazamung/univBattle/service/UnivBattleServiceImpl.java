@@ -84,6 +84,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         Participant participant = Participant.builder()
                 .memberIdx(member.getMemberIdx())
                 .univBattleId(result.getUnivBattleId())
+                .userName(member.getUsername())
                 .univId(univId)
                 .build();
         participantRepository.save(participant);
@@ -147,6 +148,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         Participant participant = Participant.builder()
                 .memberIdx(guest.getMemberIdx())
+                .userName(guest.getUsername())
                 .univBattleId(request.getUnivBattleId())
                 .univId(guestUniv)
                 .build();
@@ -196,6 +198,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .memberIdx(request.getMemberIdx())
                 .univBattleId(request.getUnivBattleId())
                 .univId(member.getUnivId())
+                .userName(member.getUsername())
                 .build();
         participantRepository.save(participant);
 
@@ -236,18 +239,46 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         int hostPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getHostUniv());
         int guestPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getGuestUniv());
 
-
         List<Participant> HostparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getHostUniv(),univBattleId);
         List<Participant> GuestparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getGuestUniv(),univBattleId);
 
 
+        University Hostuniversity = universityRepository.findById(univBattle.getHostUniv())
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
+        University GuestUniversity = universityRepository.findById(univBattle.getGuestUniv())
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
+
+
+        String hostUvName = Hostuniversity.getSchoolName();
+        String guestUvName = GuestUniversity.getSchoolName();
+
         // 응답용 Map 생성 및 값 추가
         Map<String, Object> response = new HashMap<>();
+
+
+        Map<String, Object> hostTeam = new HashMap<>();
+        hostTeam.put("hostUvName", hostUvName);
+        hostTeam.put("hostPtcCnt", hostPtc);                  // 주최팀 회원 수
+        hostTeam.put("hostPtcList", HostparticipantList);       // 주최팀 회원 리스트
+
+        Map<String, Object> guestTeam = new HashMap<>();
+        guestTeam.put("guestUvName", guestUvName);
+        guestTeam.put("guestPtcCnt", guestPtc);               // 참가팀 회원 수
+        guestTeam.put("guestPtcList", GuestparticipantList);    // 참가팀 회원 리스트
+
+        response.put("HostTeam", hostTeam);
+        response.put("GuestTeam", guestTeam);
         response.put("univBattle", univBattle);
-        response.put("HostparticipantList", HostparticipantList);
-        response.put("GuestparticipantList", GuestparticipantList);
-        response.put("hostParticipantCount", hostPtc);
-        response.put("guestParticipantCount", guestPtc);
+
+//       myBatis 보류
+//
+//        // 응답용 Map 생성 및 값 추가
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("univBattle", univBattle);
+//        response.put("HostparticipantList", HostparticipantList);
+//        response.put("GuestparticipantList", GuestparticipantList);
+//        response.put("hostParticipantCount", hostPtc);
+//        response.put("guestParticipantCount", guestPtc);
 
 
         return response;

@@ -32,6 +32,9 @@ public enum CustomExceptionCode {
     INVALID_URI("INVALID_URI","올바른 형식의 URI가 아닙니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND_HEADER_DATA("NOT_FOUND_HEADER_DATA","헤더에 memberIdx 데이터 값이 없습니다.", HttpStatus.BAD_REQUEST),
 
+    //대학
+    NOT_FOUND_UNIVERSITY("NOT_FOUND_UNIVERSITY","존재하지 않는 대학교입니다.", HttpStatus.BAD_REQUEST),
+
 
     //클럽
     AGE_LIMIT_EXCEEDED("AGE_LIMIT_EXCEEDED","가입조건에 충족하지 않은 나이", HttpStatus.BAD_REQUEST),
