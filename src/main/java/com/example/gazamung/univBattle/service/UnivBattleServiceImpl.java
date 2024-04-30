@@ -258,6 +258,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                         .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
 
 
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0,univBattleId);
+        long chatRoomId = chatRoom.getChatRoomId();
+
+
         String hostUvName = Hostuniversity.getSchoolName();
         String guestUvName = GuestUniversity.getSchoolName();
 
@@ -278,6 +282,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         response.put("HostTeam", hostTeam);
         response.put("GuestTeam", guestTeam);
         response.put("univBattle", univBattle);
+        response.put("chatRoomType", chatRoom.getChatRoomType());
+        response.put("chatRoomId", chatRoomId);
 
 //       myBatis 보류
 //
