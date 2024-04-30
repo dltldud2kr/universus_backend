@@ -1,4 +1,4 @@
-package com.example.gazamung.chatRoom;
+package com.example.gazamung.chat.chatMessage;
 
 
 import lombok.*;

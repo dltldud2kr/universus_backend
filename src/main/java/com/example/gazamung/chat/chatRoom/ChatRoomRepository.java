@@ -1,5 +1,6 @@
-package com.example.gazamung.chatRoom;
+package com.example.gazamung.chat.chatRoom;
 
+import com.example.gazamung.chat.chatRoom.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,8 @@
-package com.example.gazamung.chatRoom;
+package com.example.gazamung.chat.chatMessage;
 
 
 import com.example.gazamung._enum.CustomExceptionCode;
+import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
         // RoomType 과 RoomId를 체크
         chatRoomRepository.findByChatRoomIdAndChatRoomType(chatId, chatRoomType)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
 
         ChatMessage chatMessage = ChatMessage.builder()

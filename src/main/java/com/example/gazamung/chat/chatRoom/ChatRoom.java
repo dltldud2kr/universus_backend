@@ -1,4 +1,4 @@
-package com.example.gazamung.chatRoom;
+package com.example.gazamung.chat.chatRoom;
 
 
 import lombok.*;
@@ -19,8 +19,10 @@ public class ChatRoom {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CHATROOM_SEQ")
     @SequenceGenerator(name = "CHATROOM_SEQ", sequenceName = "chatroom_sequence", allocationSize = 1)
     private Long chatRoomId;
-    private int chatRoomType;   // 0:대학  1:과   2:개인
 
-    private Long univBattleId;  // 대항전 id
+    private String chatRoomName;
+    private int chatRoomType;   // 0:대학  1:과   2:개인 3: 모임
+
+    private Long dynamicId;  // 대항전 id
 
 }

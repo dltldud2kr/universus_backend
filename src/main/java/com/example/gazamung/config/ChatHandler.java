@@ -1,7 +1,9 @@
 package com.example.gazamung.config;
 
-import com.example.gazamung.chatRoom.ChatMessage;
-import com.example.gazamung.chatRoom.ChatMessageService;
+import com.example.gazamung.chat.chatMember.ChatMember;
+import com.example.gazamung.chat.chatMember.ChatMemberRepository;
+import com.example.gazamung.chat.chatMessage.ChatMessage;
+import com.example.gazamung.chat.chatMessage.ChatMessageService;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -21,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -30,6 +33,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ChatHandler extends TextWebSocketHandler {
     private final ChatMessageService chatMessageService;
     private final MemberRepository memberRepository;
+    private final ChatMemberRepository chatMemberRepository;
 
     private final Map<String, List<WebSocketSession>> chatRooms = new ConcurrentHashMap<>();
 
@@ -97,8 +101,13 @@ public class ChatHandler extends TextWebSocketHandler {
         ArrayNode chatMessageArray = mapper.createArrayNode();
         ObjectNode messageNode = mapper.createObjectNode();
 
+
+        String profileImgUrl = memberRepository.findById(memberIdx).get().getProfileImgUrl();
+
+
         messageNode.put("nickname", savedChatMessage.getNickname());
         messageNode.put("content", savedChatMessage.getContent());
+        messageNode.put("profileImg", profileImgUrl);
         messageNode.put("memberIdx", savedChatMessage.getMemberIdx());
 
         // LocalDateTime을 문자열로 변환하여 JSON에 추가.
@@ -131,16 +140,20 @@ public class ChatHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // WebSocket 세션의 헤더에서 memberIdx 값을 추출.
         Map<String, List<String>> headers = session.getHandshakeHeaders();
+        long parseIdx = -1;
+        int roomType = -1;
+        long dynamicId = -1;
 
         List<String> memberIdxValues = headers.get("memberIdx");
         if (memberIdxValues != null && !memberIdxValues.isEmpty()) {
             String memberIdx = memberIdxValues.get(0);
-            Long parseIdx = Long.valueOf(memberIdx);
+            parseIdx = Long.parseLong(memberIdx);
 
 
             // 추출된 memberIdx 값을 세션의 속성에 저장.
             session.getAttributes().put("memberIdx", memberIdx);
             log.info("WebSocket 연결에 포함된 memberIdx: " + memberIdx);
+
 
             String nickname = memberRepository.findById(parseIdx).get().getNickname();
             String room = extractRoom(session.getUri());
@@ -181,6 +194,9 @@ public class ChatHandler extends TextWebSocketHandler {
                 // 문자열을 정수로 변환합니다.
                 battleType = Integer.parseInt(battleTypeStr);
                 roomId = roomIdStr;
+
+                roomType = battleType;
+                dynamicId = Long.parseLong(roomIdStr);
             } catch (NumberFormatException e) {
                 // 정수로 변환할 수 없는 경우, 예외 처리를 합니다.
                 System.err.println("Invalid battleType format: " + battleTypeStr);
@@ -193,6 +209,22 @@ public class ChatHandler extends TextWebSocketHandler {
         // 해당 roomId에 대한 채팅방이 없으면 새로 생성합니다.
         chatRooms.putIfAbsent(room, new CopyOnWriteArrayList<>());
 
+        log.info("======================================");
+        log.info("memberIdx " + parseIdx);
+        log.info("roomType " + roomType);
+        log.info("dynamicId " + dynamicId);
+        Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(parseIdx,dynamicId,roomType);
+        if(findChatMember.isEmpty()){
+            ChatMember chatMember = ChatMember.builder()
+                    .chatRoomId(dynamicId)
+                    .chatRoomType(roomType)
+                    .memberIdx(parseIdx)
+                    .build();
+
+            chatMemberRepository.save(chatMember);
+        }
+
+
         // 채팅방에 현재 세션을 추가합니다.
         List<WebSocketSession> roomSessions = chatRooms.get(room);
         roomSessions.add(session);
@@ -204,10 +236,16 @@ public class ChatHandler extends TextWebSocketHandler {
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode chatMessageArray = mapper.createArrayNode();
         for (ChatMessage chatMessage : chatMessageList) {
+
+            //프로필 이미지 값을 가져옴.
+            long memberIdx = chatMessage.getMemberIdx();
+            String profileImgUrl = memberRepository.findById(memberIdx).get().getProfileImgUrl();
+
             ObjectNode messageNode = mapper.createObjectNode();
             messageNode.put("nickname", chatMessage.getNickname());
             messageNode.put("content", chatMessage.getContent());
             messageNode.put("memberIdx", chatMessage.getMemberIdx());
+            messageNode.put("profileImg", profileImgUrl);
             // LocalDateTime을 문자열로 변환하여 JSON에 추가합니다.
             messageNode.put("regDt", formatLocalDateTime(chatMessage.getRegDt()));
             chatMessageArray.add(messageNode);

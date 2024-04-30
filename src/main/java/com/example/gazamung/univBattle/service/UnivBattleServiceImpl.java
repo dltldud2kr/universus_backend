@@ -2,9 +2,8 @@ package com.example.gazamung.univBattle.service;
 
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.Status;
-import com.example.gazamung.chatRoom.ChatRoom;
-import com.example.gazamung.chatRoom.ChatRoomRepository;
-import com.example.gazamung.dto.ResultDTO;
+import com.example.gazamung.chat.chatRoom.ChatRoom;
+import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -92,7 +91,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 채팅방 생성
         ChatRoom chatRoom = ChatRoom.builder()
                 .chatRoomType(0)
-                .univBattleId(univBattle.getUnivBattleId())
+                .dynamicId(univBattle.getUnivBattleId())
                 .build();
 
         chatRoomRepository.save(chatRoom);

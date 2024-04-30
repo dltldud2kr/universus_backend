@@ -1,5 +1,6 @@
-package com.example.gazamung.chatRoom;
+package com.example.gazamung.chat.chatMessage;
 
+import com.example.gazamung.chat.chatMessage.ChatMessage;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
