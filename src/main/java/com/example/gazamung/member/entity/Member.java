@@ -33,7 +33,7 @@ public class Member implements UserDetails {
     private String email;
     private String password;
     private String refreshToken; //리프레쉬 토큰
-    private String userName;
+    private String name;
     private String nickname;
     private String birth;
     private String gender;  // M(남자), F(여자)

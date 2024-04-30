@@ -50,8 +50,12 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
 
+        log.info(member.getUsername());
 
         long univId = member.getUnivId();
+
+        University university = universityRepository.findById(univId)
+                .orElseThrow(() ->new CustomException(CustomExceptionCode.NOT_FOUND));
 
         // 대항전 생성
         UnivBattle univBattle = UnivBattle.builder()
@@ -65,6 +69,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .content(request.getContent())
                 .teamPtcLimit(request.getTeamPtcLimit())
                 .status(Status.RECRUIT)
+                .hostUnivName(university.getSchoolName())
                 .cost(request.getCost())
                 .regDt(LocalDateTime.now())
                 .build();
@@ -72,8 +77,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         UnivBattle result = univBattleRepository.save(univBattle);
 
 
-        University university = universityRepository.findById(univId)
-                .orElseThrow(() ->new CustomException(CustomExceptionCode.NOT_FOUND));
+
 
         // 주최팀 학교 로고 업데이트
         result.setHostUnivLogo(university.getLogoImg());
@@ -83,7 +87,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         Participant participant = Participant.builder()
                 .memberIdx(member.getMemberIdx())
                 .univBattleId(result.getUnivBattleId())
-                .userName(member.getUsername())
+                .userName(member.getNickname())
                 .univId(univId)
                 .build();
         participantRepository.save(participant);
@@ -92,6 +96,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         ChatRoom chatRoom = ChatRoom.builder()
                 .chatRoomType(0)
                 .dynamicId(univBattle.getUnivBattleId())
+                .chatRoomName(university.getSchoolName() + "대항전")
                 .build();
 
         chatRoomRepository.save(chatRoom);
@@ -124,6 +129,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 참가자 대학교
         long guestUniv = guest.getUnivId();
 
+        Optional<University> university = universityRepository.findById(guestUniv);
+        String guestUnivName = university.get().getSchoolName();
+
+
         // 같은 학교는 참가 불가능.
         if (hostUniv == guestUniv) {
             throw new CustomException(CustomExceptionCode.SAME_UNIVERSITY);
@@ -132,6 +141,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // Guest 팀 정보 업데이트
         univBattle.setGuestLeader(request.getGuestLeader());
         univBattle.setGuestUniv(guestUniv);
+        univBattle.setGuestUnivName(guestUnivName);
 
         // 상태를 "대기중" 으로 바꿈
         univBattle.setStatus(Status.WAITING);
@@ -212,7 +222,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         switch (status) {
             case 0:
-                return  univBattleRepository.findAll();
+                return univBattleRepository.findAll();
             case 1:
                 return univBattleRepository.findByStatus(Status.RECRUIT);
             case 2:

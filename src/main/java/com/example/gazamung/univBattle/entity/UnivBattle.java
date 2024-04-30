@@ -30,6 +30,9 @@ public class UnivBattle {
     private String content;         // 내용
     private String cost;
 
+
+    private String hostUnivName;
+    private String guestUnivName;
     private String hostUnivLogo;    // 주최팀 로고
     private String guestUnivLogo;   // 참가팀 로고
 
