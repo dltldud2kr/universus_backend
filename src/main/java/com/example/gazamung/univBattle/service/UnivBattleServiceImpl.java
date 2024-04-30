@@ -87,7 +87,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         Participant participant = Participant.builder()
                 .memberIdx(member.getMemberIdx())
                 .univBattleId(result.getUnivBattleId())
-                .userName(member.getNickname())
+                .userName(member.getName())
+                .nickName(member.getNickname())
                 .univId(univId)
                 .build();
         participantRepository.save(participant);
@@ -157,7 +158,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         Participant participant = Participant.builder()
                 .memberIdx(guest.getMemberIdx())
-                .userName(guest.getUsername())
+                .nickName(guest.getNickname())
+                .userName(guest.getName())
                 .univBattleId(request.getUnivBattleId())
                 .univId(guestUniv)
                 .build();
@@ -207,7 +209,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .memberIdx(request.getMemberIdx())
                 .univBattleId(request.getUnivBattleId())
                 .univId(member.getUnivId())
-                .userName(member.getUsername())
+                .userName(member.getName())
+                .nickName(member.getNickname())
                 .build();
         participantRepository.save(participant);
 

@@ -24,6 +24,7 @@ public class Participant {
     private Long deptId;
 
     private String userName;
+    private String nickName;
     private Long univBattleId;      // 대결 (학교)
     private Long deptBattleId;      // 대결 (학과)
 }
