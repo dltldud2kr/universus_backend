@@ -49,7 +49,7 @@ public class Member implements UserDetails {
 
     private String oneLineIntro;    // 한 줄 소개
 
-    private Long representIdx;  // 대표 사진 idx
+    private String profileImgUrl;   // 프로필 이미지   (추가)
 
 
     @ElementCollection(fetch = FetchType.EAGER)

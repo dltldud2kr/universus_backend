@@ -174,6 +174,7 @@ public class MemberServiceImpl implements MemberService {
                     .password(password) //비밀번호
                     .refreshToken(null)
                     .role(0)
+                    .profileImgUrl("https://jhuniversus.s3.ap-northeast-2.amazonaws.com/default/df_profile.jpg")
                     .birth(dto.getBirth())  // 생년월일
                     .gender(dto.getGender())    // 성별 (M, F)
                     .deptId(dto.getDeptId())        //학과 저장
@@ -184,7 +185,12 @@ public class MemberServiceImpl implements MemberService {
                     .address(dto.getAddress())  //주소
                     .regDt(LocalDateTime.now())
                     .build();
-            memberRepository.save(member);
+            Member savedMember = memberRepository.save(member);
+
+            // 클럽에 연결된 이미지 정보 조회
+
+
+
 
             //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 비밀번호 )
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
@@ -479,7 +485,9 @@ public class MemberServiceImpl implements MemberService {
     public ProfileDto getMemberInfo(Long memberIdx) {
         return memberRepository.findByMemberIdx(memberIdx)
                 .map(member -> {
-                    List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, memberIdx);
+
+                    List<UploadImage> profileImg = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, memberIdx);
+
                     University university = universityRepository.findById(member.getUnivId())
                             .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
                     ProfileDto profileDto = new ProfileDto();
@@ -491,7 +499,7 @@ public class MemberServiceImpl implements MemberService {
                             .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND)).getDeptName());
                     profileDto.setPhone(member.getPhone());
                     profileDto.setOneLineIntro(member.getOneLineIntro());
-                    profileDto.setProfileImage(clubImage);
+                    profileDto.setProfileImage(profileImg);
                     profileDto.setLogoImg(university.getLogoImg());
                     return profileDto;
                 })

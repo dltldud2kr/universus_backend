@@ -6,6 +6,7 @@ public enum AttachmentType {
     MEETING("meeting"), // 정기모임
     CLUB("club"),   // 모임
     POST("post"),   // 게시물
+    DEFAULT("default"), // 기본 이미지
     PROFILE("profile"); // 프로필
 
 

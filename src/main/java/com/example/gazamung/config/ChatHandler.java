@@ -84,7 +84,7 @@ public class ChatHandler extends TextWebSocketHandler {
             log.info("Battle Type: " + battleType);
             log.info("Room ID: " + roomId);
         } else {
-            // URI 형식이 잘못된 경우, 예외 처리를 합니다.
+            // URI 형식이 잘못된 경우, 예외 처리.
             throw new CustomException(CustomExceptionCode.INVALID_URI);
         }
 

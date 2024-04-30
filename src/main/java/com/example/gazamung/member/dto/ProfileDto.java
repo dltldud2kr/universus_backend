@@ -27,4 +27,5 @@ public class ProfileDto {
 
     private List<UploadImage> profileImage;
 
+
 }
