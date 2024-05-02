@@ -7,10 +7,13 @@ import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.club.dto.ClubDto;
 import com.example.gazamung.club.dto.ClubJoinRequest;
 import com.example.gazamung.club.dto.ClubRequest;
+import com.example.gazamung.club.dto.SuggestClub;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
 import com.example.gazamung.clubMember.entity.ClubMember;
 import com.example.gazamung.clubMember.repository.ClubMemberRepository;
+import com.example.gazamung.event.entity.Event;
+import com.example.gazamung.event.repository.EventRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.mapper.ClubMapper;
 import com.example.gazamung.member.entity.Member;
@@ -24,10 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -41,6 +41,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubMemberRepository clubMemberRepository;
     private final MemberServiceImpl memberServiceImpl;
     private final ClubMapper clubMapper;
+    private final EventRepository eventRepository;
 
     /**
      * @param dto
@@ -284,12 +285,75 @@ public class ClubServiceImpl implements ClubService {
     }
 
 
+    public List<SuggestClub> suggest(Long memberIdx) {
+        // 멤버 ID를 사용하여 클럽 멤버 엔티티 목록을 검색
+        List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdx(memberIdx);
+        if (clubMembers.isEmpty()) {
+            return Collections.emptyList(); // 비어있으면 빈 목록 반환
+        }
+
+        // 가입한 모임Id -> 해당 모임의 이벤트Id -> 해당 이벤트 Club 얻음
+        List<Long> clubIds = clubMembers.stream()
+                .map(ClubMember::getClubId).collect(Collectors.toList());
+        List<Long> eventIds = clubRepository.findAllById(clubIds)
+                .stream().map(Club::getEventId).collect(Collectors.toList());
+        List<Club> clubs = clubRepository.findAllByEventIdIn(eventIds);
+
+        // 랜덤하게 띄우기 위해 리스트에 담아 이후 shuffle
+        List<SuggestClub> suggestedClubs = clubs.stream().map(club -> {
+            Long currentMembers = clubMemberRepository.countByClubId(club.getClubId()); // 현재 클럽 멤버 수 조회
+            List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
+            String imageUrl;
+            if (!clubImage.isEmpty()) {
+                imageUrl = clubImage.get(0).getImageUrl();
+            } else {
+                // 클럽 이미지가 없는 경우
+                imageUrl = "";
+            }
+            Optional<Event> event = eventRepository.findById(club.getEventId());
+            if (event.isEmpty()){
+                throw new CustomException(CustomExceptionCode.NOT_FOUND_BOARD);
+            }
+
+            return SuggestClub.builder()
+                    .clubId(club.getClubId())
+                    .clubName(club.getClubName())
+                    .eventName(event.get().getEventName())
+                    .currentMembers(currentMembers+1)
+                    .imageUrl(imageUrl)
+                    .build();
+        }).collect(Collectors.toList());
+
+        Collections.shuffle(suggestedClubs); // 리스트 섞기
+        return suggestedClubs;
+    }
+
+
+
+
+
+    /**
+     * @param request
+     * @title 모임 가입
+     * @created 24.05.02 이승열
+     */
+    @Override
+    public void join(ClubJoinRequest request) {
+        ClubMember clubMember = ClubMember.builder()
+                .memberIdx(request.getMemberIdx())
+                .clubId(request.getClubId())
+                .build();
+        clubMemberRepository.save(clubMember);
+    }
+
+
     private List<ClubDto> convertToDto(List<Club> clubList) {
 
         return clubList.stream()
                 .map(club -> {
                     Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
                     List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
+
                     return ClubDto.builder()
                             .clubId(club.getClubId())
                             .memberIdx(club.getMemberIdx())

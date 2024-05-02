@@ -5,6 +5,8 @@ import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.club.dto.ClubDto;
 import com.example.gazamung.club.dto.ClubJoinRequest;
 import com.example.gazamung.club.dto.ClubRequest;
+import com.example.gazamung.club.dto.SuggestClub;
+import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.service.ClubService;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
@@ -79,6 +81,7 @@ public class ClubController {
     @PostMapping("/join")
     public ResultDTO join(@RequestBody ClubJoinRequest request){
         try{
+            clubService.join(request);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 가입 완료.", null);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
@@ -182,6 +185,28 @@ public class ClubController {
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 
+        }
+    }
+
+    @Operation(summary = "모임 추천", description = "" +
+            " 모임 추천" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND: 해당 정보를 찾을 수 없습니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/suggest")
+    public List<SuggestClub> suggest(@RequestParam Long memberIdx){
+        try {
+            List<SuggestClub> suggestClubList = clubService.suggest(memberIdx);
+            return suggestClubList;
+
+        } catch (CustomException e) {
+            return (List<SuggestClub>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
 }

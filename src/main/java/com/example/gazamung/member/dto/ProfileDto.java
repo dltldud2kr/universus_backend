@@ -25,7 +25,7 @@ public class ProfileDto {
 
     private String logoImg;
 
-    private List<UploadImage> profileImage;
+    private String imageUrl; //파일 이미지 URL
 
 
 }

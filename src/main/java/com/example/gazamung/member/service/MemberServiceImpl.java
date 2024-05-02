@@ -499,7 +499,11 @@ public class MemberServiceImpl implements MemberService {
                             .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND)).getDeptName());
                     profileDto.setPhone(member.getPhone());
                     profileDto.setOneLineIntro(member.getOneLineIntro());
-                    profileDto.setProfileImage(profileImg);
+                    if (profileImg != null && !profileImg.isEmpty()) {
+                        profileDto.setImageUrl(profileImg.get(0).getImageUrl());
+                    } else {
+                        profileDto.setImageUrl(member.getProfileImgUrl());
+                    }
                     profileDto.setLogoImg(university.getLogoImg());
                     return profileDto;
                 })
