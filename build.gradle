@@ -77,6 +77,9 @@ dependencies {
     implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '21.8.0.0'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
 
+    // Firebase
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+
     
 }
 
