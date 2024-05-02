@@ -2,6 +2,8 @@ package com.example.gazamung.univBattle.service;
 
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.Status;
+import com.example.gazamung.chat.chatMember.ChatMember;
+import com.example.gazamung.chat.chatMember.ChatMemberRepository;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
@@ -35,6 +37,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final MemberRepository memberRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ParticipantRepository participantRepository;
+    private final ChatMemberRepository chatMemberRepository;
 
 
     /**
@@ -101,6 +104,17 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .build();
 
         chatRoomRepository.save(chatRoom);
+
+        Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(),chatRoom.getChatRoomId(),0);
+        if(findChatMember.isEmpty()){
+            ChatMember chatMember = ChatMember.builder()
+                    .chatRoomId(chatRoom.getChatRoomId())
+                    .chatRoomType(0)
+                    .memberIdx(member.getMemberIdx())
+                    .build();
+
+            chatMemberRepository.save(chatMember);
+        }
         return true;
 
     }

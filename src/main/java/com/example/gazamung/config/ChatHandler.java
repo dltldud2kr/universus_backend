@@ -213,16 +213,6 @@ public class ChatHandler extends TextWebSocketHandler {
         log.info("memberIdx " + parseIdx);
         log.info("roomType " + roomType);
         log.info("dynamicId " + dynamicId);
-        Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(parseIdx,dynamicId,roomType);
-        if(findChatMember.isEmpty()){
-            ChatMember chatMember = ChatMember.builder()
-                    .chatRoomId(dynamicId)
-                    .chatRoomType(roomType)
-                    .memberIdx(parseIdx)
-                    .build();
-
-            chatMemberRepository.save(chatMember);
-        }
 
 
         // 채팅방에 현재 세션을 추가합니다.
