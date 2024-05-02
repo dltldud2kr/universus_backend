@@ -111,6 +111,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                     .chatRoomId(chatRoom.getChatRoomId())
                     .chatRoomType(0)
                     .memberIdx(member.getMemberIdx())
+                    .chatRoomName(chatRoom.getChatRoomName())
                     .build();
 
             chatMemberRepository.save(chatMember);

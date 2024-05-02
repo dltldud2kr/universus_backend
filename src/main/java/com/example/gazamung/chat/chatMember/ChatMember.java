@@ -23,6 +23,8 @@ public class ChatMember {
     private Long memberIdx;
 
     private int chatRoomType;
+    private String chatRoomName;
+
 
     private Long chatRoomId;  // 대항전 id
     
