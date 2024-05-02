@@ -95,6 +95,7 @@ public class MemberServiceImpl implements MemberService {
         Map<String, Object> response = new HashMap<>();
         response.put("tokenDto", tokenDto);
         response.put("memberIdx", member.getMemberIdx());
+        response.put("univId", member.getUnivId());
 
         return response;
     }

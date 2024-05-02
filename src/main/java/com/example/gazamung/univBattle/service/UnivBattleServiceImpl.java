@@ -138,7 +138,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 참가자 정보 조회
         Member guest = memberRepository.findById(request.getGuestLeader())
-                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         // 주최자 대학교
         long hostUniv = univBattle.getHostUniv();
@@ -269,15 +269,17 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         List<Participant> HostparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getHostUniv(),univBattleId);
         List<Participant> GuestparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getGuestUniv(),univBattleId);
 
+        String guestUvName = "";
 
         University Hostuniversity = universityRepository.findById(univBattle.getHostUniv())
-                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
 
-//        University GuestUniversity = universityRepository.findById(univBattle.getGuestUniv())
-//                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
+        if(univBattle.getGuestUniv() != null) {
+            University GuestUniversity = universityRepository.findById(univBattle.getGuestUniv())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
+            guestUvName = GuestUniversity.getSchoolName();
+        }
 
-        // 참여자가 없는 경우에도 정보확인이 필요해서 null값 허용
-        Optional<University> GuestUniversity = universityRepository.findById(univBattle.getGuestUniv());
 
 
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0,univBattleId);
@@ -285,7 +287,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
 
         String hostUvName = Hostuniversity.getSchoolName();
-        String guestUvName = GuestUniversity.get().getSchoolName();
+
 
         // 응답용 Map 생성 및 값 추가
         Map<String, Object> response = new HashMap<>();
