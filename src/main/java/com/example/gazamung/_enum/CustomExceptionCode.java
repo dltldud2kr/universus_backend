@@ -25,8 +25,12 @@ public enum CustomExceptionCode {
     SAME_UNIVERSITY("SAME_UNIVERSITY","같은 대학교는 참가할 수 없습니다.", HttpStatus.BAD_REQUEST),
     EXCEEDED_TOTAL_CAPACITY("EXCEEDED_CAPACITY","대항전 총 참가 인원이 초과하였습니다.", HttpStatus.BAD_REQUEST),
     EXCEEDED_UNIV_CAPACITY("EXCEEDED_UNIV_CAPACITY","대항전 대학별 참가 인원이 초과하였습니다.", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_MATCH_PLAYERS("INSUFFICIENT_MATCH_PLAYERS","경기시작을 위한 참가인원수가 부족합니다.", HttpStatus.BAD_REQUEST),
+
     INVALID_INVITE_CODE("INVALID_INVITE_CODE","참가 코드가 유효하지 않습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_ATTENDED("ALREADY_ATTENDED","이미 참가한 회원입니다.", HttpStatus.BAD_REQUEST),
+    NOT_IN_PROGRESS("NOT_IN_PROGRESS","아직 진행되지 않은 경기입니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_END_MATCH("ALREADY_END_MATCH","이미 종료된 경기입니다.", HttpStatus.BAD_REQUEST),
 
     //채팅
     INVALID_URI("INVALID_URI","올바른 형식의 URI가 아닙니다.", HttpStatus.BAD_REQUEST),

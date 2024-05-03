@@ -2,12 +2,9 @@ package com.example.gazamung.univBattle.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
-import com.example.gazamung._enum.Status;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.univBattle.dto.AttendRequest;
-import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
-import com.example.gazamung.univBattle.dto.UnivBattleCreateRequest;
+import com.example.gazamung.univBattle.dto.*;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import com.example.gazamung.univBattle.service.UnivBattleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -122,7 +119,7 @@ public class UnivBattleController {
 
 
     @Operation(summary = "대항전 정보 ", description = "" +
-            " 모임 가입." +
+            " 대항전 정보를 반환합니다." +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
@@ -136,6 +133,63 @@ public class UnivBattleController {
         try {
             Map<String, Object> result = univBattleService.info(univBattleId);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "대항전 정보", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "대항전 시작 ", description = "" +
+            " 대항전 경기를 진행상태로 변경합니다." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/matchStart")
+    public ResultDTO<Map<String, Object>> univBattleMatchStart(@RequestParam long univBattleId){
+        try {
+            return ResultDTO.of(univBattleService.matchStart(univBattleId), ApiResponseCode.SUCCESS.getCode(), "대항전 시작", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "대항전 결과 전송(주최자) ", description = "" +
+            " 대항전 결과를 참가팀측에 전송합니다." +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @PostMapping("/resultReq")
+    public ResultDTO<Map<String, Object>> matchResultReq(@RequestBody MatchResultRequest dto){
+        try {
+            return ResultDTO.of(univBattleService.matchResultReq(dto), ApiResponseCode.SUCCESS.getCode(), "대항전 결과전송", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "대항전 결과 확인(참가자) ", description = "" +
+            " 주최자측에서 보낸 결과를 확인 후 경기를 종료합니다. " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @PostMapping("/resultRes")
+    public ResultDTO<Map<String, Object>> matchResultRes(@RequestBody MatchResultResponse dto){
+        try {
+            return ResultDTO.of(univBattleService.matchResultRes(dto), ApiResponseCode.SUCCESS.getCode(), "대항전 결과확인", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

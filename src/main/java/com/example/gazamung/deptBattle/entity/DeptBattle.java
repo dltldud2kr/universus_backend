@@ -1,6 +1,6 @@
 package com.example.gazamung.deptBattle.entity;
 
-import com.example.gazamung._enum.Status;
+import com.example.gazamung._enum.MatchStatus;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +34,7 @@ public class DeptBattle {
     private String location;        // 장소
 
     @Enumerated(EnumType.STRING)
-    private Status status;            // 상태
+    private MatchStatus matchStatus;            // 상태
 
     private int hostScore;         // 주최팀 점수
     private int guestScore;        // 참가팀 점수

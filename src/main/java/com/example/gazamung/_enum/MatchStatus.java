@@ -1,6 +1,6 @@
 package com.example.gazamung._enum;
 
-public enum Status {
+public enum MatchStatus {
 
     IN_PROGRESS,    //진행중   3
     RECRUIT,        // 모집중  1

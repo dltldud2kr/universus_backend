@@ -1,6 +1,6 @@
 package com.example.gazamung.univBattle.entity;
 
-import com.example.gazamung._enum.Status;
+import com.example.gazamung._enum.MatchStatus;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,8 +35,9 @@ public class UnivBattle {
     private String guestUnivName;
     private String hostUnivLogo;    // 주최팀 로고
     private String guestUnivLogo;   // 참가팀 로고
-
     private String battleDate;     // 일정
+    private LocalDateTime matchStartDt; // 경기 시작시간
+    private LocalDateTime matchEndDt;   // 경기 종료시간
 
     private String lat;             // 위도
     private String lng;             // 경도
@@ -44,7 +45,7 @@ public class UnivBattle {
 
 
     @Enumerated(EnumType.STRING)
-    private Status status;           // 상태 -> 진행중 , 대기중, 모집중 , 종료
+    private MatchStatus matchStatus;           // 상태 -> 진행중 , 대기중, 모집중 , 종료
 
     private Long hostScore;         // 주최팀 점수
     private Long guestScore;        // 참가팀 점수
