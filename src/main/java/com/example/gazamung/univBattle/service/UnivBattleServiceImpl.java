@@ -130,6 +130,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
      * @return
      */
     @Override
+    @Transactional
     public boolean GuestLeaderAttend(GuestLeaderAttendRequest request) {
 
         UnivBattle univBattle = univBattleRepository.findById(request.getUnivBattleId())
@@ -175,6 +176,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         univBattleRepository.save(univBattle);
 
+        // 참가인원 초과 여부 체크
+        int totalParticipant = participantRepository.countByUnivBattleId(univBattle.getUnivBattleId());
+
+        // 마지막 참가자일 경우 대기중으로 변경.
+        if(totalParticipant == univBattle.getTeamPtcLimit() - 1){
+            univBattle.setMatchStatus(MatchStatus.WAITING);
+        }
+
         Participant participant = Participant.builder()
                 .memberIdx(guest.getMemberIdx())
                 .nickName(guest.getNickname())
@@ -193,6 +202,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     //@TODO 참가자가 꽉 찼을 때는 대기중으로 변경해야함.
 
     @Override
+    @Transactional
     public boolean attend(AttendRequest request) {
 
         // 참가자 정보 조회
@@ -202,6 +212,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 대항전 정보 조회
         UnivBattle univBattle = univBattleRepository.findById(request.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 이미 진행중인 경우 참가 불가
+        if(univBattle.getMatchStatus() == MatchStatus.IN_PROGRESS || univBattle.getMatchStatus() == MatchStatus.COMPLETED){
+            throw new CustomException(CustomExceptionCode.ALREADY_IN_PROGRESS);
+        }
 
         // 이미 참가한 경우 예외 처리
         boolean alreadyAttended = participantRepository.existsByMemberIdxAndUnivBattleId(member.getMemberIdx(), univBattle.getUnivBattleId());
@@ -224,6 +239,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 참가 코드 체크
         if (!request.getInvitationCode().equals(univBattle.getInvitationCode())){
             throw new CustomException(CustomExceptionCode.INVALID_INVITE_CODE);
+        }
+
+        // 마지막 참가자일 경우 대기중으로 변경.
+        if(totalParticipant == univBattle.getTeamPtcLimit() - 1){
+            univBattle.setMatchStatus(MatchStatus.WAITING);
         }
 
         // 참가자 저장
@@ -363,11 +383,9 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new CustomException(CustomExceptionCode.NOT_IN_PROGRESS);
         }
 
-                univBattle.builder()
-                .guestScore(dto.getGuestScore())
-                .hostScore(dto.getHostScore())
-                .winUniv(dto.getWinUniv())
-                .build();
+        univBattle.setGuestScore(dto.getGuestScore());
+        univBattle.setHostScore(dto.getHostScore());
+        univBattle.setWinUniv(dto.getWinUniv());
 
         univBattleRepository.save(univBattle);
 
@@ -379,10 +397,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 // 1시간 대기. (테스트용으로 1분으로 변경.)
                 Thread.sleep(Duration.ofMinutes(1).toMillis());
 
+                log.info("스레드 실행");
                 // 1시간 후 아래 메서드 실행
                 checkIncompleteMatch(univBattle.getUnivBattleId());
             } catch (InterruptedException e) {
-                // 스레드 종료시 안전 종료ㅗ.
+                // 스레드 종료시 안전 종료.
                 Thread.currentThread().interrupt();
             }
         });
@@ -406,24 +425,22 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new CustomException(CustomExceptionCode.ALREADY_END_MATCH);
         }
 
+        // remove 메서드는 CompletableFuture 안의 해당 값을 삭제하지만 future 쪽에 값을 반환할 수 있다.
+        // CompletableFuture 에는 더이상 해당 쓰레드가 들어있지않고. 해당 쓰레드는 future.cancel 로 종료시킴.
+        CompletableFuture<Void> future = incompleteMatchThreads.remove(univBattle.getUnivBattleId());
+        if (future != null) {
+            // 해당 쓰레드 종료
+            future.cancel(true);
+            log.info("스레드종료");
+        }
+
         if(dto.isResultYN()){
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
 
-            // remove 메서드는 CompletableFuture 안의 해당 값을 삭제하지만 future 쪽에 값을 반환할 수 있다.
-            // CompletableFuture 에는 더이상 해당 쓰레드가 들어있지않고. 해당 쓰레드는 future.cancel 로 종료시킴.
-            CompletableFuture<Void> future = incompleteMatchThreads.remove(univBattle.getUnivBattleId());
-            if (future != null) {
-                // 해당 쓰레드 종료
-                future.cancel(true);
-            }
-
         } else {
-            univBattle.builder()
-                    .guestScore(null)
-                    .hostScore(null)
-                    .winUniv(null)
-                    .endDt(LocalDateTime.now())
-                    .build();
+            univBattle.setGuestScore(null);
+            univBattle.setHostScore(null);
+            univBattle.setWinUniv(null);
         }
 
         univBattleRepository.save(univBattle);

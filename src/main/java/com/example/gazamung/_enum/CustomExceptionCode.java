@@ -30,6 +30,7 @@ public enum CustomExceptionCode {
     INVALID_INVITE_CODE("INVALID_INVITE_CODE","참가 코드가 유효하지 않습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_ATTENDED("ALREADY_ATTENDED","이미 참가한 회원입니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_PROGRESS("NOT_IN_PROGRESS","아직 진행되지 않은 경기입니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_IN_PROGRESS("ALREADY_IN_PROGRESS","이미 진행중인 경기입니다.", HttpStatus.BAD_REQUEST),
     ALREADY_END_MATCH("ALREADY_END_MATCH","이미 종료된 경기입니다.", HttpStatus.BAD_REQUEST),
 
     //채팅
