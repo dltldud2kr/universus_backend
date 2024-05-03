@@ -177,7 +177,7 @@ public class UnivBattleController {
     }
 
     @Operation(summary = "대항전 결과 확인(참가자) ", description = "" +
-            " 주최자측에서 보낸 결과를 확인 후 경기를 종료합니다. " +
+            " 주최자측에서 보낸 결과를 확인 후 경기를 종료 또는 재요청합니다. " +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
@@ -189,7 +189,7 @@ public class UnivBattleController {
     @PostMapping("/resultRes")
     public ResultDTO<Map<String, Object>> matchResultRes(@RequestBody MatchResultResponse dto){
         try {
-            return ResultDTO.of(univBattleService.matchResultRes(dto), ApiResponseCode.SUCCESS.getCode(), "대항전 결과확인", null);
+            return ResultDTO.of(univBattleService.matchResultRes(dto), ApiResponseCode.SUCCESS.getCode(), "대항전 결과응답", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

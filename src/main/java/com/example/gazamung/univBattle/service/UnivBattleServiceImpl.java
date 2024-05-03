@@ -26,8 +26,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 @Service
 @Slf4j
@@ -40,7 +39,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final ChatRoomRepository chatRoomRepository;
     private final ParticipantRepository participantRepository;
     private final ChatMemberRepository chatMemberRepository;
-    private Map<Long, CompletableFuture<Void>> incompleteMatchThreads = new ConcurrentHashMap<>();
+    // 스케줄러 생성
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    // 예약 작업 관리를 위한 ConcurrentHashMap
+    private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
+
 
 
 
@@ -350,6 +353,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         return response;
     }
 
+
     @Override
     public boolean matchStart(Long univBattleId) {
 
@@ -370,74 +374,77 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         return true;
     }
 
+    /**
+     * 경기 결과 요청 (주최팀 -> 참가팀)
+     * 경기의 결과 기록은 주최측 대표자가 함.
+     * 그 기록은 참가팀 대표자에게 보내서 확인 받아야한다.
+     * @param dto
+     * @return
+     */
     //@TODO 점수와 맞는 경기결과값이여야할거같음. 예외처리 추가할것.
+
     @Override
     public boolean matchResultReq(MatchResultRequest dto) {
-
-
         UnivBattle univBattle = univBattleRepository.findById(dto.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
-        // 진행중인 경기가 아닌 경우 예외처리
-        if(univBattle.getMatchStatus() != MatchStatus.IN_PROGRESS){
+        // 경기 상태가 진행 중이 아닐 경우 예외처리
+        if (univBattle.getMatchStatus() != MatchStatus.IN_PROGRESS) {
             throw new CustomException(CustomExceptionCode.NOT_IN_PROGRESS);
         }
 
+        // 경기 점수와 승리한 대학교 기록 설정
         univBattle.setGuestScore(dto.getGuestScore());
         univBattle.setHostScore(dto.getHostScore());
         univBattle.setWinUniv(dto.getWinUniv());
 
         univBattleRepository.save(univBattle);
 
-        // 결과 전송 후 시간이 지나면 자동으로 결과 변경
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            try {
-//                Thread.sleep(Duration.ofHours(1).toMillis());
+        // 1분 후에 실행될 스케줄링 작업을 생성합니다. (테스트용)
+        ScheduledFuture<?> scheduledFuture = scheduler.schedule(() -> {
+            log.info("Scheduled Task 실행");
+            checkIncompleteMatch(univBattle.getUnivBattleId());
+        }, 1, TimeUnit.MINUTES); // 1분 후에 실행
 
-                // 1시간 대기. (테스트용으로 1분으로 변경.)
-                Thread.sleep(Duration.ofMinutes(1).toMillis());
-
-                log.info("스레드 실행");
-                // 1시간 후 아래 메서드 실행
-                checkIncompleteMatch(univBattle.getUnivBattleId());
-            } catch (InterruptedException e) {
-                // 스레드 종료시 안전 종료.
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        // 쓰레드를 incompleteMatchThreads에 저장하여 관리
-        incompleteMatchThreads.put(univBattle.getUnivBattleId(), future);
+        // 예약된 작업을 관리 목록에 추가
+        scheduledTasks.put(univBattle.getUnivBattleId(), scheduledFuture);
 
         return true;
     }
 
-
+    /**
+     * 경기 결과 응답 (참가팀)
+     * 주최자의 경기기록에 대해 응답함.
+     * <resultYN 값에 따른 결과>
+     * true: 경기 종료 (MatchStatus.COMPLETE)로 변경
+     * false: 주최측에 경기결과 재요청 (MatchStatus.IN_PROGRESS)유지
+     * 어떠한 결과값이든 스케줄 작업을 삭제 및 취소함.
+     * @param dto
+     * @return
+     */
     @Override
     public boolean matchResultRes(MatchResultResponse dto) {
-
         UnivBattle univBattle = univBattleRepository.findById(dto.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
-        // 경기결과에 대해 정해진 기간 내에 응답이 없었을 때 경기는 주최측이 정한 경기기록으로 종료되어있음.
-        // 이 때 참가측은 경기결과에 권한이 없음.
-        if(univBattle.getMatchStatus() == MatchStatus.COMPLETED){
+        // 이미 경기가 완료된 상태일 경우 예외 처리
+        if (univBattle.getMatchStatus() == MatchStatus.COMPLETED) {
             throw new CustomException(CustomExceptionCode.ALREADY_END_MATCH);
         }
 
-        // remove 메서드는 CompletableFuture 안의 해당 값을 삭제하지만 future 쪽에 값을 반환할 수 있다.
-        // CompletableFuture 에는 더이상 해당 쓰레드가 들어있지않고. 해당 쓰레드는 future.cancel 로 종료시킴.
-        CompletableFuture<Void> future = incompleteMatchThreads.remove(univBattle.getUnivBattleId());
+        // 주최자측 결과 보고에 응답했는 경우 관리 목록에서 해당 경기의 스케줄링 작업을 가져와 취소
+        ScheduledFuture<?> future = scheduledTasks.remove(univBattle.getUnivBattleId());
         if (future != null) {
-            // 해당 쓰레드 종료
-            future.cancel(true);
-            log.info("스레드종료");
+            future.cancel(false); // 작업 취소
+            log.info("Scheduled Task 취소 시도");
         }
 
-        if(dto.isResultYN()){
+        // true 로 반응한 경우 경기결과에 문제가 없으니 COMPLETED 처리
+        if (dto.isResultYN()) {
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
-
-        } else {
+        }
+        // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
+        else {
             univBattle.setGuestScore(null);
             univBattle.setHostScore(null);
             univBattle.setWinUniv(null);
@@ -446,6 +453,25 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         univBattleRepository.save(univBattle);
 
         return true;
+    }
+
+    /**
+     * 경기 종료 메서드
+     * @author 이시영
+     * @param univBattleId
+     */
+    // 경기 종료 처리 메서드
+    private void checkIncompleteMatch(Long univBattleId) {
+        UnivBattle univBattle = univBattleRepository.findById(univBattleId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 경기 상태가 완료되지 않았을 경우 경기를 종료 처리합니다.
+        if (univBattle.getMatchStatus() != MatchStatus.COMPLETED) {
+            univBattle.setMatchStatus(MatchStatus.COMPLETED);
+            univBattle.setEndDt(LocalDateTime.now());
+            univBattleRepository.save(univBattle);
+            log.info("경기 종료 처리 완료");
+        }
     }
 
 
@@ -462,21 +488,5 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         return Base64.getUrlEncoder().encodeToString(bytes).substring(0, length);
     }
 
-    /**
-     * 경기 종료 메서드
-     * @author 이시영
-     * @param univBattleId
-     */
-    // 경기 종료 처리 메서드
-    private void checkIncompleteMatch(Long univBattleId) {
-        UnivBattle univBattle = univBattleRepository.findById(univBattleId)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
-        if (univBattle.getMatchStatus() != MatchStatus.COMPLETED) {
-            // 경기 종료 상태로 변경
-            univBattle.setMatchStatus(MatchStatus.COMPLETED);
-            univBattle.setEndDt(LocalDateTime.now());
-            univBattleRepository.save(univBattle);
-        }
-    }
 }
