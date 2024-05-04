@@ -360,6 +360,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         UnivBattle univBattle = univBattleRepository.findById(univBattleId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
+        // 준비가 안 된 경우 경기 시작을 할 수 없음.
+        if(univBattle.getMatchStatus()!= MatchStatus.WAITING){
+            throw new CustomException(CustomExceptionCode.CANNOT_START_MATCH);
+        }
         // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
         int ptcCount = participantRepository.countByUnivBattleId(univBattleId);
         if(ptcCount != univBattle.getTeamPtcLimit()){
@@ -415,7 +419,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     /**
      * 경기 결과 응답 (참가팀)
      * 주최자의 경기기록에 대해 응답함.
-     * <resultYN 값에 따른 결과>
+     * < resultYN 값에 따른 결과 >
      * true: 경기 종료 (MatchStatus.COMPLETE)로 변경
      * false: 주최측에 경기결과 재요청 (MatchStatus.IN_PROGRESS)유지
      * 어떠한 결과값이든 스케줄 작업을 삭제 및 취소함.

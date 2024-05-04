@@ -32,6 +32,7 @@ public enum CustomExceptionCode {
     NOT_IN_PROGRESS("NOT_IN_PROGRESS","아직 진행되지 않은 경기입니다.", HttpStatus.BAD_REQUEST),
     ALREADY_IN_PROGRESS("ALREADY_IN_PROGRESS","이미 진행중인 경기입니다.", HttpStatus.BAD_REQUEST),
     ALREADY_END_MATCH("ALREADY_END_MATCH","이미 종료된 경기입니다.", HttpStatus.BAD_REQUEST),
+    CANNOT_START_MATCH("CANNOT_START_MATCH", "경기를 시작할 수 없습니다.", HttpStatus.BAD_REQUEST),
 
     //채팅
     INVALID_URI("INVALID_URI","올바른 형식의 URI가 아닙니다.", HttpStatus.BAD_REQUEST),
