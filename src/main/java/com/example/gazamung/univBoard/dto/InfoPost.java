@@ -14,8 +14,8 @@ import java.util.List;
 public class InfoPost {
 
     private Long memberIdx;
-    private String categoryName;        // 카테고리 ID
-    private String clubName;        // 모임명
+    private String categoryName;
+    private String clubName;
 
     private String title;
     private String content;
@@ -23,5 +23,9 @@ public class InfoPost {
     private LocalDateTime udtDt;
 
     private List<String> postImageUrls;
+
+    private String lat;             // 위도
+    private String lng;             // 경도
+    private String place;           // 위치
 
 }

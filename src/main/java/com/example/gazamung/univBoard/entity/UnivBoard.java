@@ -32,5 +32,9 @@ public class UnivBoard {
     private LocalDateTime regDt;    // 생성일
     private LocalDateTime udtDt;    // 수정일
 
+    private String lat;             // 위도
+    private String lng;             // 경도
+    private String place;           // 위치
+
     private Long representIdx;  // 대표 사진 idx
 }

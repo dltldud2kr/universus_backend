@@ -24,4 +24,8 @@ public class PostDto {
 
         private List<MultipartFile> postImage;
 
+        private String lat;             // 위도
+        private String lng;             // 경도
+        private String place;           // 위치
+
 }
