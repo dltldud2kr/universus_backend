@@ -339,6 +339,12 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         response.put("chatRoomType", chatRoom.getChatRoomType());
         response.put("chatRoomId", chatRoomId);
 
+        if(univBattle.getWinUniv() != null) {
+            String winUniv = universityRepository.findById(univBattle.getWinUniv()).orElse(null).getSchoolName();
+            response.put("winUnivName", winUniv);
+        }
+
+
 //       myBatis 보류
 //
 //        // 응답용 Map 생성 및 값 추가
