@@ -2,10 +2,10 @@ package com.example.gazamung.univBoard.controller;
 
 
 import com.example.gazamung._enum.ApiResponseCode;
-import com.example.gazamung.club.dto.ClubDto;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.univBoard.dto.UnivBoardDto;
+import com.example.gazamung.univBoard.dto.InfoPost;
+import com.example.gazamung.univBoard.dto.PostDto;
 import com.example.gazamung.univBoard.service.UnivBoardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,8 +27,8 @@ public class UnivBoardController {
 
     private final UnivBoardService univBoardService;
 
-    @Operation(summary = "게시글 생성", description = "" +
-            "게시글(대학)을 생성합니다" +
+    @Operation(summary = "게시글 작성", description = "" +
+            "게시글을 작성합니다." +
             "\n### HTTP STATUS 에 따른 요청 결과" +
             "\n- 200: 서버요청 정상 성공" +
             "\n- 403: 회원정보 인증 실패" +
@@ -39,11 +39,10 @@ public class UnivBoardController {
             @ApiResponse(responseCode = "200", description = "게시글 생성 성공"),
     })
     @PostMapping("/create")
-    public ResultDTO createPost(UnivBoardDto.CreateUnivBoardDto dto){
-
+    public ResultDTO createPost(PostDto dto){
         try {
             Map<String, Object> result = univBoardService.createPost(dto);
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "게시글(대학) 생성 완료", result);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "게시글 작성 완료", result);
         } catch (CustomException e) {
             return  ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
@@ -70,13 +69,14 @@ public class UnivBoardController {
     }
 
     @GetMapping("/list")
-    public List<UnivBoardDto.InfoUnivBoardDto> listUniv(@RequestParam Long memberIdx){
+    public Object listPost(@RequestParam Long memberIdx, Long clubId){
         try{
-            List<UnivBoardDto.InfoUnivBoardDto> dtoList = univBoardService.listUniv(memberIdx);
-            return dtoList;
+            List<InfoPost> listPosts = univBoardService.listPost(memberIdx, clubId);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "게시글 리스트 조회 완료", listPosts);
         } catch (CustomException e) {
-            return (List<UnivBoardDto.InfoUnivBoardDto>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 전체 리스트 조회 완료");
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
+
 
 }

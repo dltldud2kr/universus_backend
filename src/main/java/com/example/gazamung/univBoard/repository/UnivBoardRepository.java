@@ -10,4 +10,8 @@ public interface UnivBoardRepository extends JpaRepository<UnivBoard, Long> {
     List<UnivBoard> findByUnivId(Long univId);
 
     List<UnivBoard> findByTitleContaining(String query);
+
+    List<UnivBoard> findByClubIdIsNull();
+
+    List<UnivBoard> findByClubId(Long clubId);
 }

@@ -288,16 +288,19 @@ public class ClubServiceImpl implements ClubService {
     public List<SuggestClub> suggest(Long memberIdx) {
         // 멤버 ID를 사용하여 클럽 멤버 엔티티 목록을 검색
         List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdx(memberIdx);
-        if (clubMembers.isEmpty()) {
-            return Collections.emptyList(); // 비어있으면 빈 목록 반환
-        }
 
-        // 가입한 모임Id -> 해당 모임의 이벤트Id -> 해당 이벤트 Club 얻음
-        List<Long> clubIds = clubMembers.stream()
-                .map(ClubMember::getClubId).collect(Collectors.toList());
-        List<Long> eventIds = clubRepository.findAllById(clubIds)
-                .stream().map(Club::getEventId).collect(Collectors.toList());
-        List<Club> clubs = clubRepository.findAllByEventIdIn(eventIds);
+        List<Club> clubs;
+        if (clubMembers.isEmpty()) {
+            // 멤버가 어떤 클럽에도 속하지 않는 경우, 전체 클럽을 대상으로 추천
+            clubs = clubRepository.findAll();
+        } else {
+            // 가입한 모임Id -> 해당 모임의 이벤트Id -> 해당 이벤트 Club 얻음
+            List<Long> clubIds = clubMembers.stream()
+                    .map(ClubMember::getClubId).collect(Collectors.toList());
+            List<Long> eventIds = clubRepository.findAllById(clubIds)
+                    .stream().map(Club::getEventId).collect(Collectors.toList());
+            clubs = clubRepository.findAllByEventIdIn(eventIds);
+        }
 
         // 랜덤하게 띄우기 위해 리스트에 담아 이후 shuffle
         List<SuggestClub> suggestedClubs = clubs.stream().map(club -> {
@@ -319,7 +322,7 @@ public class ClubServiceImpl implements ClubService {
                     .clubId(club.getClubId())
                     .clubName(club.getClubName())
                     .eventName(event.get().getEventName())
-                    .currentMembers(currentMembers+1)
+                    .currentMembers(currentMembers + 1)
                     .imageUrl(imageUrl)
                     .build();
         }).collect(Collectors.toList());
@@ -327,6 +330,7 @@ public class ClubServiceImpl implements ClubService {
         Collections.shuffle(suggestedClubs); // 리스트 섞기
         return suggestedClubs;
     }
+
 
 
 
