@@ -43,12 +43,12 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
 
         Category category = categoryRepository.findById(post.getCategoryId())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CATEGORY));
 
         Club club = null;
         if (post.getClubId() != null) {
             club = clubRepository.findById(post.getClubId())
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
         }
 
         List<UploadImage> postImage = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoardId);
@@ -77,17 +77,24 @@ public class UnivBoardServiceImpl implements UnivBoardService {
     }
 
 
+    /**
+     * @param dto
+     * @title 게시글 작성
+     * @created 24.05.06 이승열
+     * @description 커뮤니티 게시글 작성 (학교 게시판, 모임 게시판 공통 사용)
+     */
     @Override
     public Map<String, Object> createPost(PostDto dto) {
         Member member = memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CATEGORY));
 
         UnivBoard univBoard;
+        // clubId 유무로 학교 / 모임 게시판 구분
         if (dto.getClubId() == null) {
             clubRepository.findById(dto.getClubId())
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
             univBoard = UnivBoard.builder()
                     .memberIdx(dto.getMemberIdx())
                     .categoryId(0L) // 잠재적으로 이 부분도 개선이 필요할 수 있습니다.
@@ -146,23 +153,24 @@ public class UnivBoardServiceImpl implements UnivBoardService {
     public List<InfoPost> listPost(Long memberIdx, Long clubId) {
 
         // 멤버 조회
-        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         // 게시글 목록 조회
-        List<UnivBoard> univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNull()
-                : univBoardRepository.findByClubId(clubId);
+        List<UnivBoard> univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivId(member.getUnivId())
+                : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
 
         List<InfoPost> infoPosts = new ArrayList<>();
         for (UnivBoard univBoard : univBoards) {
             // 카테고리 정보 조회
             Category category = categoryRepository.findById(univBoard.getCategoryId())
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CATEGORY));
 
             // 클럽 정보 조회, 클럽 ID가 null이면 조회하지 않음
             Club club = null;
             if (univBoard.getClubId() != null) {
                 club = clubRepository.findById(univBoard.getClubId())
-                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
             }
 
             // 게시글의 이미지 정보 조회

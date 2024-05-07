@@ -4,10 +4,7 @@ import com.example.gazamung.S3FileUploader.UploadImage;
 import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
-import com.example.gazamung.club.dto.ClubDto;
-import com.example.gazamung.club.dto.ClubJoinRequest;
-import com.example.gazamung.club.dto.ClubRequest;
-import com.example.gazamung.club.dto.SuggestClub;
+import com.example.gazamung.club.dto.*;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
 import com.example.gazamung.clubMember.entity.ClubMember;
@@ -19,9 +16,12 @@ import com.example.gazamung.mapper.ClubMapper;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.member.service.MemberServiceImpl;
+import com.example.gazamung.univBoard.entity.UnivBoard;
+import com.example.gazamung.univBoard.repository.UnivBoardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -42,6 +42,7 @@ public class ClubServiceImpl implements ClubService {
     private final MemberServiceImpl memberServiceImpl;
     private final ClubMapper clubMapper;
     private final EventRepository eventRepository;
+    private final UnivBoardRepository univBoardRepository;
 
     /**
      * @param dto
@@ -234,7 +235,7 @@ public class ClubServiceImpl implements ClubService {
      */
     public ClubDto info(Long clubId) {
         Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
         // 클럽에 연결된 이미지 정보 조회
         List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, clubId);
@@ -284,8 +285,16 @@ public class ClubServiceImpl implements ClubService {
         }
     }
 
-
+    /**
+     * @param memberIdx
+     * @title 모임 추천
+     * @created 24.05.06 이승열
+     * @description 사용자의 관심 모임 위주로 랜덤한 5개 모임의 정보 반환
+     */
     public List<SuggestClub> suggest(Long memberIdx) {
+
+        memberRepository.findById(memberIdx).orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
         // 멤버 ID를 사용하여 클럽 멤버 엔티티 목록을 검색
         List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdx(memberIdx);
 
@@ -315,7 +324,7 @@ public class ClubServiceImpl implements ClubService {
             }
             Optional<Event> event = eventRepository.findById(club.getEventId());
             if (event.isEmpty()){
-                throw new CustomException(CustomExceptionCode.NOT_FOUND_BOARD);
+                throw new CustomException(CustomExceptionCode.NOT_FOUND_EVENT);
             }
 
             return SuggestClub.builder()
@@ -332,10 +341,6 @@ public class ClubServiceImpl implements ClubService {
     }
 
 
-
-
-
-
     /**
      * @param request
      * @title 모임 가입
@@ -349,6 +354,38 @@ public class ClubServiceImpl implements ClubService {
                 .build();
         clubMemberRepository.save(clubMember);
     }
+
+    /**
+     * @param memberIdx
+     * @title 번개(용병) 모집
+     * @created 24.05.07 이승열
+     * @description 학교 커뮤니티 내 모집 게시판의 게시글 3개를 최신순으로 반환
+     */
+    @Override
+    public List<MercenaryDto> mercenary(Long memberIdx) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        // categoryId가 2(모집)인 게시판의 게시물을 최신순으로 가져옴
+        List<UnivBoard> univBoardList = univBoardRepository.findByCategoryIdAndUnivId(2L, member.getUnivId(), Sort.by(Sort.Direction.DESC, "regDt"));
+
+        if (univBoardList.isEmpty()) {
+            throw new CustomException(CustomExceptionCode.NOT_FOUND_BOARD);
+        }
+
+        return univBoardList.stream()
+                .map(univBoard -> MercenaryDto.builder()
+                        .univBoardId(univBoard.getUnivBoardId())
+                        .title(univBoard.getTitle())
+                        .eventName(univBoard.getEventName())
+                        .lat(univBoard.getLat())
+                        .lng(univBoard.getLng())
+                        .place(univBoard.getPlace())
+                        .build())
+                .limit(3) // 3개만 반환
+                .collect(Collectors.toList());
+    }
+
 
 
     private List<ClubDto> convertToDto(List<Club> clubList) {

@@ -1,13 +1,8 @@
 package com.example.gazamung.club.service;
 
 
-import com.example.gazamung.club.dto.ClubDto;
-import com.example.gazamung.club.dto.ClubJoinRequest;
-import com.example.gazamung.club.dto.ClubRequest;
-import com.example.gazamung.club.dto.SuggestClub;
-import com.example.gazamung.club.entity.Club;
+import com.example.gazamung.club.dto.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +40,8 @@ public interface ClubService {
     List<SuggestClub> suggest(Long memberIdx);
 
     void join(ClubJoinRequest request);
+
+    List<MercenaryDto> mercenary(Long memberIdx);
 
     /**
      * 모임 추천

@@ -28,4 +28,6 @@ public class PostDto {
         private String lng;             // 경도
         private String place;           // 위치
 
+        private String eventName;
+
 }
