@@ -4,6 +4,7 @@ import com.example.gazamung.chat.chatMember.ChatMember;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public interface ChatRoomService {
@@ -18,5 +19,5 @@ public interface ChatRoomService {
      * @param memberIdx
      * @return
      */
-    List<ChatMember> myChatRoomList(Long memberIdx);
+    Map<String, Object> myChatRoomList(Long memberIdx);
 }

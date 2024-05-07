@@ -151,7 +151,7 @@ public class UnivBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/matchStart")
-    public ResultDTO<Map<String, Object>> univBattleMatchStart(@RequestParam long univBattleId){
+    public ResultDTO univBattleMatchStart(@RequestParam long univBattleId){
         try {
             return ResultDTO.of(univBattleService.matchStart(univBattleId), ApiResponseCode.SUCCESS.getCode(), "대항전 시작", null);
         } catch (CustomException e) {
@@ -170,7 +170,7 @@ public class UnivBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @PostMapping("/resultReq")
-    public ResultDTO<Map<String, Object>> matchResultReq(@RequestBody MatchResultRequest dto){
+    public ResultDTO matchResultReq(@RequestBody MatchResultRequest dto){
         try {
             return ResultDTO.of(univBattleService.matchResultReq(dto), ApiResponseCode.SUCCESS.getCode(), "대항전 결과전송", null);
         } catch (CustomException e) {
@@ -189,7 +189,7 @@ public class UnivBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @PostMapping("/resultRes")
-    public ResultDTO<Map<String, Object>> matchResultRes(@RequestBody MatchResultResponse dto){
+    public ResultDTO matchResultRes(@RequestBody MatchResultResponse dto){
         try {
             return ResultDTO.of(univBattleService.matchResultRes(dto), ApiResponseCode.SUCCESS.getCode(), "대항전 결과응답", null);
         } catch (CustomException e) {
