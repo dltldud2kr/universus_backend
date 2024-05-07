@@ -11,7 +11,7 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
 
     // univBattleId와 univId를 가지고 참가자 수를 세는 메소드
     int countByUnivBattleIdAndUnivId(Long univBattleId, Long univId);
-    int countByDeptBattleIdAndUnivId(Long univBattleId, Long univId);
+    int countByDeptBattleIdAndDeptId(Long univBattleId, Long univId);
 
     // 총 인원 수 체크
     int countByUnivBattleId(Long univBattleId);

@@ -71,93 +71,116 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
 
 
-    @Override
-    public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
+//    @Override
+//    public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
+//
+//        DeptBattle deptBattle = deptBattleRepository.findById(request.getDeptBattleId())
+//                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+//
+//        //이미 참가팀 대표가 있는지 확인
+//        if (deptBattle.getGuestLeader() != null){
+//            throw new CustomException(CustomExceptionCode.REPRESENTATIVE_ALREADY_EXISTS);
+//        }
+//
+//        // 참가자 정보 조회
+//        Member guest = memberRepository.findById(request.getGuestLeader())
+//                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+//
+//        // 같은 대학교인지 확인
+//        if (!Objects.equals(deptBattle.getUnivId(), guest.getUnivId())){
+//            throw new CustomException(CustomExceptionCode.NOT_SAME_UNIVERSITY);
+//        }
+//
+//        // 주최자 대학교
+//        long hostDept = deptBattle.getHostDept();
+//        // 참가자 대학교
+//        long guestDept = guest.getDeptId();
+//
+//        Department department = departmentRepository.findById(guest.getDeptId()).
+//                orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT));
+//
+//        String guestDeptName = department.getDeptName();
+//
+//        // 같은 과는 참가 불가능.
+//        if (hostDept == guestDept) {
+//            throw new CustomException(CustomExceptionCode.SAME_DEPARTMENT);
+//        }
+//
+//        // Guest 팀 정보 업데이트
+//        deptBattle.setGuestLeader(request.getGuestLeader());
+//        deptBattle.setGuestDept(guestDept);
+//        deptBattle.setGuestDeptName(guestDeptName);
+//
+//        // 상태를 "대기중" 으로 바꿈
+//        deptBattle.setMatchStatus(MatchStatus.WAITING);
+//
+//        // 초대 코드 생성
+//        deptBattle.setInvitationCode(generateRandomString(8));
+//
+//        deptBattleRepository.save(deptBattle);
+//
+//        // 참가인원 초과 여부 체크
+//        int totalParticipant = participantRepository.countByDeptBattleId(deptBattle.getDeptBattleId());
+//
+//        // 마지막 참가자일 경우 대기중으로 변경.
+//        if(totalParticipant == deptBattle.getTeamPtcLimit() * 2 - 1){
+//            deptBattle.setMatchStatus(MatchStatus.PREPARED);
+//        }
+//
+//        Participant participant = Participant.builder()
+//                .memberIdx(guest.getMemberIdx())
+//                .nickName(guest.getNickname())
+//                .userName(guest.getName())
+//                .deptBattleId(request.getDeptBattleId())
+//                .univId(deptBattle.getUnivId())
+//                .build();
+//
+//        participantRepository.save(participant);
+//
+//        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(1,deptBattle.getDeptBattleId());
+//
+//        ChatMember chatMember = ChatMember.builder()
+//                .chatRoomId(chatRoom.getChatRoomId())
+//                .chatRoomType(1)
+//                .customChatRoomName(deptBattle.getHostDeptName() + "대항전")
+//                .memberIdx(guest.getMemberIdx())
+//                .build();
+//
+//        chatMemberRepository.save(chatMember);
+//
+//        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(),chatRoom.getChatRoomId());
+//
+//        hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + "대항전");
+//
+//        chatMemberRepository.save(hostChatMember);
+//
+//        return true;
+//    }
+//
 
-        DeptBattle deptBattle = deptBattleRepository.findById(request.getDeptBattleId())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+@Override
+public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
+    // 대항전 정보를 검증 후 존재하지 않을 경우 예외 발생
+    DeptBattle deptBattle = validateDeptBattle(request.getDeptBattleId());
 
-        //이미 참가팀 대표가 있는지 확인
-        if (deptBattle.getGuestLeader() != null){
-            throw new CustomException(CustomExceptionCode.REPRESENTATIVE_ALREADY_EXISTS);
-        }
+    // 게스트 리더의 유효성을 검사 후 조건에 맞지 않으면 예외 발생
+    Member guest = validateGuest(request.getGuestLeader(), deptBattle);
 
-        // 참가자 정보 조회
-        Member guest = memberRepository.findById(request.getGuestLeader())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+    // 동일 대학교 내의 다른 과 검증 후, 같은 과일 경우 예외를 발생
+    validateDepartments(deptBattle, guest);
 
-        // 같은 대학교인지 확인
-        if (!Objects.equals(deptBattle.getUnivId(), guest.getUnivId())){
-            throw new CustomException(CustomExceptionCode.NOT_SAME_UNIVERSITY);
-        }
+    // 대항전 게스트 리더 관련 정보를 업데이트
+    updateDeptBattleWithGuestInfo(deptBattle, guest, request);
 
-        // 주최자 대학교
-        long hostDept = deptBattle.getHostDept();
-        // 참가자 대학교
-        long guestDept = guest.getDeptId();
+    // 참가자 관리 로직을 처리. 참가자 수에 따라 대항전의 상태를 업데이트.
+    manageParticipants(deptBattle, guest);
 
-        Department department = departmentRepository.findById(guest.getDeptId()).
-                orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT));
-
-        String guestDeptName = department.getDeptName();
-
-        // 같은 과는 참가 불가능.
-        if (hostDept == guestDept) {
-            throw new CustomException(CustomExceptionCode.SAME_DEPARTMENT);
-        }
-
-        // Guest 팀 정보 업데이트
-        deptBattle.setGuestLeader(request.getGuestLeader());
-        deptBattle.setGuestDept(guestDept);
-        deptBattle.setGuestDeptName(guestDeptName);
-
-        // 상태를 "대기중" 으로 바꿈
-        deptBattle.setMatchStatus(MatchStatus.WAITING);
-
-        // 초대 코드 생성
-        deptBattle.setInvitationCode(generateRandomString(8));
-
-        deptBattleRepository.save(deptBattle);
-
-        // 참가인원 초과 여부 체크
-        int totalParticipant = participantRepository.countByDeptBattleId(deptBattle.getDeptBattleId());
-
-        // 마지막 참가자일 경우 대기중으로 변경.
-        if(totalParticipant == deptBattle.getTeamPtcLimit() * 2 - 1){
-            deptBattle.setMatchStatus(MatchStatus.PREPARED);
-        }
-
-        Participant participant = Participant.builder()
-                .memberIdx(guest.getMemberIdx())
-                .nickName(guest.getNickname())
-                .userName(guest.getName())
-                .deptBattleId(request.getDeptBattleId())
-                .univId(deptBattle.getUnivId())
-                .build();
-
-        participantRepository.save(participant);
-
-        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(1,deptBattle.getDeptBattleId());
-
-        ChatMember chatMember = ChatMember.builder()
-                .chatRoomId(chatRoom.getChatRoomId())
-                .chatRoomType(1)
-                .customChatRoomName(deptBattle.getHostDeptName() + "대항전")
-                .memberIdx(guest.getMemberIdx())
-                .build();
-
-        chatMemberRepository.save(chatMember);
-
-        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(),chatRoom.getChatRoomId());
-
-        hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + "대항전");
-
-        chatMemberRepository.save(hostChatMember);
-
-        return true;
-    }
+    // 관련 채팅방 멤버 정보를 관리. 채팅방 이름 업데이트 포함.
+    manageChatRoomMembers(deptBattle, guest);
 
 
+    return true;
+}
 
 
     @Override
@@ -189,7 +212,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         }
 
         // 과별 인원 초과 여부 체크
-        int univTotalParticipant = participantRepository.countByDeptBattleIdAndUnivId(deptBattle.getDeptBattleId(), member.getUnivId());
+        int univTotalParticipant = participantRepository.countByDeptBattleIdAndDeptId(deptBattle.getDeptBattleId(), member.getUnivId());
         if (univTotalParticipant >= deptBattle.getTeamPtcLimit()) {
             throw new CustomException(CustomExceptionCode.EXCEEDED_DEPT_CAPACITY);
         }
@@ -207,16 +230,31 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         // 참가자 저장
         Participant participant = Participant.builder()
                 .memberIdx(request.getMemberIdx())
-                .univBattleId(request.getDeptBattleId())
+                .deptBattleId(request.getDeptBattleId())
                 .univId(member.getUnivId())
                 .userName(member.getName())
                 .nickName(member.getNickname())
                 .build();
         participantRepository.save(participant);
 
+        // 해당 대항전에 대한 채팅방을 설정합니다.
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(1, deptBattle.getDeptBattleId());
+        ChatMember chatMember = ChatMember.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .chatRoomType(1)
+                .customChatRoomName(deptBattle.getHostDeptName() + "대항전")
+                .memberIdx(request.getMemberIdx())
+                .build();
+
+        chatMemberRepository.save(chatMember);
+
+        // 호스트 채팅방의 이름을 게스트 부서 이름으로 업데이트합니다.
+        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(), chatRoom.getChatRoomId());
+        hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + "대항전");
+        chatMemberRepository.save(hostChatMember);
+
         return true;
     }
-
 
 
 
@@ -277,6 +315,84 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 .memberIdx(member.getMemberIdx())
                 .build();
         chatMemberRepository.save(chatMember);
+    }
+
+    private DeptBattle validateDeptBattle(Long deptBattleId) {
+        return deptBattleRepository.findById(deptBattleId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+    }
+
+    private Member validateGuest(Long guestLeaderId, DeptBattle deptBattle) {
+        Member guest = memberRepository.findById(guestLeaderId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        if (!Objects.equals(deptBattle.getUnivId(), guest.getUnivId())) {
+            throw new CustomException(CustomExceptionCode.NOT_SAME_UNIVERSITY);
+        }
+
+        if (deptBattle.getGuestLeader() != null) {
+            throw new CustomException(CustomExceptionCode.REPRESENTATIVE_ALREADY_EXISTS);
+        }
+
+        return guest;
+    }
+
+    private void validateDepartments(DeptBattle deptBattle, Member guest) {
+        if (Objects.equals(deptBattle.getHostDept(), guest.getDeptId())) {
+            throw new CustomException(CustomExceptionCode.SAME_DEPARTMENT);
+        }
+    }
+
+    private void updateDeptBattleWithGuestInfo(DeptBattle deptBattle, Member guest, DeptGuestLeaderAttendRequest request) {
+        Department department = departmentRepository.findById(guest.getDeptId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT));
+
+        deptBattle.setGuestLeader(guest.getMemberIdx());
+        deptBattle.setGuestDept(guest.getDeptId());
+        deptBattle.setGuestDeptName(department.getDeptName());
+        deptBattle.setMatchStatus(MatchStatus.WAITING);
+        deptBattle.setInvitationCode(generateRandomString(8));
+
+        deptBattleRepository.save(deptBattle);
+    }
+
+    private void manageParticipants(DeptBattle deptBattle, Member guest) {
+        int totalParticipant = participantRepository.countByDeptBattleId(deptBattle.getDeptBattleId());
+        if (totalParticipant == deptBattle.getTeamPtcLimit() * 2 - 1) {
+            deptBattle.setMatchStatus(MatchStatus.PREPARED);
+            deptBattleRepository.save(deptBattle);
+        }
+
+        Participant participant = Participant.builder()
+                .memberIdx(guest.getMemberIdx())
+                .nickName(guest.getNickname())
+                .userName(guest.getName())
+                .deptBattleId(deptBattle.getDeptBattleId())
+                .univId(deptBattle.getUnivId())
+                .build();
+        participantRepository.save(participant);
+    }
+
+    private void manageChatRoomMembers(DeptBattle deptBattle, Member guest) {
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(1, deptBattle.getDeptBattleId());
+        if (chatRoom == null) {
+            // Handle chat room not found
+            return;
+        }
+
+        ChatMember chatMember = ChatMember.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .chatRoomType(1)
+                .customChatRoomName(deptBattle.getHostDeptName() + " 대항전")
+                .memberIdx(guest.getMemberIdx())
+                .build();
+        chatMemberRepository.save(chatMember);
+
+        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(), chatRoom.getChatRoomId());
+        if (hostChatMember != null) {
+            hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + " 대항전");
+            chatMemberRepository.save(hostChatMember);
+        }
     }
 
 

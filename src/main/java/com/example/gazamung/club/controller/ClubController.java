@@ -197,13 +197,12 @@ public class ClubController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/suggest")
-    public List<SuggestClub> suggest(@RequestParam Long memberIdx){
+    public ResultDTO<List<SuggestClub>> suggest(@RequestParam Long memberIdx){
         try {
             List<SuggestClub> suggestClubList = clubService.suggest(memberIdx);
-            return suggestClubList;
-
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 추천.", suggestClubList);
         } catch (CustomException e) {
-            return (List<SuggestClub>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
 
