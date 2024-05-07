@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class DeptBattleAttendRequest {
 
     private long deptBattleId;   // 해당 대항전 ID 값
-    private long guestLeader ;   // 대표자 memberIdx
+    private long memberIdx ;   // memberIdx
+    private String invitationCode;  // 초대코드
+
 
 }

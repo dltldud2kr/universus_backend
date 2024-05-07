@@ -172,10 +172,10 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         deptBattleRepository.save(deptBattle);
 
         // 참가인원 초과 여부 체크
-        int totalParticipant = participantRepository.countByUnivBattleId(deptBattle.getDeptBattleId());
+        int totalParticipant = participantRepository.countByDeptBattleId(deptBattle.getDeptBattleId());
 
         // 마지막 참가자일 경우 대기중으로 변경.
-        if(totalParticipant == deptBattle.getTeamPtcLimit() - 1){
+        if(totalParticipant == deptBattle.getTeamPtcLimit() * 2 - 1){
             deptBattle.setMatchStatus(MatchStatus.PREPARED);
         }
 
@@ -197,7 +197,59 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
     @Override
     public boolean attend(DeptBattleAttendRequest request) {
-        return false;
+
+        // 참가자 정보 조회
+        Member member = memberRepository.findById(request.getMemberIdx())
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        // 대항전 정보 조회
+        DeptBattle deptBattle = deptBattleRepository.findById(request.getDeptBattleId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 이미 진행중인 경우 참가 불가
+        if(deptBattle.getMatchStatus() == MatchStatus.IN_PROGRESS || deptBattle.getMatchStatus() == MatchStatus.COMPLETED){
+            throw new CustomException(CustomExceptionCode.ALREADY_IN_PROGRESS);
+        }
+
+        // 이미 참가한 경우 예외 처리
+        boolean alreadyAttended = participantRepository.existsByMemberIdxAndDeptBattleId(member.getMemberIdx(), deptBattle.getDeptBattleId());
+        if (alreadyAttended) {
+            throw new CustomException(CustomExceptionCode.ALREADY_ATTENDED);
+        }
+
+        // 참가인원 초과 여부 체크
+        int totalParticipant = participantRepository.countByUnivBattleId(deptBattle.getDeptBattleId());
+        if (totalParticipant >= deptBattle.getTeamPtcLimit() * 2) {
+            throw new CustomException(CustomExceptionCode.EXCEEDED_TOTAL_CAPACITY);
+        }
+
+        // 과별 인원 초과 여부 체크
+        int univTotalParticipant = participantRepository.countByDeptBattleIdAndUnivId(deptBattle.getDeptBattleId(), member.getUnivId());
+        if (univTotalParticipant >= deptBattle.getTeamPtcLimit()) {
+            throw new CustomException(CustomExceptionCode.EXCEEDED_DEPT_CAPACITY);
+        }
+
+        // 참가 코드 체크
+        if (!request.getInvitationCode().equals(deptBattle.getInvitationCode())){
+            throw new CustomException(CustomExceptionCode.INVALID_INVITE_CODE);
+        }
+
+        // 마지막 참가자일 경우 대기중으로 변경.
+        if(totalParticipant == deptBattle.getTeamPtcLimit() * 2 - 1){
+            deptBattle.setMatchStatus(MatchStatus.PREPARED);
+        }
+
+        // 참가자 저장
+        Participant participant = Participant.builder()
+                .memberIdx(request.getMemberIdx())
+                .univBattleId(request.getDeptBattleId())
+                .univId(member.getUnivId())
+                .userName(member.getName())
+                .nickName(member.getNickname())
+                .build();
+        participantRepository.save(participant);
+
+        return true;
     }
 
 

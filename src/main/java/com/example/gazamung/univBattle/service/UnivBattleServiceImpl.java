@@ -182,7 +182,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         int totalParticipant = participantRepository.countByUnivBattleId(univBattle.getUnivBattleId());
 
         // 마지막 참가자일 경우 대기중으로 변경.
-        if(totalParticipant == univBattle.getTeamPtcLimit() - 1){
+        if(totalParticipant == univBattle.getTeamPtcLimit() * 2 - 1){
             univBattle.setMatchStatus(MatchStatus.PREPARED);
         }
 
@@ -243,7 +243,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         }
 
         // 마지막 참가자일 경우 대기중으로 변경.
-        if(totalParticipant == univBattle.getTeamPtcLimit() - 1){
+        if(totalParticipant == univBattle.getTeamPtcLimit() * 2  - 1){
             univBattle.setMatchStatus(MatchStatus.PREPARED);
         }
 
