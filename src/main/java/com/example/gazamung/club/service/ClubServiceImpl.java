@@ -72,8 +72,8 @@ public class ClubServiceImpl implements ClubService {
 
         List<Map<String, Object>> uploadedImages = null;
 
-        if (dto.getClubImage() != null && !dto.getClubImage().isEmpty()){
-        //정상적으로 모임이 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
+        if (dto.getClubImage() != null && !dto.getClubImage().isEmpty()) {
+            //정상적으로 모임이 생성됐는 경우 리뷰에 등록할 이미지를 첨부했는지 확인하고 해당 리뷰 IDX에 이미지 업로드를 실행함
             uploadedImages = uploadService.upload(dto.getClubImage(), dto.getMemberIdx(), AttachmentType.CLUB, savedClub.getClubId());
 
             // 업로드된 이미지 중 0번째 이미지를 대표 이미지로 지정
@@ -113,7 +113,7 @@ public class ClubServiceImpl implements ClubService {
                 throw new CustomException(CustomExceptionCode.ACCESS_DENIED);
             }
 
-            if (dto.getClubImage() != null && !dto.getClubImage().isEmpty()){
+            if (dto.getClubImage() != null && !dto.getClubImage().isEmpty()) {
                 //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 CLUB 파일을 모두 삭제합니다.
                 //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
                 List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, dto.getClubId());
@@ -293,13 +293,16 @@ public class ClubServiceImpl implements ClubService {
      */
     public List<SuggestClub> suggest(Long memberIdx) {
 
-        memberRepository.findById(memberIdx).orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         // 멤버 ID를 사용하여 클럽 멤버 엔티티 목록을 검색
         List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdx(memberIdx);
 
+        // 멤버 ID를 사용하여 Club 엔티티 목록 검색 (내가 모임장인 경우)
+        List<Club> clubList = clubRepository.findByMemberIdx(memberIdx);
+
         List<Club> clubs;
-        if (clubMembers.isEmpty()) {
+        if (clubMembers.isEmpty() && clubList.isEmpty()) {
             // 멤버가 어떤 클럽에도 속하지 않는 경우, 전체 클럽을 대상으로 추천
             clubs = clubRepository.findAll();
         } else {
@@ -308,6 +311,9 @@ public class ClubServiceImpl implements ClubService {
                     .map(ClubMember::getClubId).collect(Collectors.toList());
             List<Long> eventIds = clubRepository.findAllById(clubIds)
                     .stream().map(Club::getEventId).collect(Collectors.toList());
+            clubList.stream()
+                    .map(Club::getEventId)
+                    .forEach(eventIds::add);
             clubs = clubRepository.findAllByEventIdIn(eventIds);
         }
 
@@ -323,7 +329,7 @@ public class ClubServiceImpl implements ClubService {
                 imageUrl = "";
             }
             Optional<Event> event = eventRepository.findById(club.getEventId());
-            if (event.isEmpty()){
+            if (event.isEmpty()) {
                 throw new CustomException(CustomExceptionCode.NOT_FOUND_EVENT);
             }
 
@@ -387,7 +393,6 @@ public class ClubServiceImpl implements ClubService {
     }
 
 
-
     private List<ClubDto> convertToDto(List<Club> clubList) {
 
         return clubList.stream()
@@ -414,7 +419,7 @@ public class ClubServiceImpl implements ClubService {
 
     // 현재 멤버 수 계산 메서드
     private Long calculateCurrentMembers(Long clubId) {
-            return clubMemberRepository.countByClubId(clubId);
+        return clubMemberRepository.countByClubId(clubId);
 
     }
 }
