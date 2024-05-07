@@ -243,6 +243,13 @@ public class ClubServiceImpl implements ClubService {
         // 현재 멤버 수 계산 (모임장 포함)
         Long currentMembers = calculateCurrentMembers(club.getClubId());
 
+        Member LeaderMember = memberRepository.findById(club.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+
+        String LeaderNickname = LeaderMember.getNickname();
+        String LeaderProfileImg = LeaderMember.getProfileImgUrl();
+
+
         // 클럽 정보를 Dto로 변환하여 반환
         return ClubDto.builder()
                 .clubId(club.getClubId())
@@ -256,6 +263,8 @@ public class ClubServiceImpl implements ClubService {
                 .maximumMembers(club.getMaximumMembers())
                 .currentMembers(currentMembers + 1) // 모임장 포함
                 .clubImage(clubImage) // 클럽 이미지 정보 추가
+                .LeaderNickname(LeaderNickname)
+                .LeaderProfileImg(LeaderProfileImg)
                 .build();
     }
 

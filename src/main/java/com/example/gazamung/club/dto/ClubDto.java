@@ -32,5 +32,8 @@ public class ClubDto {
     private Long currentMembers;   // 현재 인원
 
     private List<UploadImage> clubImage;
+    
+    private String LeaderNickname; // 리더 닉네임
+    private String LeaderProfileImg; // 리더 프로필사진
 }
 
