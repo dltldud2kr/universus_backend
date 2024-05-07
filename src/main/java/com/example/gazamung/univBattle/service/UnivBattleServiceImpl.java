@@ -272,6 +272,22 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .build();
         participantRepository.save(participant);
 
+        // 해당 대항전에 대한 채팅방을 설정합니다.
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0, univBattle.getUnivBattleId());
+        ChatMember chatMember = ChatMember.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .chatRoomType(1)
+                .customChatRoomName(univBattle.getHostUnivName() + "대항전")
+                .memberIdx(request.getMemberIdx())
+                .build();
+
+        chatMemberRepository.save(chatMember);
+
+        // 호스트 채팅방의 이름을 게스트 부서 이름으로 업데이트합니다.
+        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(univBattle.getHostLeader(), chatRoom.getChatRoomId());
+        hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + "대항전");
+        chatMemberRepository.save(hostChatMember);
+
         return true;
     }
 
