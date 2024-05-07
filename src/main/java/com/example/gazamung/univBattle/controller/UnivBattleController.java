@@ -48,14 +48,16 @@ public class UnivBattleController {
     }
 
     @Operation(summary = "대항전 대표 참가 ", description = "" +
-            " 모임 가입." +
+            " 대항전 대학 대표자 참가." +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
             "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
             "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
-            "\n- SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." )
+            "\n- SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." +
+            "\n- REPRESENTATIVE_ALREADY_EXISTS: 대표자가 이미 존재합니다."
+    )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })

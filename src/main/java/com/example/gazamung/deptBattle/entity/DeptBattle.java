@@ -24,11 +24,14 @@ public class DeptBattle {
     private Long hostLeader;        // 주최팀 대표
     private Long guestLeader;       // 참가팀 대표
     private Long hostDept;          // 주최팀 학과
+    private String hostDeptName;    // 주최팀 학과명
+    private String guestDeptName;   // 참가팀 학과명
     private Long guestDept;         // 참가팀 학과
     private Long winDept;           // 승리팀 학과
     private Long eventId;           // 대결 종목
     private String content;         // 내용
     private String cost;
+    private long teamPtcLimit;
 
     private String battleDate;     // 일정
     private String location;        // 장소

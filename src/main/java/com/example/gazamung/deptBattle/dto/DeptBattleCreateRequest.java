@@ -13,9 +13,10 @@ public class DeptBattleCreateRequest {
 
     private long hostLeader ;   // 대표자 memberIdx
     private long eventId;       // 종목ID
-    private long hostDept;      // 대표자 과
     private String location;    // 장소
     private String battleDate;  // 일정
     private String content;     // 내용
+    private long teamPtcLimit;
+
     private String cost;        // 비용
 }

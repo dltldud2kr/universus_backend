@@ -48,7 +48,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
 
     /**
-     * 대항전 생성
+     * 대학 vs 대학 대항전 생성
      * @param request
      * @return
      */
@@ -140,7 +140,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         //이미 참가팀 대표가 있는지 확인
         if (univBattle.getGuestLeader() != null){
-            throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+            throw new CustomException(CustomExceptionCode.REPRESENTATIVE_ALREADY_EXISTS);
         }
 
         // 참가자 정보 조회
@@ -183,7 +183,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 마지막 참가자일 경우 대기중으로 변경.
         if(totalParticipant == univBattle.getTeamPtcLimit() - 1){
-            univBattle.setMatchStatus(MatchStatus.WAITING);
+            univBattle.setMatchStatus(MatchStatus.PREPARED);
         }
 
         Participant participant = Participant.builder()
@@ -244,7 +244,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 마지막 참가자일 경우 대기중으로 변경.
         if(totalParticipant == univBattle.getTeamPtcLimit() - 1){
-            univBattle.setMatchStatus(MatchStatus.WAITING);
+            univBattle.setMatchStatus(MatchStatus.PREPARED);
         }
 
         // 참가자 저장
@@ -365,7 +365,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
         // 준비가 안 된 경우 경기 시작을 할 수 없음.
-        if(univBattle.getMatchStatus()!= MatchStatus.WAITING){
+        if(univBattle.getMatchStatus()!= MatchStatus.PREPARED){
             throw new CustomException(CustomExceptionCode.CANNOT_START_MATCH);
         }
         // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
