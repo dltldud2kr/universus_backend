@@ -100,7 +100,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .categoryId(0L) // 잠재적으로 이 부분도 개선이 필요할 수 있습니다.
                     .univId(member.getUnivId())
                     .deptId(member.getDeptId())
-                    .clubId(dto.getClubId())
+                    .clubId(null)
                     .title(dto.getTitle())
                     .content(dto.getContent())
                     .regDt(LocalDateTime.now())
@@ -111,7 +111,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .categoryId(dto.getCategoryId())
                     .univId(member.getUnivId())
                     .deptId(member.getDeptId())
-                    .clubId(null)
+                    .clubId(dto.getClubId())
                     .title(dto.getTitle())
                     .content(dto.getContent())
                     .regDt(LocalDateTime.now())
@@ -178,7 +178,10 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
             // 게시글의 상세 정보 생성
             InfoPost infoPost = InfoPost.builder()
+                    .univBoardId(univBoard.getUnivBoardId())
                     .memberIdx(univBoard.getMemberIdx())
+                    .nickname(member.getNickname())
+                    .memberProfileImg(member.getProfileImgUrl())
                     .clubName(club != null ? club.getClubName() : null)
                     .categoryName(category.getCategoryName())
                     .title(univBoard.getTitle())
