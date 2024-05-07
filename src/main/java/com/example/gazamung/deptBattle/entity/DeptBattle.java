@@ -38,6 +38,8 @@ public class DeptBattle {
 
     private int hostScore;         // 주최팀 점수
     private int guestScore;        // 참가팀 점수
+
+    private String univLogo;
     private LocalDateTime regDt;    // 생성일
     private LocalDateTime endDt;    // 종료일
     private String invitationCode;  // 초대 코드

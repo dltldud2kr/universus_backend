@@ -82,16 +82,15 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .hostUnivName(university.getSchoolName())
                 .cost(request.getCost())
                 .regDt(LocalDateTime.now())
+                .hostUnivLogo(university.getLogoImg())
                 .build();
 
         UnivBattle result = univBattleRepository.save(univBattle);
 
 
-
-
         // 주최팀 학교 로고 업데이트
-        result.setHostUnivLogo(university.getLogoImg());
-        univBattleRepository.save(result);
+//        result.setHostUnivLogo(university.getLogoImg());
+//        univBattleRepository.save(result);
 
         //대항전 참가자 테이블에 생성자 추가
         Participant participant = Participant.builder()
@@ -202,7 +201,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     }
 
 
-    //@TODO 참가자가 꽉 찼을 때는 대기중으로 변경해야함.
 
     @Override
     @Transactional
@@ -391,7 +389,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
      * @param dto
      * @return
      */
-    //@TODO 점수와 맞는 경기결과값이여야할거같음. 예외처리 추가할것.
 
     @Override
     public boolean matchResultReq(MatchResultRequest dto) {
