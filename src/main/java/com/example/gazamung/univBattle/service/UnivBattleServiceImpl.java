@@ -106,7 +106,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         ChatRoom chatRoom = ChatRoom.builder()
                 .chatRoomType(0)
                 .dynamicId(univBattle.getUnivBattleId())
-                .chatRoomName(university.getSchoolName() + "대항전")
                 .build();
 
         chatRoomRepository.save(chatRoom);
@@ -117,7 +116,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                     .chatRoomId(chatRoom.getChatRoomId())
                     .chatRoomType(0)
                     .memberIdx(member.getMemberIdx())
-                    .chatRoomName(chatRoom.getChatRoomName())
                     .build();
 
             chatMemberRepository.save(chatMember);
@@ -195,6 +193,23 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .build();
 
         participantRepository.save(participant);
+
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0,univBattle.getUnivBattleId());
+
+        ChatMember chatMember = ChatMember.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .chatRoomType(1)
+                .customChatRoomName(univBattle.getHostUnivName() + "대항전")
+                .memberIdx(guest.getMemberIdx())
+                .build();
+
+        chatMemberRepository.save(chatMember);
+
+        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(univBattle.getHostLeader(),chatRoom.getChatRoomId());
+
+        hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + "대항전");
+
+        chatMemberRepository.save(hostChatMember);
 
         return true;
 

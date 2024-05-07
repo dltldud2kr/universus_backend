@@ -55,71 +55,19 @@ public class DeptBattleServiceImpl implements DeptBattleService {
      */
     @Override
     public boolean create(DeptBattleCreateRequest request) {
+        Member member = validateMember(request.getHostLeader());
+        University university = validateUniversity(member.getUnivId());
+        Department department = validateDepartment(member.getDeptId());
 
-        Member member = memberRepository.findById(request.getHostLeader())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        DeptBattle deptBattle = buildDeptBattle(request, member, university, department);
+        deptBattleRepository.save(deptBattle);
 
-        long univId = member.getUnivId();
-
-
-        University university = universityRepository.findById(univId)
-                .orElseThrow(() ->new CustomException(CustomExceptionCode.NOT_FOUND));
-
-        Department department = departmentRepository.findById(member.getDeptId())
-                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT));
-
-        DeptBattle deptBattle = DeptBattle.builder()
-                .hostLeader(request.getHostLeader())
-                .eventId(request.getEventId())
-                .univId(univId)
-                .hostDept(member.getDeptId())
-                .content(request.getContent())
-                .cost(request.getCost())
-                .battleDate(request.getBattleDate())
-                .teamPtcLimit(request.getTeamPtcLimit())
-                .location(request.getLocation())
-                .matchStatus(MatchStatus.RECRUIT)
-                .regDt(LocalDateTime.now())
-                .hostDeptName(department.getDeptName())
-                .univLogo(university.getLogoImg())
-                .build();
-
-        DeptBattle result = deptBattleRepository.save(deptBattle);
-
-        //대항전 참가자 테이블에 생성자 추가
-        Participant participant = Participant.builder()
-                .memberIdx(member.getMemberIdx())
-                .deptBattleId(result.getDeptBattleId())
-                .userName(member.getName())
-                .nickName(member.getNickname())
-                .univId(univId)
-                .build();
-        participantRepository.save(participant);
-
-        // 채팅방 생성
-        ChatRoom chatRoom = ChatRoom.builder()
-                .chatRoomType(1)
-                .dynamicId(result.getDeptBattleId())
-                .chatRoomName(university.getSchoolName() + "대항전")
-                .build();
-
-        chatRoomRepository.save(chatRoom);
-
-        Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(),chatRoom.getChatRoomId(),1);
-        if(findChatMember.isEmpty()){
-            ChatMember chatMember = ChatMember.builder()
-                    .chatRoomId(chatRoom.getChatRoomId())
-                    .chatRoomType(1)
-                    .memberIdx(member.getMemberIdx())
-                    .chatRoomName(chatRoom.getChatRoomName())
-                    .build();
-
-            chatMemberRepository.save(chatMember);
-        }
-
+        addParticipant(member, deptBattle);
+        createChatRoomWithMember(member, deptBattle);
 
         return true;
     }
+
 
 
 
@@ -189,6 +137,23 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
         participantRepository.save(participant);
 
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(1,deptBattle.getDeptBattleId());
+
+        ChatMember chatMember = ChatMember.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .chatRoomType(1)
+                .customChatRoomName(deptBattle.getHostDeptName() + "대항전")
+                .memberIdx(guest.getMemberIdx())
+                .build();
+
+        chatMemberRepository.save(chatMember);
+
+        ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(),chatRoom.getChatRoomId());
+
+        hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + "대항전");
+
+        chatMemberRepository.save(hostChatMember);
+
         return true;
     }
 
@@ -254,6 +219,65 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
 
 
+
+
+    private Member validateMember(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER, "Member not found with ID: " + memberId));
+    }
+
+    private University validateUniversity(Long universityId) {
+        return universityRepository.findById(universityId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND, "University not found with ID: " + universityId));
+    }
+
+    private Department validateDepartment(Long departmentId) {
+        return departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT, "Department not found with ID: " + departmentId));
+    }
+
+    private DeptBattle buildDeptBattle(DeptBattleCreateRequest request, Member member, University university, Department department) {
+        return DeptBattle.builder()
+                .hostLeader(member.getMemberIdx())
+                .eventId(request.getEventId())
+                .univId(member.getUnivId())
+                .hostDept(member.getDeptId())
+                .content(request.getContent())
+                .cost(request.getCost())
+                .battleDate(request.getBattleDate())
+                .teamPtcLimit(request.getTeamPtcLimit())
+                .location(request.getLocation())
+                .matchStatus(MatchStatus.RECRUIT)
+                .regDt(LocalDateTime.now())
+                .hostDeptName(department.getDeptName())
+                .univLogo(university.getLogoImg())
+                .build();
+    }
+
+    private void addParticipant(Member member, DeptBattle deptBattle) {
+        Participant participant = Participant.builder()
+                .memberIdx(member.getMemberIdx())
+                .deptBattleId(deptBattle.getDeptBattleId())
+                .userName(member.getName())
+                .nickName(member.getNickname())
+                .univId(member.getUnivId())
+                .build();
+        participantRepository.save(participant);
+    }
+
+    private void createChatRoomWithMember(Member member, DeptBattle deptBattle) {
+        ChatRoom chatRoom = ChatRoom.builder()
+                .chatRoomType(1)
+                .dynamicId(deptBattle.getDeptBattleId()).build();
+        chatRoomRepository.save(chatRoom);
+
+        ChatMember chatMember = ChatMember.builder()
+                .chatRoomId(chatRoom.getChatRoomId())
+                .chatRoomType(1)
+                .memberIdx(member.getMemberIdx())
+                .build();
+        chatMemberRepository.save(chatMember);
+    }
 
 
     /**

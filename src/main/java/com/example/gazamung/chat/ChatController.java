@@ -5,6 +5,7 @@ import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomService;
+import com.example.gazamung.chat.dto.DirectMessageReq;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,6 +45,17 @@ public class ChatController {
         try {
             Map<String, Object> result = chatRoomService.myChatRoomList(memberIdx);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "채팅방 리스트 정보", result);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+
+    }
+
+    @PostMapping("/direct")
+    public ResultDTO directMessage(@RequestBody DirectMessageReq dto){
+        try {
+            chatRoomService.directMessage(dto);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "1대1 채팅방 생성", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

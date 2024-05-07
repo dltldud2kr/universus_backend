@@ -20,7 +20,7 @@ public class ChatRoom {
     @SequenceGenerator(name = "CHATROOM_SEQ", sequenceName = "chatroom_sequence", allocationSize = 1)
     private Long chatRoomId;
 
-    private String chatRoomName;
+//    private String chatRoomName;
     private int chatRoomType;   // 0:대학  1:과   2:개인 3: 모임
 
     private Long dynamicId;  // 대항전 id
