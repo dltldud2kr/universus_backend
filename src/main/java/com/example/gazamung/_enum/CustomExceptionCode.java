@@ -72,7 +72,10 @@ public enum CustomExceptionCode {
     NOT_FOUND_CATEGORY("NOT_FOUND_CATEGORY","해당 카테고리를 확인 할 수 없습니다", HttpStatus.BAD_REQUEST),
 
     //기타
-    DEBUGGING_REQUIRED("DEBUGGING_REQUIRED", "디버깅 필요", HttpStatus.BAD_REQUEST);
+    DEBUGGING_REQUIRED("DEBUGGING_REQUIRED", "디버깅 필요", HttpStatus.BAD_REQUEST),
+
+    //댓글
+    NOT_FOUND_REPLY("NOT_FOUND_REPLY", "댓글을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
 
 
 
