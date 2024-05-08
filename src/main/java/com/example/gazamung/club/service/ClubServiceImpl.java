@@ -381,22 +381,35 @@ public class ClubServiceImpl implements ClubService {
         Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-        // categoryId가 2(모집)인 게시판의 게시물을 최신순으로 가져옴
-        List<UnivBoard> univBoardList = univBoardRepository.findByCategoryIdAndUnivId(2L, member.getUnivId(), Sort.by(Sort.Direction.DESC, "regDt"));
+        // categoryId가 1(모집)인 게시판의 게시물을 최신순으로 가져옴
+        List<UnivBoard> univBoardList = univBoardRepository.findByCategoryIdAndUnivId(1L, member.getUnivId(), Sort.by(Sort.Direction.DESC, "regDt"));
 
         if (univBoardList.isEmpty()) {
             throw new CustomException(CustomExceptionCode.NOT_FOUND_BOARD);
         }
 
+        // univBoardList의 각각의 UnivBoard에 대해 이벤트 정보를 가져와서 MercenaryDto로 변환
         return univBoardList.stream()
-                .map(univBoard -> MercenaryDto.builder()
-                        .univBoardId(univBoard.getUnivBoardId())
-                        .title(univBoard.getTitle())
-                        .eventName(univBoard.getEventName())
-                        .lat(univBoard.getLat())
-                        .lng(univBoard.getLng())
-                        .place(univBoard.getPlace())
-                        .build())
+                .map(univBoard -> {
+                    Optional<Event> event = eventRepository.findById(univBoard.getEventId());
+                    if (event.isEmpty()) {
+                        throw new CustomException(CustomExceptionCode.NOT_FOUND_EVENT);
+                    }
+                    // 첫 번째 이미지만 반환
+                    List<UploadImage> postImages = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoard.getUnivBoardId());
+                    String firstImageUrl = postImages.isEmpty() ? null : postImages.get(0).getImageUrl();
+
+                    return MercenaryDto.builder()
+                            .univBoardId(univBoard.getUnivBoardId())
+                            .title(univBoard.getTitle())
+                            .eventName(event.get().getEventName())
+                            .lat(univBoard.getLat())
+                            .lng(univBoard.getLng())
+                            .place(univBoard.getPlace())
+                            .imageUrl(firstImageUrl)
+                            .matchDt(univBoard.getMatchDt())
+                            .build();
+                })
                 .limit(3) // 3개만 반환
                 .collect(Collectors.toList());
     }

@@ -36,7 +36,9 @@ public class UnivBoard {
     private String lng;             // 경도
     private String place;           // 위치
 
-    private String eventName;
+    private Long eventId;
+
+    private String matchDt;  // 경기 일시
 
     private Long representIdx;  // 대표 사진 idx
 }

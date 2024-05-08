@@ -34,4 +34,6 @@ public class InfoPost {
 
     private String eventName;
 
+    private String matchDt;  // 경기 일시
+
 }

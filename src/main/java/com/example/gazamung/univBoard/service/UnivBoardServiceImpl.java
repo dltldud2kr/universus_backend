@@ -70,7 +70,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         if (post.getCategoryId() == 1) {
             builder.lat(post.getLat())
                     .lng(post.getLng())
-                    .place(post.getPlace());
+                    .place(post.getPlace())
+                    .matchDt(post.getMatchDt());
         }
 
         return builder.build();
@@ -92,7 +93,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
         UnivBoard univBoard;
         // clubId 유무로 학교 / 모임 게시판 구분
-        if (dto.getClubId() == null) {
+        if (dto.getClubId() != null) {
             clubRepository.findById(dto.getClubId())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
             univBoard = UnivBoard.builder()
@@ -100,10 +101,11 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .categoryId(0L) // 잠재적으로 이 부분도 개선이 필요할 수 있습니다.
                     .univId(member.getUnivId())
                     .deptId(member.getDeptId())
-                    .clubId(null)
+                    .clubId(dto.getClubId())
                     .title(dto.getTitle())
                     .content(dto.getContent())
                     .regDt(LocalDateTime.now())
+                    .eventId(dto.getEventId())
                     .build();
         } else {
             univBoard = UnivBoard.builder()
@@ -111,19 +113,18 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .categoryId(dto.getCategoryId())
                     .univId(member.getUnivId())
                     .deptId(member.getDeptId())
-                    .clubId(dto.getClubId())
+                    .clubId(null)
                     .title(dto.getTitle())
                     .content(dto.getContent())
                     .regDt(LocalDateTime.now())
+                    .eventId(dto.getEventId())
                     .build();
             // categoryId == 1 인 경우 위치 정보도 저장
             if (dto.getCategoryId() == 1) {
                 univBoard.setLat(dto.getLat());
                 univBoard.setLng(dto.getLng());
                 univBoard.setPlace(dto.getPlace());
-                System.out.println("Latitude set to: " + dto.getLat());
-                System.out.println("Longitude set to: " + dto.getLng());
-                System.out.println("Place set to: " + dto.getPlace());
+                univBoard.setMatchDt(dto.getMatchDt());
             }
         }
         UnivBoard savedUnivBoard = univBoardRepository.save(univBoard);
