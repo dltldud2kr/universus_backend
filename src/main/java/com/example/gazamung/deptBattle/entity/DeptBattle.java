@@ -40,8 +40,8 @@ public class DeptBattle {
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;            // 상태
 
-    private int hostScore;         // 주최팀 점수
-    private int guestScore;        // 참가팀 점수
+    private Long hostScore;         // 주최팀 점수
+    private Long guestScore;        // 참가팀 점수
 
     private String univLogo;
     private LocalDateTime regDt;    // 생성일

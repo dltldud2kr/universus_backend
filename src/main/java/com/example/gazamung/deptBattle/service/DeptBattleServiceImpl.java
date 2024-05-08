@@ -8,9 +8,7 @@ import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.department.entity.Department;
 import com.example.gazamung.department.repository.DepartmentRepository;
-import com.example.gazamung.deptBattle.dto.DeptBattleAttendRequest;
-import com.example.gazamung.deptBattle.dto.DeptBattleCreateRequest;
-import com.example.gazamung.deptBattle.dto.DeptGuestLeaderAttendRequest;
+import com.example.gazamung.deptBattle.dto.*;
 import com.example.gazamung.deptBattle.entity.DeptBattle;
 import com.example.gazamung.deptBattle.repository.DeptBattleRepository;
 import com.example.gazamung.exception.CustomException;
@@ -29,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.*;
 
 @Service
 @Slf4j
@@ -42,6 +41,12 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final DepartmentRepository departmentRepository;
+
+    // 스케줄러 생성
+    private final ScheduledExecutorService scheduler2 = Executors.newScheduledThreadPool(1);
+    // 예약 작업 관리를 위한 ConcurrentHashMap
+    private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks2 = new ConcurrentHashMap<>();
+
 
 
     /**
@@ -185,6 +190,71 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         deptBattle.setMatchStartDt(LocalDateTime.now());
 
         deptBattleRepository.save(deptBattle);
+
+        return true;
+    }
+
+    @Override
+    public boolean matchResultReq(DeptMatchResultReq dto) {
+
+        DeptBattle deptBattle = deptBattleRepository.findById(dto.getDeptBattleId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 경기 상태가 진행 중이 아닐 경우 예외처리
+        if (deptBattle.getMatchStatus() != MatchStatus.IN_PROGRESS) {
+            throw new CustomException(CustomExceptionCode.NOT_IN_PROGRESS);
+        }
+
+        // 경기 점수와 승리한 대학교 기록 설정
+        deptBattle.setGuestScore(dto.getGuestScore());
+        deptBattle.setHostScore(dto.getHostScore());
+        deptBattle.setWinDept(dto.getWinDept());
+
+        deptBattleRepository.save(deptBattle);
+
+        // 1분 후에 실행될 스케줄링 작업을 생성합니다. (테스트용)
+        ScheduledFuture<?> scheduledFuture = scheduler2.schedule(() -> {
+            log.info("Scheduled Task 실행");
+            checkIncompleteMatch(deptBattle.getDeptBattleId());
+        }, 1, TimeUnit.MINUTES); // 1분 후에 실행
+
+        // 예약된 작업을 관리 목록에 추가
+        scheduledTasks2.put(deptBattle.getDeptBattleId(), scheduledFuture);
+
+        return true;
+    }
+
+    @Override
+    public boolean matchResultRes(DeptMatchResultRes dto) {
+
+        DeptBattle deptBattle = deptBattleRepository.findById(dto.getDeptBattleId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 이미 경기가 완료된 상태일 경우 예외 처리
+        if (deptBattle.getMatchStatus() == MatchStatus.COMPLETED) {
+            throw new CustomException(CustomExceptionCode.ALREADY_END_MATCH);
+        }
+
+        // 주최자측 결과 보고에 응답했는 경우 관리 목록에서 해당 경기의 스케줄링 작업을 가져와 취소
+        ScheduledFuture<?> future = scheduledTasks2.remove(deptBattle.getDeptBattleId());
+        if (future != null) {
+            future.cancel(false); // 작업 취소
+            log.info("Scheduled Task 취소 시도");
+        }
+
+        // true 로 반응한 경우 경기결과에 문제가 없으니 COMPLETED 처리
+        if (dto.isResultYN()) {
+            deptBattle.setMatchStatus(MatchStatus.COMPLETED);
+        }
+        // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
+        else {
+            deptBattle.setGuestScore(null);
+            deptBattle.setHostScore(null);
+            deptBattle.setWinDept(null);
+        }
+
+        deptBattleRepository.save(deptBattle);
+
 
         return true;
     }
@@ -399,6 +469,26 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         if (hostChatMember != null) {
             hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + " 대항전");
             chatMemberRepository.save(hostChatMember);
+        }
+    }
+
+
+    /**
+     * 경기 종료 메서드
+     * @author 이시영
+     * @param deptBattleId
+     */
+    // 경기 종료 처리 메서드
+    private void checkIncompleteMatch(Long deptBattleId) {
+        DeptBattle deptBattle = deptBattleRepository.findById(deptBattleId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 경기 상태가 완료되지 않았을 경우 경기를 종료 처리합니다.
+        if (deptBattle.getMatchStatus() != MatchStatus.COMPLETED) {
+            deptBattle.setMatchStatus(MatchStatus.COMPLETED);
+            deptBattle.setEndDt(LocalDateTime.now());
+            deptBattleRepository.save(deptBattle);
+            log.info("경기 종료 처리 완료");
         }
     }
 

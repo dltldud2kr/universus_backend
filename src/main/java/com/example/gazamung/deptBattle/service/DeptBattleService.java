@@ -1,10 +1,10 @@
 package com.example.gazamung.deptBattle.service;
 
-import com.example.gazamung.deptBattle.dto.DeptBattleAttendRequest;
-import com.example.gazamung.deptBattle.dto.DeptBattleCreateRequest;
-import com.example.gazamung.deptBattle.dto.DeptGuestLeaderAttendRequest;
+import com.example.gazamung.deptBattle.dto.*;
 import com.example.gazamung.deptBattle.entity.DeptBattle;
 import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
+import com.example.gazamung.univBattle.dto.MatchResultRequest;
+import com.example.gazamung.univBattle.dto.MatchResultResponse;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import org.springframework.stereotype.Service;
 
@@ -53,5 +53,13 @@ public interface DeptBattleService {
     boolean matchStart(long deptBattleId);
 
 
+    /**
+     * 대항전 결과 전송 (대표자)
+     * @param dto
+     * @return
+     */
+    boolean matchResultReq(DeptMatchResultReq dto);
+
+    boolean matchResultRes(DeptMatchResultRes dto);
 
 }

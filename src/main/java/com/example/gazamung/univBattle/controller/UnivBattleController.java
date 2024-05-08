@@ -27,7 +27,7 @@ import java.util.Map;
 public class UnivBattleController {
 
     private  final UnivBattleService univBattleService;
-    @Operation(summary = "대항전 생성 ", description = "" +
+    @Operation(summary = "대학 vs 대학 대항전 생성 ", description = "" +
             " 모임 가입." +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
