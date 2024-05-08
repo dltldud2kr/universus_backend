@@ -294,24 +294,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     @Override
     public List<UnivBattle> list(int status) {
 
-        Map<String, Object> response = new HashMap<>();
-
-
-        switch (status) {
-            case 0:
-                return univBattleRepository.findAll();
-            case 1:
-                return univBattleRepository.findByMatchStatus(MatchStatus.RECRUIT);
-            case 2:
-                return univBattleRepository.findByMatchStatus(MatchStatus.WAITING);
-            case 3:
-                return univBattleRepository.findByMatchStatus(MatchStatus.IN_PROGRESS);
-            case 4:
-                return univBattleRepository.findByMatchStatus(MatchStatus.COMPLETED);
-
-            default:
-                throw new CustomException(CustomExceptionCode.SERVER_ERROR);
-        }
+        return switch (status) {
+            case 0 -> univBattleRepository.findAll();
+            case 1 -> univBattleRepository.findByMatchStatus(MatchStatus.RECRUIT);
+            case 2 -> univBattleRepository.findByMatchStatus(MatchStatus.WAITING);
+            case 3 -> univBattleRepository.findByMatchStatus(MatchStatus.IN_PROGRESS);
+            case 4 -> univBattleRepository.findByMatchStatus(MatchStatus.COMPLETED);
+            default -> throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+        };
 
     }
 
@@ -328,11 +318,13 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         List<Participant> HostparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getHostUniv(),univBattleId);
         List<Participant> GuestparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getGuestUniv(),univBattleId);
 
-        String guestUvName = "";
-
-        University Hostuniversity = universityRepository.findById(univBattle.getHostUniv())
+        University hostuniversity = universityRepository.findById(univBattle.getHostUniv())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
 
+        String hostUvName = hostuniversity.getSchoolName();
+        String guestUvName = "";
+
+        // 대항전에 대표참가자가 참여했다면 대학명 추출
         if(univBattle.getGuestUniv() != null) {
             University GuestUniversity = universityRepository.findById(univBattle.getGuestUniv())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
@@ -340,12 +332,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         }
 
 
-
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0,univBattleId);
         long chatRoomId = chatRoom.getChatRoomId();
-
-
-        String hostUvName = Hostuniversity.getSchoolName();
 
 
         // 응답용 Map 생성 및 값 추가

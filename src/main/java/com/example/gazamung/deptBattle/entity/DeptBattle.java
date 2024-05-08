@@ -35,6 +35,7 @@ public class DeptBattle {
 
     private String battleDate;     // 일정
     private String location;        // 장소
+    private LocalDateTime matchStartDt;
 
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;            // 상태

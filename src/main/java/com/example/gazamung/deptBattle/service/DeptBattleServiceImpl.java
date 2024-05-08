@@ -18,7 +18,6 @@ import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.participant.entity.Participant;
 import com.example.gazamung.participant.repository.ParticipantRepository;
-import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import com.example.gazamung.univBattle.service.UnivBattleServiceImpl;
 import com.example.gazamung.university.entity.University;
@@ -29,9 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -45,7 +42,6 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final DepartmentRepository departmentRepository;
-    private final UnivBattleServiceImpl univBattleService;
 
 
     /**
@@ -92,6 +88,106 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
 
     return true;
 }
+
+    @Override
+    public List<DeptBattle> list(int status) {
+
+        return switch (status) {
+            case 0 -> deptBattleRepository.findAll();
+            case 1 -> deptBattleRepository.findByMatchStatus(MatchStatus.RECRUIT);
+            case 2 -> deptBattleRepository.findByMatchStatus(MatchStatus.WAITING);
+            case 3 -> deptBattleRepository.findByMatchStatus(MatchStatus.IN_PROGRESS);
+            case 4 -> deptBattleRepository.findByMatchStatus(MatchStatus.COMPLETED);
+            default -> throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+        };
+    }
+
+    @Override
+    public Map<String, Object> info(long deptBattleId) {
+
+        DeptBattle deptBattle = deptBattleRepository.findById(deptBattleId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+
+        int hostPtc = participantRepository.countByDeptBattleIdAndDeptId(deptBattleId,deptBattle.getHostDept());
+        int guestPtc = participantRepository.countByDeptBattleIdAndDeptId(deptBattleId,deptBattle.getGuestDept());
+
+        List<Participant> hostparticipantList = participantRepository.findAllByDeptIdAndDeptBattleId(deptBattle.getHostDept(),deptBattleId);
+        List<Participant> guestparticipantList = participantRepository.findAllByDeptIdAndDeptBattleId(deptBattle.getGuestDept(),deptBattleId);
+
+        University university = universityRepository.findById(deptBattle.getUnivId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
+
+        String uvName = university.getSchoolName();
+
+        Department hostDept = departmentRepository.findById(deptBattle.getHostDept())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT));
+
+
+
+        String hostDeptName = hostDept.getDeptName();
+        String guestDeptName = "";
+
+        if(deptBattle.getGuestDept() != null){
+            Department guestDept = departmentRepository.findById(deptBattle.getGuestDept())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT));
+            guestDeptName = guestDept.getDeptName();
+        }
+
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(1,deptBattleId);
+        long chatRoomId = chatRoom.getChatRoomId();
+
+        // 응답용 Map 생성 및 값 추가
+        Map<String, Object> response = new HashMap<>();
+
+        Map<String, Object> hostTeam = new HashMap<>();
+        hostTeam.put("hostDeptName",hostDeptName);
+        hostTeam.put("hostPtcCnt", hostPtc);
+        hostTeam.put("hostPtcList", hostparticipantList);
+
+        Map<String, Object> guestTeam = new HashMap<>();
+        guestTeam.put("guestDeptName", guestDeptName);
+        guestTeam.put("guestPtcCnt", guestPtc);               // 참가팀 회원 수
+        guestTeam.put("guestPtcList", guestparticipantList);    // 참가팀 회원 리스트
+
+        response.put("HostTeam", hostTeam);
+        response.put("GuestTeam", guestTeam);
+        response.put("deptBattle", deptBattle);
+        response.put("chatRoomType", chatRoom.getChatRoomType());
+        response.put("chatRoomId", chatRoomId);
+
+        if(deptBattle.getWinDept() != null) {
+            String winUniv = departmentRepository.findById(deptBattle.getWinDept()).orElse(null).getDeptName();
+            response.put("winDeptName", winUniv);
+        }
+
+
+        return response;
+    }
+
+    @Override
+    public boolean matchStart(long deptBattleId) {
+
+        DeptBattle deptBattle = deptBattleRepository.findById(deptBattleId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 준비가 안 된 경우 경기 시작을 할 수 없음.
+        if(deptBattle.getMatchStatus()!= MatchStatus.PREPARED){
+            throw new CustomException(CustomExceptionCode.CANNOT_START_MATCH);
+        }
+        // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
+        int ptcCount = participantRepository.countByUnivBattleId(deptBattleId);
+        if(ptcCount != deptBattle.getTeamPtcLimit()){
+            throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
+        }
+
+        deptBattle.setMatchStatus(MatchStatus.IN_PROGRESS);
+        deptBattle.setMatchStartDt(LocalDateTime.now());
+
+        deptBattleRepository.save(deptBattle);
+
+        return true;
+    }
 
 
     @Override
