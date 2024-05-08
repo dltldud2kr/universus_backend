@@ -7,6 +7,8 @@ import com.example.gazamung.chat.chatMember.ChatMemberRepository;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.fcmSend.FcmSendDto;
+import com.example.gazamung.fcmSend.FcmService;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.participant.entity.Participant;
@@ -22,6 +24,7 @@ import org.checkerframework.checker.signature.qual.IdentifierOrPrimitiveType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -39,6 +42,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final ChatRoomRepository chatRoomRepository;
     private final ParticipantRepository participantRepository;
     private final ChatMemberRepository chatMemberRepository;
+    private final FcmService fcmService;
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     // 예약 작업 관리를 위한 ConcurrentHashMap
@@ -389,14 +393,51 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         }
         // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
         int ptcCount = participantRepository.countByUnivBattleId(univBattleId);
-        if(ptcCount != univBattle.getTeamPtcLimit()){
+        if(ptcCount != univBattle.getTeamPtcLimit() * 2){
             throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
         }
+        //@TODO 대체 메서드가 될 수 있음.
+//        if(participantList.size() != univBattle.getTeamPtcLimit() * 2){
+//            throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
+//        }
+
+        List<Participant> participantList = participantRepository.findByUnivBattleId(univBattleId);
+
+        //@TODO 테스트를 위해 주석처리  실서비스 메서드.
+//        for (Participant participants : participantList){
+//            Member member = memberRepository.findById(participants.getMemberIdx())
+//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+//            FcmSendDto fcmSendDto = FcmSendDto.builder()
+//                    .token(member.getFcmToken())
+//                    .title("대항전이 시작되었습니다.")
+//                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+//                    .build();
+//            try {
+//                fcmService.sendMessageTo(fcmSendDto);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
 
         univBattle.setMatchStatus(MatchStatus.IN_PROGRESS);
         univBattle.setMatchStartDt(LocalDateTime.now());
 
         univBattleRepository.save(univBattle);
+
+        // FCM 알림 전송 메서드
+
+        FcmSendDto fcmSendDto = FcmSendDto.builder()
+                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .title("대항전이 시작되었습니다.")
+                .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+                .build();
+        try {
+            fcmService.sendMessageTo(fcmSendDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
 
         return true;
     }

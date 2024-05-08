@@ -197,8 +197,12 @@ public class ClubController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/suggest")
-    public ResultDTO<List<SuggestClub>> suggest(@RequestParam Long memberIdx){
+    public ResultDTO<List<SuggestClub>> suggest(@RequestParam Long memberIdx , @RequestParam(required = false) String fcmToken){
         try {
+            if (!fcmToken.isEmpty()){
+                clubService.fcmToken(fcmToken, memberIdx);
+            }
+
             List<SuggestClub> suggestClubList = clubService.suggest(memberIdx);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"조회 성공", suggestClubList);
 
@@ -225,6 +229,7 @@ public class ClubController {
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"조회 성공", mercenaryDtos);
         } catch (CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+
         }
     }
 }

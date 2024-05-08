@@ -370,6 +370,10 @@ public class ClubServiceImpl implements ClubService {
         }).collect(Collectors.toList());
 
         Collections.shuffle(suggestedClubs); // 리스트 섞기
+
+
+
+
         return suggestedClubs;
     }
 
@@ -430,6 +434,16 @@ public class ClubServiceImpl implements ClubService {
                 })
                 .limit(3) // 3개만 반환
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void fcmToken(String fcmToken, Long memberIdx) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        member.setFcmToken(fcmToken);
+        memberRepository.save(member);
+
     }
 
 

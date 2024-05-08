@@ -31,8 +31,6 @@ public enum CustomExceptionCode {
     INSUFFICIENT_MATCH_PLAYERS("INSUFFICIENT_MATCH_PLAYERS","경기시작을 위한 참가인원수가 부족합니다.", HttpStatus.BAD_REQUEST),
     REPRESENTATIVE_ALREADY_EXISTS("REPRESENTATIVE_ALREADY_EXISTS", "이미 대표자가 존재합니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND_DEPARTMENT("NOT_FOUND_DEPARTMENT","존재하지 않는 과입니다.", HttpStatus.BAD_REQUEST),
-
-
     INVALID_INVITE_CODE("INVALID_INVITE_CODE","참가 코드가 유효하지 않습니다.", HttpStatus.BAD_REQUEST),
     ALREADY_ATTENDED("ALREADY_ATTENDED","이미 참가한 회원입니다.", HttpStatus.BAD_REQUEST),
     NOT_IN_PROGRESS("NOT_IN_PROGRESS","아직 진행되지 않은 경기입니다.", HttpStatus.BAD_REQUEST),

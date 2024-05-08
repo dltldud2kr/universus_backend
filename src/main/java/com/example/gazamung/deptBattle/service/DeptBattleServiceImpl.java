@@ -182,7 +182,7 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         }
         // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
         int ptcCount = participantRepository.countByUnivBattleId(deptBattleId);
-        if(ptcCount != deptBattle.getTeamPtcLimit()){
+        if(ptcCount != deptBattle.getTeamPtcLimit() * 2){
             throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
         }
 

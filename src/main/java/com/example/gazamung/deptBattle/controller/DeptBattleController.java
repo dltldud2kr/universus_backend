@@ -38,7 +38,9 @@ public class DeptBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." )
+            "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
+            "\n- NOT_FOUND: 존재하지 않는 회원입니다." +
+            "\n- NOT_FOUND_DEPARTMENT: 존재하지 않는 회원입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -60,7 +62,11 @@ public class DeptBattleController {
             "\n### Result Code 에 따른 요청 결과" +
             "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
             "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
-            "\n- SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." )
+            "\n- SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." +
+            "\n- NOT_SAME_UNIVERSITY: 같은 대학교는 참가할 수 없습니다." +
+            "\n- REPRESENTATIVE_ALREADY_EXISTS: 같은 대학교는 참가할 수 없습니다." +
+            "\n- SAME_DEPARTMENT: 같은 대학교는 참가할 수 없습니다." +
+            "\n- NOT_FOUND_DEPARTMENT: 같은 대학교는 참가할 수 없습니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -82,9 +88,10 @@ public class DeptBattleController {
             "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
             "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
             "\n- EXCEEDED_TOTAL_CAPACITY: 대항전 총 참가 인원이 초과하였습니다." +
-            "\n- EXCEEDED_UNIV_CAPACITY: 대항전 대학별 참가 인원이 초과하였습니다." +
+            "\n- EXCEEDED_DEPT_CAPACITY: 대항전 과 최대 참가 인원이 초과하였습니다." +
             "\n- INVALID_INVITE_CODE: 참가 코드가 유효하지 않습니다." +
-            "\n- ALREADY_ATTENDED: 이미 참가한 회원입니다.")
+            "\n- ALREADY_ATTENDED: 이미 참가한 회원입니다." +
+            "\n- ALREADY_IN_PROGRESS: 이미 진행중인 경기입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -130,7 +137,9 @@ public class DeptBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- NOT_FOUND_UNIVERSITY: 존재하지 않는 대항전입니다." +
+            "\n- NOT_FOUND_DEPARTMENT: 존재하지 않는 대항전입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -150,7 +159,9 @@ public class DeptBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- CANNOT_START_MATCH: 존재하지 않는 대항전입니다." +
+            "\n- INSUFFICIENT_MATCH_PLAYERS: 존재하지 않는 대항전입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -170,7 +181,8 @@ public class DeptBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- NOT_IN_PROGRESS: 존재하지 않는 대항전입니다." )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -189,7 +201,8 @@ public class DeptBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- ALREADY_END_MATCH: 존재하지 않는 대항전입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })

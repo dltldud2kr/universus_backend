@@ -33,7 +33,8 @@ public class UnivBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." )
+            "\n- NOT_FOUND_USER: 존재하지 않는 회원입니다." +
+            "\n- NOT_FOUND: 해당 정보를 찾을 수 없습니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -126,7 +127,8 @@ public class UnivBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- NOT_FOUND_UNIVERSITY: 존재하지 않는 대학교입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -146,7 +148,9 @@ public class UnivBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- CANNOT_START_MATCH: 경기를 시작할 수 없습니다." +
+            "\n- INSUFFICIENT_MATCH_PLAYERS: 경기시작을 위한 참가인원수가 부족합니다." )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -165,7 +169,8 @@ public class UnivBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- NOT_IN_PROGRESS: 아직 진행되지 않은 경기입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -184,7 +189,8 @@ public class UnivBattleController {
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
-            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." )
+            "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
+            "\n- ALREADY_END_MATCH: 이미 종료된 경기입니다." )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })

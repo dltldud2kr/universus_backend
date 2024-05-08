@@ -50,6 +50,7 @@ public class Member implements UserDetails {
     private String oneLineIntro;    // 한 줄 소개
 
     private String profileImgUrl;   // 프로필 이미지   (추가)
+    private String fcmToken;    // fcm 토큰값
 
 
     @ElementCollection(fetch = FetchType.EAGER)

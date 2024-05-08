@@ -43,8 +43,5 @@ public interface ClubService {
 
     List<MercenaryDto> mercenary(Long memberIdx);
 
-    /**
-     * 모임 추천
-     * @param memberIdx
-     */
+    void fcmToken(String fcmToken, Long memberIdx);
 }

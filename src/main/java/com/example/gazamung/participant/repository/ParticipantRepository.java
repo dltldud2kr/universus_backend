@@ -17,6 +17,9 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     int countByUnivBattleId(Long univBattleId);
     int countByDeptBattleId(Long univBattleId);
 
+    List<Participant> findByUnivBattleId(Long univBattleId);
+    List<Participant> findByDeptBattleId(Long deptBattleId);
+
     // 대학별 참가인원 리스트
     List<Participant> findAllByUnivIdAndUnivBattleId(Long univId, Long univBattleId);
 

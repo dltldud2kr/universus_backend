@@ -3,6 +3,8 @@ package com.example.gazamung.fcmSend;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class FcmServiceImpl implements FcmService {
 
     /**
@@ -32,7 +36,7 @@ public class FcmServiceImpl implements FcmService {
 
         HttpEntity entity = new HttpEntity<>(message, headers);
 
-        String API_URL = "<https://fcm.googleapis.com/v1/projects/universealert-1345f/messages:send>";
+        String API_URL = "https://fcm.googleapis.com/v1/projects/universealert-1345f/messages:send";
         ResponseEntity response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
 
         System.out.println(response.getStatusCode());
@@ -50,7 +54,7 @@ public class FcmServiceImpl implements FcmService {
 
         GoogleCredentials googleCredentials = GoogleCredentials
                 .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
-                .createScoped(List.of("<https://www.googleapis.com/auth/cloud-platform>"));
+                .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
 
         googleCredentials.refreshIfExpired();
         return googleCredentials.getAccessToken().getTokenValue();
