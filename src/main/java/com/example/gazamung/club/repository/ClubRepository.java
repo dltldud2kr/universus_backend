@@ -15,4 +15,6 @@ public interface ClubRepository extends JpaRepository<Club, Long>{
     Club findByEventId(Long eventId);
 
     List<Club> findByMemberIdx(Long memberIdx);
+
+    List<Club> findAllByEventIdInAndClubIdNotIn(List<Long> eventIds, List<Long> clubIds);
 }

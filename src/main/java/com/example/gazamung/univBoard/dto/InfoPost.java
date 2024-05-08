@@ -13,11 +13,8 @@ import java.util.List;
 @Builder
 public class InfoPost {
 
-    private Long univBoardId;
 
-    private Long memberIdx;
     private String nickname;
-    private String memberProfileImg;
     private String categoryName;
     private String clubName;
 

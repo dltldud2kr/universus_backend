@@ -12,6 +12,7 @@ import java.util.List;
 @Data
 @Builder
 public class PostDto {
+        private Long univBoardId;      // 게시판 ID
 
         private Long memberIdx;
         private Long categoryId;        // 카테고리 ID

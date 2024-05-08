@@ -71,7 +71,11 @@ public enum CustomExceptionCode {
     NOT_FOUND_EVENT("NOT_FOUND_EVENT","해당 이벤트를 확인 할 수 없습니다", HttpStatus.BAD_REQUEST),
 
     // 카테고리
-    NOT_FOUND_CATEGORY("NOT_FOUND_CATEGORY","해당 카테고리를 확인 할 수 없습니다", HttpStatus.BAD_REQUEST);
+    NOT_FOUND_CATEGORY("NOT_FOUND_CATEGORY","해당 카테고리를 확인 할 수 없습니다", HttpStatus.BAD_REQUEST),
+
+    //기타
+    DEBUGGING_REQUIRED("DEBUGGING_REQUIRED", "디버깅 필요", HttpStatus.BAD_REQUEST);
+
 
 
     // 추후에 추가될 다른 업로드 타입들

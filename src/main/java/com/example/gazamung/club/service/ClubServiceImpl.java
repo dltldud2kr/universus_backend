@@ -169,6 +169,7 @@ public class ClubServiceImpl implements ClubService {
      * @created 24.03.13 이시영
      * @description 모임 삭제요청시 기존 업로드 되었던 S3 업로드 정보를 모두 삭제합니다.
      */
+    @Transactional
     public void delete(Long clubId, Long memberIdx) {
 
         try {
@@ -183,7 +184,7 @@ public class ClubServiceImpl implements ClubService {
 
                 //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 리뷰 파일을 모두 삭제.
                 //해당 리뷰에 업로드 등록되어있는 이미지를 검색.
-                List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.REVIEW, clubId);
+                List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.CLUB, clubId);
                 String[] removeTarget = new String[imageByAttachmentType.size() + 1];
 
                 int removeCount = 0;
@@ -268,7 +269,6 @@ public class ClubServiceImpl implements ClubService {
                 .build();
     }
 
-
     /**
      * @param request
      * @title 모임 탈퇴
@@ -302,34 +302,52 @@ public class ClubServiceImpl implements ClubService {
      */
     public List<SuggestClub> suggest(Long memberIdx) {
 
-        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-
-        // 멤버 ID를 사용하여 클럽 멤버 엔티티 목록을 검색
+        // 내가 가입한 클럽 목록 검색
         List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdx(memberIdx);
 
         // 멤버 ID를 사용하여 Club 엔티티 목록 검색 (내가 모임장인 경우)
         List<Club> clubList = clubRepository.findByMemberIdx(memberIdx);
 
+        List<Long> clubIds = new ArrayList<>(); // 클럽 ID를 저장할 리스트
+        List<Long> eventIds = new ArrayList<>(); // 이벤트 ID를 저장할 리스트
+
+        // 클럽 멤버가 있는 경우, 해당 클럽의 ID와 이벤트 ID를 추출
+        if (!clubMembers.isEmpty()) {
+            clubIds.addAll(clubMembers.stream()
+                    .map(ClubMember::getClubId)
+                    .collect(Collectors.toList()));
+
+            eventIds.addAll(clubRepository.findAllById(clubIds).stream()
+                    .map(Club::getEventId)
+                    .collect(Collectors.toList()));
+        }
+
+        // 모임장인 클럽이 있는 경우, 해당 클럽의 이벤트 ID를 추가하고 클럽 ID도 추출
+        if (!clubList.isEmpty()) {
+            eventIds.addAll(clubList.stream()
+                    .map(Club::getEventId)
+                    .collect(Collectors.toList()));
+
+            clubIds.addAll(clubList.stream()
+                    .map(Club::getClubId)
+                    .collect(Collectors.toList()));
+        }
+
         List<Club> clubs;
-        if (clubMembers.isEmpty() && clubList.isEmpty()) {
-            // 멤버가 어떤 클럽에도 속하지 않는 경우, 전체 클럽을 대상으로 추천
+        // 클럽 멤버가 없고, 모임장인 클럽도 없는 경우 모든 클럽을 대상으로 추천
+        if (clubIds.isEmpty() && eventIds.isEmpty()) {
             clubs = clubRepository.findAll();
         } else {
-            // 가입한 모임Id -> 해당 모임의 이벤트Id -> 해당 이벤트 Club 얻음
-            List<Long> clubIds = clubMembers.stream()
-                    .map(ClubMember::getClubId).collect(Collectors.toList());
-            List<Long> eventIds = clubRepository.findAllById(clubIds)
-                    .stream().map(Club::getEventId).collect(Collectors.toList());
-            clubList.stream()
-                    .map(Club::getEventId)
-                    .forEach(eventIds::add);
-            clubs = clubRepository.findAllByEventIdIn(eventIds);
+            // 추출된 이벤트 ID와 클럽 ID를 사용하여 클럽을 검색
+            clubs = clubRepository.findAllByEventIdInAndClubIdNotIn(eventIds, clubIds);
         }
 
         // 랜덤하게 띄우기 위해 리스트에 담아 이후 shuffle
         List<SuggestClub> suggestedClubs = clubs.stream().map(club -> {
+
             Long currentMembers = clubMemberRepository.countByClubId(club.getClubId()); // 현재 클럽 멤버 수 조회
             List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
+
             String imageUrl;
             if (!clubImage.isEmpty()) {
                 imageUrl = clubImage.get(0).getImageUrl();

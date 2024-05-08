@@ -18,6 +18,7 @@ import com.example.gazamung.univBoard.repository.UnivBoardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,6 +39,12 @@ public class UnivBoardServiceImpl implements UnivBoardService {
     private final ClubRepository clubRepository;
 
 
+    /**
+     * @param univBoardId
+     * @title 게시글 조회
+     * @created 24.05.07 이승열
+     * @description 커뮤니티 게시글 조회
+     */
     public Object infoPost(Long univBoardId) {
         UnivBoard post = univBoardRepository.findById(univBoardId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
@@ -51,6 +58,10 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
         }
 
+        // 멤버 조회
+        Member member = memberRepository.findById(post.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
         List<UploadImage> postImage = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoardId);
         List<String> postImageUrls = new ArrayList<>();
         for (UploadImage image : postImage) {
@@ -58,8 +69,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         }
 
         InfoPost.InfoPostBuilder builder = InfoPost.builder()
-                .memberIdx(post.getMemberIdx())
                 .clubName(club != null ? club.getClubName() : null)
+                .nickname(member.getNickname())
                 .categoryName(category.getCategoryName())
                 .title(post.getTitle())
                 .content(post.getContent())
@@ -150,6 +161,13 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         return result;
     }
 
+    /**
+     * @param memberIdx
+     * @param clubId
+     * @title 게시글 리스트 조회
+     * @created 24.05.07 이승열
+     * @description 커뮤니티 게시글 리스트 조회
+     */
     @Override
     public List<InfoPost> listPost(Long memberIdx, Long clubId) {
 
@@ -179,10 +197,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
             // 게시글의 상세 정보 생성
             InfoPost infoPost = InfoPost.builder()
-                    .univBoardId(univBoard.getUnivBoardId())
-                    .memberIdx(univBoard.getMemberIdx())
                     .nickname(member.getNickname())
-                    .memberProfileImg(member.getProfileImgUrl())
                     .clubName(club != null ? club.getClubName() : null)
                     .categoryName(category.getCategoryName())
                     .title(univBoard.getTitle())
@@ -197,8 +212,125 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         return infoPosts;
     }
 
+    /**
+     * @param univBoardId
+     * @param memberIdx
+     * @title 게시글 삭제
+     * @created 24.05.08 이승열
+     * @description 커뮤니티 게시글 삭제
+     */
+    @Override
+    @Transactional
+    public void deletePost(Long univBoardId, Long memberIdx) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        UnivBoard univBoard = univBoardRepository.findById(univBoardId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
+
+        // 글 작성자이거나 관리자인 경우
+        if ((univBoard.getMemberIdx().equals(memberIdx)) || (member.getRole() == 1)) {
+            univBoardRepository.delete(univBoard);
+
+            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoardId);
+            String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+
+            int removeCount = 0;
+            //업로드된 이미지가 잇는 경우
+            try {
+                if (imageByAttachmentType.size() > 0) {
+                    for (UploadImage file : imageByAttachmentType) {
+                        // 문자열에서 ".com/" 다음의 정보를 추출
+                        int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                        String result = file.getImageUrl().substring(startIndex);
+                        removeTarget[removeCount] = result;
+                        removeCount++;
+                    }
+                    //등록되어있는 파일 정보 삭제 요청.
+                    uploadService.removeS3Files(removeTarget);
+                    //데이터베이스에 맵핑되어있는 정보삭제
+                    uploadService.removeDatabaseByReviewIdx(univBoardId);
+                }
+            } catch (CustomException e) {
+                throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+            }
+        } else {
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+        }
+
+    }
+
+    @Override
+    public void modifyPost(PostDto dto) {
+        try {
+            UnivBoard univBoard = univBoardRepository.findById(dto.getUnivBoardId())
+                    .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
+
+            memberRepository.findById(dto.getMemberIdx())
+                    .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+            //수정을 요청한 사용자와 작성자가 다른 경우 : (본인인지의 대한 유효성 검사)
+            if (dto.getMemberIdx() != univBoard.getMemberIdx()) {
+                throw new CustomException(CustomExceptionCode.ACCESS_DENIED);
+            }
+            if (dto.getPostImage() != null && !dto.getPostImage().isEmpty()) {
+                //유효성 검증에 모두 통과했다면 버킷에 업로드되어있는 CLUB 파일을 모두 삭제합니다.
+                //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
+                List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.POST, dto.getUnivBoardId());
+                String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+
+                int removeCount = 0;
+
+                //업로드된 이미지가 잇는 경우
+                try {
+                    if (imageByAttachmentType.size() > 0) {
+                        for (UploadImage file : imageByAttachmentType) {
+                            // 문자열에서 ".com/" 다음의 정보를 추출
+                            int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                            String result = file.getImageUrl().substring(startIndex);
+                            removeTarget[removeCount] = result;
+                            removeCount++;
+                        }
+                        //등록되어있는 파일 정보 삭제 요청.
+                        uploadService.removeS3Files(removeTarget);
+                        //데이터베이스에 맵핑되어있는 정보삭제
+                        uploadService.removeDatabaseByReviewIdx(dto.getUnivBoardId());
+                    }
+                } catch (CustomException e) {
+                    throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+                }
+
+                //새롭게 요청온 업로드 이미지를  버킷에 업로드함.
+                uploadService.upload(dto.getPostImage(), dto.getMemberIdx(), AttachmentType.POST, univBoard.getUnivBoardId());
+
+                //업로드된 이미지 정보를 데이터베이스
+                List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoard.getUnivBoardId());
+            }
+
+            univBoard.setTitle(dto.getTitle());
+            univBoard.setContent(dto.getContent());
+            univBoard.setMatchDt(dto.getMatchDt());
+            univBoard.setCategoryId(dto.getCategoryId());
+            univBoard.setUdtDt(LocalDateTime.now());
+            if (dto.getClubId() != null)
+                univBoard.setClubId(dto.getClubId());
+            if (dto.getCategoryId() == 1L) {
+                univBoard.setLat(dto.getLat());
+                univBoard.setLng(dto.getLng());
+                univBoard.setPlace(dto.getPlace());
+                univBoard.setMatchDt(dto.getMatchDt());
+                univBoard.setEventId(dto.getEventId());
+            }
+
+            univBoardRepository.save(univBoard);
+        } catch (CustomException e) {
+            throw e;
+        }
+
+    }
 
 }
+
 
 
 

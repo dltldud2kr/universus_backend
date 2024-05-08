@@ -97,9 +97,9 @@ public class ClubController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @DeleteMapping("/delete")
-    public ResultDTO delete(@RequestParam Long moimId, Long memberIdx){
+    public ResultDTO delete(@RequestParam Long clubId, Long memberIdx){
         try{
-            clubService.delete(moimId, memberIdx);
+            clubService.delete(clubId, memberIdx);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "모임 삭제 완료.", null);
         } catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
