@@ -51,6 +51,7 @@ public class Member implements UserDetails {
 
     private String profileImgUrl;   // 프로필 이미지   (추가)
     private String fcmToken;    // fcm 토큰값
+    private String univLogoImg; // 대학 로고 이미지
 
 
     @ElementCollection(fetch = FetchType.EAGER)

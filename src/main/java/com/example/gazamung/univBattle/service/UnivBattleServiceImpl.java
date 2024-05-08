@@ -149,6 +149,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         Member guest = memberRepository.findById(request.getGuestLeader())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
+        Member host = memberRepository.findById(univBattle.getHostLeader())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         // 주최자 대학교
         long hostUniv = univBattle.getHostUniv();
         // 참가자 대학교
@@ -205,6 +207,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .chatRoomType(1)
                 .customChatRoomName(univBattle.getHostUnivName() + "대항전")
                 .memberIdx(guest.getMemberIdx())
+                .chatRoomImg(host.getUnivLogoImg())
                 .build();
 
         chatMemberRepository.save(chatMember);
@@ -212,6 +215,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(univBattle.getHostLeader(),chatRoom.getChatRoomId());
 
         hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + "대항전");
+        hostChatMember.setChatRoomImg(guest.getUnivLogoImg());
 
         chatMemberRepository.save(hostChatMember);
 

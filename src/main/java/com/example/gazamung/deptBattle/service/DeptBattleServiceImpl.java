@@ -457,17 +457,22 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
             return;
         }
 
+        Member host = memberRepository.findById(deptBattle.getHostLeader())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
         ChatMember chatMember = ChatMember.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
                 .chatRoomType(1)
                 .customChatRoomName(deptBattle.getHostDeptName() + " 대항전")
                 .memberIdx(guest.getMemberIdx())
+                .chatRoomImg(host.getUnivLogoImg())
                 .build();
         chatMemberRepository.save(chatMember);
 
         ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(), chatRoom.getChatRoomId());
         if (hostChatMember != null) {
             hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + " 대항전");
+            hostChatMember.setChatRoomImg(guest.getUnivLogoImg());
             chatMemberRepository.save(hostChatMember);
         }
     }

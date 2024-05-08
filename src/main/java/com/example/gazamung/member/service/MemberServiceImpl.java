@@ -169,6 +169,8 @@ public class MemberServiceImpl implements MemberService {
 //            emailAuthRepository.findByEmailAndEmailAuthStatus(email,EmailAuthStatus.VERIFIED)
 //                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_COMPLETE_AUTH));
 
+            University university = universityRepository.findById(dto.getUnivId())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
 
             Member member = Member.builder()
                     .email(email)   // 이메일
@@ -185,6 +187,7 @@ public class MemberServiceImpl implements MemberService {
                     .phone(dto.getPhone())  // 휴대폰번호
                     .address(dto.getAddress())  //주소
                     .regDt(LocalDateTime.now())
+                    .univLogoImg(university.getLogoImg())
                     .build();
             Member savedMember = memberRepository.save(member);
 

@@ -25,6 +25,7 @@ public class ChatMember {
     private int chatRoomType;
 //    private String chatRoomName;
     private String customChatRoomName;
+    private String chatRoomImg;
 
     private Long chatRoomId;  // 대항전 id
     
