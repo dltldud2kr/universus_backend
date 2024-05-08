@@ -4,16 +4,27 @@
 <mapper namespace="com.example.gazamung.mapper.ChatMapper">
 
     <!-- chatRoomId를 기반으로 가장 최근의 메시지 내용 조회 -->
-    <select id="findLatestMessageContentByChatRoomId" resultType="string">
-        SELECT content
+<!--    <select id="findLatestMessageContentByChatRoomId" resultType="string">-->
+<!--        SELECT content-->
+<!--        FROM (-->
+<!--                 SELECT content-->
+<!--                 FROM chat_message-->
+<!--                 WHERE chat_room_id = #{chatRoomId}-->
+<!--                 ORDER BY reg_dt DESC-->
+<!--             )-->
+<!--        WHERE ROWNUM = 1-->
+<!--    </select>-->
+
+    <!-- chatRoomId를 기반으로 가장 최근의 메시지 내용과 시간 조회 -->
+    <select id="findLatestMessageByChatRoomId" resultType="map">
+        SELECT content, reg_dt AS reg_dt
         FROM (
-                 SELECT content
+                 SELECT content, reg_dt
                  FROM chat_message
                  WHERE chat_room_id = #{chatRoomId}
                  ORDER BY reg_dt DESC
              )
         WHERE ROWNUM = 1
     </select>
-
 
 </mapper>
