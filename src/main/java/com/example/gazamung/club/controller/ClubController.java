@@ -199,7 +199,8 @@ public class ClubController {
     @GetMapping("/suggest")
     public ResultDTO<List<SuggestClub>> suggest(@RequestParam Long memberIdx , @RequestParam(required = false) String fcmToken){
         try {
-            if (!fcmToken.isEmpty()){
+            // fcmToken이 null이 아니고, 빈 문자열이 아닌 경우에만 실행
+            if (fcmToken != null && !fcmToken.isEmpty()) {
                 clubService.fcmToken(fcmToken, memberIdx);
             }
 
