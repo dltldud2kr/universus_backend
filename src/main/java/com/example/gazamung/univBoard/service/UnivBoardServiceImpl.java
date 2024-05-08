@@ -75,7 +75,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                 .title(post.getTitle())
                 .content(post.getContent())
                 .regDt(post.getRegDt())
-                .postImageUrls(postImageUrls);
+                .postImageUrls(postImageUrls)
+                .profileImgUrl(member.getProfileImgUrl());
 
         // categoryId가 1인 경우, 위치 정보도 반환 객체에 포함
         if (post.getCategoryId() == 1) {
