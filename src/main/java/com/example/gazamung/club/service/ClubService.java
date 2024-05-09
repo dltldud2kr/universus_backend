@@ -44,4 +44,6 @@ public interface ClubService {
     List<MercenaryDto> mercenary(Long memberIdx);
 
     void fcmToken(String fcmToken, Long memberIdx);
+
+    void expelMember(ExpelClub request);
 }

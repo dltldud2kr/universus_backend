@@ -117,8 +117,6 @@ public class ClubServiceImpl implements ClubService {
             chatMemberRepository.save(chatMember);
         }
 
-
-
         return result;
 
     }
@@ -535,6 +533,36 @@ public class ClubServiceImpl implements ClubService {
         member.setFcmToken(fcmToken);
         memberRepository.save(member);
 
+    }
+
+    @Override
+    public void expelMember(ExpelClub request) {
+
+        Club club = clubRepository.findById(request.getClubId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
+        memberRepository.findById(request.getExpelMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        Member member = memberRepository.findById(request.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        if ((request.getMemberIdx() == club.getMemberIdx()) || member.getRole() == 1) {
+            ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
+            // 가입된 회원인지 확인 후 탈퇴
+            Optional<ClubMember> clubMemberOptional = clubMemberRepository.findByClubIdAndMemberIdx(request.getClubId(), request.getExpelMemberIdx());
+            if (clubMemberOptional.isPresent()) {
+                ClubMember clubMember = clubMemberOptional.get();
+                clubMemberRepository.delete(clubMember);
+
+                Optional<ChatMember> chatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(request.getMemberIdx(), chatRoom.getChatRoomId(), 3);
+                if (!chatMember.isEmpty()) {
+                    chatMemberRepository.deleteById(chatMember.get().getIdx());
+                }
+            } else {
+                throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
+            }
+        }
     }
 
     // 현재 멤버 수 계산 메서드
