@@ -20,5 +20,4 @@ public interface ChatMemberRepository extends JpaRepository<ChatMember,Long> {
 
     ChatMember findByChatRoomIdAndChatRoomType(Long dynamicId, int i);
 
-    void delete(Optional<ChatMember> chatMember);
 }
