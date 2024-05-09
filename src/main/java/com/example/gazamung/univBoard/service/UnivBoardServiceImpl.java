@@ -76,7 +76,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                 .content(post.getContent())
                 .regDt(post.getRegDt())
                 .postImageUrls(postImageUrls)
-                .profileImgUrl(member.getProfileImgUrl());
+                .profileImgUrl(member.getProfileImgUrl())
+                .univBoardId(post.getUnivBoardId());
 
         // categoryId가 1인 경우, 위치 정보도 반환 객체에 포함
         if (post.getCategoryId() == 1) {
@@ -193,19 +194,24 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                         .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
             }
 
+            // 작성자 닉네임, 프로필이미지 반환
+            Member PostMember = memberRepository.findById(univBoard.getMemberIdx()).orElse(null);
+
+
             // 게시글의 이미지 정보 조회
             List<UploadImage> postImages = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoard.getUnivBoardId());
 
             // 게시글의 상세 정보 생성
             InfoPost infoPost = InfoPost.builder()
                     .univBoardId(univBoard.getUnivBoardId())
-                    .nickname(member.getNickname())
+                    .nickname(PostMember.getNickname())
                     .clubName(club != null ? club.getClubName() : null)
                     .categoryName(category.getCategoryName())
                     .title(univBoard.getTitle())
                     .content(univBoard.getContent())
                     .regDt(univBoard.getRegDt())
                     .postImageUrls(postImages.stream().map(UploadImage::getImageUrl).collect(Collectors.toList()))
+                    .profileImgUrl(PostMember.getProfileImgUrl())
                     .build();
 
             infoPosts.add(infoPost);

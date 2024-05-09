@@ -309,6 +309,7 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
 
         return ClubDto.builder()
+                .clubId(club.getClubId())
                 .nickname(member.getNickname())
                 .memberImageUrl(member.getProfileImgUrl())
                 .oneLineIntro(member.getOneLineIntro())
