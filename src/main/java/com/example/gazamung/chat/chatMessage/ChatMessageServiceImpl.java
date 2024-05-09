@@ -24,15 +24,14 @@ public class ChatMessageServiceImpl implements ChatMessageService {
 
     @Override
     public ChatMessage saveChatMessage(int chatRoomType, String chatRoomId, Long memberIdx, String content, String nickname) {
-        System.out.println("chatroomID : " + chatRoomId);
-        Long chatId = Long.valueOf(chatRoomId);
 
+        Long chatId = Long.valueOf(chatRoomId);
 
         // RoomType 과 RoomId를 체크
         chatRoomRepository.findByChatRoomIdAndChatRoomType(chatId, chatRoomType)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
 
-
+        // 채팅 내역 저장
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoomType(chatRoomType)
                 .chatRoomId(chatId)

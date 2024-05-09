@@ -39,12 +39,12 @@ public class ChatHandler extends TextWebSocketHandler {
 
 
     /**
-     * WebSocket으로 수신된 텍스트 메시지를 처리합니다.
+     * WebSocket으로 수신된 텍스트 메시지를 처리.
      * 클라이언트로부터 받은 메시지를 파싱하여 필요한 작업을 수행하고,
-     * 채팅 메시지를 데이터베이스에 저장한 뒤, 해당 채팅방에 있는 모든 클라이언트에게 전송합니다.
+     * 채팅 메시지를 데이터베이스에 저장한 뒤, 해당 채팅방에 있는 모든 클라이언트에게 전송.
      *
      * @param session WebSocket 세션
-     * @param message WebSocket으로부터 수신된 텍스트 메시지
+     * @param message WebSocket 으로부터 수신된 텍스트 메시지
      * @throws Exception 예외 발생 시
      */
     @Override
@@ -101,9 +101,7 @@ public class ChatHandler extends TextWebSocketHandler {
         ArrayNode chatMessageArray = mapper.createArrayNode();
         ObjectNode messageNode = mapper.createObjectNode();
 
-
         String profileImgUrl = memberRepository.findById(memberIdx).get().getProfileImgUrl();
-
 
         messageNode.put("nickname", savedChatMessage.getNickname());
         messageNode.put("content", savedChatMessage.getContent());
@@ -129,9 +127,9 @@ public class ChatHandler extends TextWebSocketHandler {
 
 
     /**
-     * WebSocket 연결이 확립된 후 호출됩니다.
+     * WebSocket 연결이 확립된 후 호출.
      * 클라이언트가 연결되면, 해당 클라이언트의 고유한 memberIdx를 추출하여 WebSocket 세션의 속성에 저장하고,
-     * 채팅방에 입장한 사용자에 대한 정보를 브로드캐스트하여 다른 클라이언트에게 알립니다.
+     * 채팅방에 입장한 사용자에 대한 정보를 브로드캐스트하여 다른 클라이언트에게 알림.
      *
      * @param session WebSocket 세션
      * @throws Exception 예외 발생 시
@@ -154,7 +152,6 @@ public class ChatHandler extends TextWebSocketHandler {
             session.getAttributes().put("memberIdx", memberIdx);
             log.info("WebSocket 연결에 포함된 memberIdx: " + memberIdx);
 
-
             String nickname = memberRepository.findById(parseIdx).get().getNickname();
             String room = extractRoom(session.getUri());
 
@@ -176,17 +173,16 @@ public class ChatHandler extends TextWebSocketHandler {
             throw new CustomException(CustomExceptionCode.NOT_FOUND_HEADER_DATA);
         }
 
-
         // 세션의 URI에서 roomId를 추출합니다.
         String room = extractRoom(session.getUri());
 
         String roomId = null;
         int battleType = -1;
 
-        // "/" 기준으로 문자열을 분할합니다.
+        // "/" 기준으로 문자열을 분할.
         String[] parts = room.split("/");
         if (parts.length == 2) {
-            // 분할된 결과 배열의 길이가 2여야 합니다.
+            // 분할된 결과 배열의 길이가 2여야 함.
             String battleTypeStr = parts[0];
             String roomIdStr = parts[1];
 
@@ -198,12 +194,11 @@ public class ChatHandler extends TextWebSocketHandler {
                 roomType = battleType;
                 dynamicId = Long.parseLong(roomIdStr);
             } catch (NumberFormatException e) {
-                // 정수로 변환할 수 없는 경우, 예외 처리를 합니다.
+                // 정수로 변환할 수 없는 경우, 예외 처리.
                 System.err.println("Invalid battleType format: " + battleTypeStr);
             }
         } else {
-            // 유효한 형식이 아닐 경우 예외 처리나 다른 로직을 수행할 수 있습니다.
-            System.err.println("Invalid room format: " + room);
+            // @TODO 유효한 형식이 아닐 경우.  예외 처리가 필요한 경우 추가하기
         }
 
         // 해당 roomId에 대한 채팅방이 없으면 새로 생성합니다.
@@ -213,7 +208,6 @@ public class ChatHandler extends TextWebSocketHandler {
         log.info("memberIdx " + parseIdx);
         log.info("roomType " + roomType);
         log.info("dynamicId " + dynamicId);
-
 
         // 채팅방에 현재 세션을 추가합니다.
         List<WebSocketSession> roomSessions = chatRooms.get(room);
@@ -249,8 +243,8 @@ public class ChatHandler extends TextWebSocketHandler {
 
 
     /**
-     * WebSocket 연결이 닫힌 후 호출됩니다.
-     * 클라이언트가 연결을 닫으면, 해당 클라이언트를 채팅방에서 제거합니다.
+     * WebSocket 연결이 닫힌 후 호출.
+     * 클라이언트가 연결을 닫으면, 해당 클라이언트를 채팅방에서 제거.
      *
      * @param session WebSocket 세션
      * @param status  클라이언트 연결 종료 상태

@@ -35,6 +35,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatMapper chatMapper;
 
 
+    /**
+     * 1 대 1 채팅
+     * @param dto
+     * @return
+     */
     @Override
     public boolean directMessage(DirectMessageReq dto) {
 
@@ -50,6 +55,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
         chatRoomRepository.save(chatRoom);
 
+        // 상대방의 닉네임 및 프로필사진으로 채팅방명과 사진을 저장.
         ChatMember senderChatMember = ChatMember.builder()
                 .chatRoomType(2)
                 .chatRoomId(chatRoom.getChatRoomId())
@@ -72,38 +78,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return true;
     }
 
-//    @Override
-//    public Map<String, Object> myChatRoomList(Long memberIdx) {
-//
-//        // 응답용 Map 생성 및 값 추가
-//        Map<String, Object> response = new HashMap<>();
-//        List<Map<String, Object>> chatRoomList = new ArrayList<>();
-//
-//        List<ChatMember> chatMembers = chatMemberRepository.findAllByMemberIdx(memberIdx);
-//
-//        for (ChatMember chatMember : chatMembers) {
-//            Map<String, Object> chatRoomInfo = new HashMap<>();
-//            long chatRoomId = chatMember.getChatRoomId();
-//            String recentChat = chatMapper.findLatestMessageContentByChatRoomId(chatRoomId);
-//
-//            chatRoomInfo.put("chatRoom", chatMember);
-//            chatRoomInfo.put("recentChat", recentChat);
-//            chatRoomList.add(chatRoomInfo);
-//        }
-//
-//        response.put("chatRooms", chatRoomList);
-//        return response;
-//    }
-
-
     @Override
     @Transactional
     public Map<String, Object> myChatRoomList(Long memberIdx) {
+
+        // List 데이터를 Map 에 넣어서 반환.
         Map<String, Object> response = new HashMap<>();
         List<Map<String, Object>> chatRoomList = new ArrayList<>();
 
         List<ChatMember> chatMembers = chatMemberRepository.findAllByMemberIdx(memberIdx);
 
+        // Mapper 를 이용해 최근 채팅 메세지와 시간을 가져옴.
         for (ChatMember chatMember : chatMembers) {
             Map<String, Object> chatRoomInfo = new HashMap<>();
             long chatRoomId = chatMember.getChatRoomId();
@@ -112,22 +97,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             chatRoomInfo.put("chatRoom", chatMember);
             if (latestMessage != null) {
                 Object regDtObject = latestMessage.get("REG_DT");
-                System.out.println("regDtObject class: " + regDtObject.getClass());
-                System.out.println("regDtObject value: " + regDtObject);
 
                 LocalDateTime regDt = null;
                 if (regDtObject instanceof TIMESTAMP) {
+
+                    // oracle.sql.TIMESTAMP를 java.sql.Timestamp로 변환
                     TIMESTAMP oracleTimestamp = (TIMESTAMP) regDtObject;
-                    Timestamp sqlTimestamp = null; // oracle.sql.TIMESTAMP를 java.sql.Timestamp로 변환
+                    Timestamp sqlTimestamp = null;
                     try {
                         sqlTimestamp = oracleTimestamp.timestampValue();
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
-                    regDt = sqlTimestamp.toLocalDateTime(); // java.sql.Timestamp를 LocalDateTime으로 변환
-                    System.out.println("Converted LocalDateTime: " + regDt);
+                    // java.sql.Timestamp를 LocalDateTime으로 변환
+                    regDt = sqlTimestamp.toLocalDateTime();
                 } else {
-                    System.out.println("regDtObject is not an instance of oracle.sql.TIMESTAMP");
                 }
 
                 chatRoomInfo.put("recentChat", latestMessage.get("CONTENT"));
@@ -136,15 +120,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 chatRoomInfo.put("recentChat", "No messages");
                 chatRoomInfo.put("recentChatDate", null);
             }
-
             chatRoomList.add(chatRoomInfo);
         }
-
         response.put("chatRooms", chatRoomList);
         return response;
     }
-
-
-
 
 }

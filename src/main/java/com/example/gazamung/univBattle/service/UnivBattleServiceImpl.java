@@ -23,13 +23,11 @@ import com.example.gazamung.university.entity.University;
 import com.example.gazamung.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.signature.qual.IdentifierOrPrimitiveType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -63,23 +61,28 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     @Override
     @Transactional
     public boolean create(UnivBattleCreateRequest request) {
+        /**
+         * 1. 회원 검증
+         * 2. 대학 정보 조회
+         * 3. 대항전 생성
+         * 4. Participant 테이블에 대항전 참가자 추가
+         * 5. 채팅방 생성
+         * 6. ChatMember 테이블에 채팅방 참가자 추가
+         */
 
+        // 회원 검증
         Member member = memberRepository.findById(request.getHostLeader())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-
-        log.info(member.getUsername());
-
-        long univId = member.getUnivId();
-
-        University university = universityRepository.findById(univId)
+        // 회원 대학 정보 조회
+        University university = universityRepository.findById(member.getUnivId())
                 .orElseThrow(() ->new CustomException(CustomExceptionCode.NOT_FOUND));
 
         // 대항전 생성
         UnivBattle univBattle = UnivBattle.builder()
                 .hostLeader(request.getHostLeader())
                 .eventId(request.getEventId())
-                .hostUniv(univId)
+                .hostUniv(member.getUnivId())
                 .battleDate(request.getBattleDate())
                 .lat(request.getLat())
                 .lng(request.getLng())
@@ -95,18 +98,13 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         UnivBattle result = univBattleRepository.save(univBattle);
 
-
-        // 주최팀 학교 로고 업데이트
-//        result.setHostUnivLogo(university.getLogoImg());
-//        univBattleRepository.save(result);
-
-        //대항전 참가자 테이블에 생성자 추가
+        // 대항전 참가자 테이블에 생성자 추가
         Participant participant = Participant.builder()
                 .memberIdx(member.getMemberIdx())
                 .univBattleId(result.getUnivBattleId())
                 .userName(member.getName())
                 .nickName(member.getNickname())
-                .univId(univId)
+                .univId(member.getUnivId())
                 .build();
         participantRepository.save(participant);
 
@@ -141,10 +139,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     @Transactional
     public boolean GuestLeaderAttend(GuestLeaderAttendRequest request) {
 
+        // 대항전 정보 조회
         UnivBattle univBattle = univBattleRepository.findById(request.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
-        //이미 참가팀 대표가 있는지 확인
+        // 이미 참가팀 대표가 있는지 확인
         if (univBattle.getGuestLeader() != null){
             throw new CustomException(CustomExceptionCode.REPRESENTATIVE_ALREADY_EXISTS);
         }
@@ -152,38 +151,31 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 참가자 정보 조회
         Member guest = memberRepository.findById(request.getGuestLeader())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-
         Member host = memberRepository.findById(univBattle.getHostLeader())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-        // 주최자 대학교
-        long hostUniv = univBattle.getHostUniv();
-        // 참가자 대학교
-        long guestUniv = guest.getUnivId();
 
-        Optional<University> university = universityRepository.findById(guestUniv);
+        //회원 대학 정보 조회
+        Optional<University> university = universityRepository.findById(guest.getUnivId());
         String guestUnivName = university.get().getSchoolName();
 
-
-        // 같은 학교는 참가 불가능.
-        if (hostUniv == guestUniv) {
+        // 주최자와 같은 학교는 참가 불가능.
+        if (univBattle.getHostUniv() == guest.getUnivId()) {
             throw new CustomException(CustomExceptionCode.SAME_UNIVERSITY);
         }
 
-        // Guest 팀 정보 업데이트
+        // 해당 대항전 데이터에 Guest 팀 정보 업데이트
         univBattle.setGuestLeader(request.getGuestLeader());
-        univBattle.setGuestUniv(guestUniv);
+        univBattle.setGuestUniv(guest.getUnivId());
         univBattle.setGuestUnivName(guestUnivName);
+        univBattle.setGuestUnivLogo(university.get().getLogoImg());
 
         // 상태를 "대기중" 으로 바꿈
         univBattle.setMatchStatus(MatchStatus.WAITING);
 
-        // 참가팀 로고 업데이트
-        Optional<University> findHostUniv = universityRepository.findById(guestUniv);
-        univBattle.setGuestUnivLogo(findHostUniv.get().getLogoImg());
-
         // 초대코드 생성
         univBattle.setInvitationCode(generateRandomString(8));
 
+        // 업데이트 후 저장
         univBattleRepository.save(univBattle);
 
         // 참가인원 초과 여부 체크
@@ -194,12 +186,17 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             univBattle.setMatchStatus(MatchStatus.PREPARED);
         }
 
+
+        /**
+         * Participant 테이블에 대항전 참가자 추가
+         * ChatMember 테이블에 채팅방 참가자 추가
+         */
         Participant participant = Participant.builder()
                 .memberIdx(guest.getMemberIdx())
                 .nickName(guest.getNickname())
                 .userName(guest.getName())
                 .univBattleId(request.getUnivBattleId())
-                .univId(guestUniv)
+                .univId(guest.getUnivId())
                 .build();
 
         participantRepository.save(participant);
@@ -228,7 +225,12 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     }
 
 
-
+    /**
+     * 대항전 일반 참가
+     * 주최자와 참가자대표의 초대코드를 통해 참여가능
+     * @param request
+     * @return
+     */
     @Override
     @Transactional
     public boolean attend(AttendRequest request) {
@@ -240,6 +242,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 대항전 정보 조회
         UnivBattle univBattle = univBattleRepository.findById(request.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
+
+        // 초대 코드 체크
+        if (!request.getInvitationCode().equals(univBattle.getInvitationCode())){
+            throw new CustomException(CustomExceptionCode.INVALID_INVITE_CODE);
+        }
 
         // 이미 진행중인 경우 참가 불가
         if(univBattle.getMatchStatus() == MatchStatus.IN_PROGRESS || univBattle.getMatchStatus() == MatchStatus.COMPLETED){
@@ -264,12 +271,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new CustomException(CustomExceptionCode.EXCEEDED_UNIV_CAPACITY);
         }
 
-        // 참가 코드 체크
-        if (!request.getInvitationCode().equals(univBattle.getInvitationCode())){
-            throw new CustomException(CustomExceptionCode.INVALID_INVITE_CODE);
-        }
-
-        // 마지막 참가자일 경우 대기중으로 변경.
+        // 마지막 참가자일 경우 준비중으로 변경.
         if(totalParticipant == univBattle.getTeamPtcLimit() * 2  - 1){
             univBattle.setMatchStatus(MatchStatus.PREPARED);
         }
@@ -285,19 +287,20 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         participantRepository.save(participant);
 
         // 해당 대항전에 대한 채팅방을 설정합니다.
+        // 게스트 채팅방 이름을 호스트 대학명으로 업데이트
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0, univBattle.getUnivBattleId());
         ChatMember chatMember = ChatMember.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
                 .chatRoomType(1)
-                .customChatRoomName(univBattle.getHostUnivName() + "대항전")
+                .customChatRoomName(univBattle.getHostUnivName() + " 대항전")
                 .memberIdx(request.getMemberIdx())
                 .build();
 
         chatMemberRepository.save(chatMember);
 
-        // 호스트 채팅방의 이름을 게스트 부서 이름으로 업데이트합니다.
+        // 호스트 채팅방의 이름을 게스트 대학명으로 업데이트.
         ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(univBattle.getHostLeader(), chatRoom.getChatRoomId());
-        hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + "대항전");
+        hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + " 대항전");
         chatMemberRepository.save(hostChatMember);
 
         return true;
@@ -317,18 +320,23 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
     }
 
+    /**
+     * 대항전 정보 조회
+     * @param univBattleId
+     * @return
+     */
     @Override
     public Map<String, Object> info(long univBattleId) {
 
         UnivBattle univBattle = univBattleRepository.findById(univBattleId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
-
-        int hostPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getHostUniv());
-        int guestPtc = participantRepository.countByUnivBattleIdAndUnivId(univBattleId,univBattle.getGuestUniv());
-
+        // 대학별 참가자 리스트 추출
         List<Participant> HostparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getHostUniv(),univBattleId);
         List<Participant> GuestparticipantList = participantRepository.findAllByUnivIdAndUnivBattleId(univBattle.getGuestUniv(),univBattleId);
+
+        int hostPtc = HostparticipantList.size();
+        int guestPtc = GuestparticipantList.size();
 
         University hostuniversity = universityRepository.findById(univBattle.getHostUniv())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
@@ -350,7 +358,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 응답용 Map 생성 및 값 추가
         Map<String, Object> response = new HashMap<>();
-
 
         Map<String, Object> hostTeam = new HashMap<>();
         hostTeam.put("hostUvName", hostUvName);
@@ -399,19 +406,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         if(univBattle.getMatchStatus()!= MatchStatus.PREPARED){
             throw new CustomException(CustomExceptionCode.CANNOT_START_MATCH);
         }
-        // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
-        int ptcCount = participantRepository.countByUnivBattleId(univBattleId);
-        if(ptcCount != univBattle.getTeamPtcLimit() * 2){
-            throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
-        }
-        //@TODO 대체 메서드가 될 수 있음.
-//        if(participantList.size() != univBattle.getTeamPtcLimit() * 2){
-//            throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
-//        }
 
         List<Participant> participantList = participantRepository.findByUnivBattleId(univBattleId);
+        // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
+        if(participantList.size() != univBattle.getTeamPtcLimit() * 2){
+            throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
+        }
 
-        //@TODO 테스트를 위해 주석처리  실서비스 메서드.
+        //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
 //        for (Participant participants : participantList){
 //            Member member = memberRepository.findById(participants.getMemberIdx())
 //                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -427,13 +429,12 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 //            }
 //        }
 
+        // 대항전 상태를 "진행중" 으로 업데이트
         univBattle.setMatchStatus(MatchStatus.IN_PROGRESS);
         univBattle.setMatchStartDt(LocalDateTime.now());
-
         univBattleRepository.save(univBattle);
 
         // FCM 알림 전송 메서드
-
         FcmSendDto fcmSendDto = FcmSendDto.builder()
                 .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
                         "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
@@ -446,6 +447,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new RuntimeException(e);
         }
 
+        //@TODO 배포 전에 위 주석 메서드 부분에 추가할것. 지금은 따로 빼서 TEST
         for (Participant participants : participantList){
             Member member = memberRepository.findById(participants.getMemberIdx())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -454,7 +456,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                     .type(MsgType.UNIV_BATTLE)
                     .isRead(false)
                     .receiver(member.getMemberIdx())
-                    .title("대항전 시작! 경기를 확인하세요.")
+                    .title("대항전이 시작되었습니다.")
                     .content(univBattle.getGuestUnivName() + "VS" + univBattle.getHostUnivName() + "경기 시작")
                     .relatedItemId(univBattle.getUnivBattleId())
                     .build();
@@ -463,15 +465,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         }
 
 
-
-
         return true;
     }
 
     /**
      * 경기 결과 요청 (주최팀 -> 참가팀)
      * 경기의 결과 기록은 주최측 대표자가 함.
-     * 그 기록은 참가팀 대표자에게 보내서 확인 받아야한다.
+     * 그 기록은 참가팀 대표자가 동의해야한다.
+     * 요청에 대한 응답이 1시간이 넘으면 주최자측 기록으로 종료된다.
      * @param dto
      * @return
      */
@@ -493,7 +494,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         univBattleRepository.save(univBattle);
 
-        // 1분 후에 실행될 스케줄링 작업을 생성합니다. (테스트용)
+        /**
+         * 주최자측 대항전 결과 전송에 대한 참가자 동의를 1시간 동안 안 받을 시
+         * checkIncompleteMatch 메서드 실행 후 대항전 상태를 COMPLETE 로 변경.
+         */
+        // 1시간 이후에 실행될 스케줄링 작업을 생성합니다. (테스트용 1분 설정)
         ScheduledFuture<?> scheduledFuture = scheduler.schedule(() -> {
             log.info("Scheduled Task 실행");
             checkIncompleteMatch(univBattle.getUnivBattleId());
@@ -550,7 +555,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
     /**
      * 경기 종료 메서드
-     * @author 이시영
      * @param univBattleId
      */
     // 경기 종료 처리 메서드
@@ -570,7 +574,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
     /**
      * 초대 코드 생성기
-     * @author 이시영
      * @param length
      * @return
      */
