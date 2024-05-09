@@ -131,6 +131,18 @@ public class ClubController {
         }
     }
 
+    @Operation(summary = "모임 리스트 조회", description = "" +
+            " 모임 리스트 조회 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- NOT_FOUND_EVENT: 해당 이벤트를 확인할 수 없습니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @GetMapping("/list")    /** 모임 리스트 조회 **/
     public Object list(Long memberIdx){
         try{

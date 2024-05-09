@@ -276,6 +276,19 @@ public class MemberController {
 
 
 
+    @Operation(summary = "프로필 조회", description = "" +
+            " 프로필 조회 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- NOT_FOUND_UNIVERSITY: 존재하지 않는 대학교입니다." +
+            "\n- NOT_FOUND_DEPARTMENT: 존재하지 않는 과입니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @GetMapping("/member/profile")  /** 프로필 조회 **/
     public ResponseEntity<ProfileDto> getMemberInfo(@RequestParam Long memberIdx){
 
@@ -285,6 +298,20 @@ public class MemberController {
         return ResponseEntity.ok(profileDto);
 
     }
+
+    @Operation(summary = "프로필 수정", description = "" +
+            " 프로필 수정 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- DUPLICATED: 중복된 정보가 존재합니다." +
+            "\n- CHARACTER_LIMIT: 글자 수 제한." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @PostMapping("/member/updateProfile")     /** 프로필 수정 **/
     public ResultDTO updateProfile(@RequestBody ProfileDto dto){
         try{
@@ -294,6 +321,17 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "비밀번호 변경", description = "" +
+            " 비밀번호 변경 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @PostMapping("/member/updatePw")    /** 비밀번호 변경 **/
     public ResultDTO updatePw(@RequestBody PwChangeDto dto){
 
@@ -305,6 +343,18 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "회원 탈퇴", description = "" +
+            " 회원 탈퇴 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- DIFFERENT_PASSWORD: 잘못된 비밀번호입니다.." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @DeleteMapping("/member/withDraw")    /** 회원 탈퇴 **/
     public ResultDTO withDraw(@RequestParam Long memberIdx, String password){
         try{
@@ -314,6 +364,17 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "프로필 사진 등록", description = "" +
+            " 프로필 사진 등록 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @PostMapping("/member/uploadImage") /** 프로필 사진 등록 */
     public ResultDTO uploadImage(UpdateProfileDto dto) {
         try {
@@ -324,6 +385,18 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "프로필 사진 수정", description = "" +
+            " 프로필 사진 수정 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- SERVER_ERROR: 요청중 서버 문제가 발생했습니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @PatchMapping("/member/updateImage")    /** 프로필 사진 수정 */
     public ResultDTO updateImage(UpdateProfileDto dto){
         try{

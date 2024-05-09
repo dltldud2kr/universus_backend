@@ -507,14 +507,14 @@ public class MemberServiceImpl implements MemberService {
                     List<UploadImage> profileImg = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, memberIdx);
 
                     University university = universityRepository.findById(member.getUnivId())
-                            .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
+                            .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_UNIVERSITY));
                     ProfileDto profileDto = new ProfileDto();
                     profileDto.setMemberIdx(memberIdx);
                     profileDto.setUserName(member.getUsername());
                     profileDto.setNickname(member.getNickname());
                     profileDto.setSchoolName(university.getSchoolName());
                     profileDto.setDeptName(departmentRepository.findById(member.getDeptId())
-                            .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND)).getDeptName());
+                            .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_DEPARTMENT)).getDeptName());
                     profileDto.setPhone(member.getPhone());
                     profileDto.setOneLineIntro(member.getOneLineIntro());
                     if (profileImg != null && !profileImg.isEmpty()) {
@@ -525,7 +525,7 @@ public class MemberServiceImpl implements MemberService {
                     profileDto.setLogoImg(university.getLogoImg());
                     return profileDto;
                 })
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
     }
 
     /**
