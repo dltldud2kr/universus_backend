@@ -98,10 +98,10 @@ public class ClubServiceImpl implements ClubService {
         result.put("club", club);
 
         ChatRoom chatRoom = ChatRoom.builder()
-                .chatRoomId(club.getClubId())
                 .chatRoomType(3)
                 .dynamicId(club.getClubId())
                 .build();
+        chatRoomRepository.save(chatRoom);
 
         List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
         Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(),chatRoom.getChatRoomId(),0);
@@ -117,7 +117,7 @@ public class ClubServiceImpl implements ClubService {
             chatMemberRepository.save(chatMember);
         }
 
-        chatRoomRepository.save(chatRoom);
+
 
         return result;
 
@@ -236,6 +236,12 @@ public class ClubServiceImpl implements ClubService {
                     throw new CustomException(CustomExceptionCode.SERVER_ERROR);
                 }
             }
+
+            ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, clubId);
+            List<ChatMember> chatMember = chatMemberRepository.findAllByChatRoomIdAndChatRoomType(chatRoom.getChatRoomId(), 3);
+            chatMemberRepository.deleteAll(chatMember);
+            chatRoomRepository.delete(chatRoom);
+
         } catch (CustomException e) {
             throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         } catch (EmptyResultDataAccessException e) {
@@ -335,7 +341,7 @@ public class ClubServiceImpl implements ClubService {
         clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
-        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3,request.getClubId());
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
         // 가입된 회원인지 확인 후 탈퇴
         Optional<ClubMember> clubMemberOptional = clubMemberRepository.findByClubIdAndMemberIdx(request.getClubId(), request.getMemberIdx());
         if (clubMemberOptional.isPresent()) {
@@ -343,9 +349,6 @@ public class ClubServiceImpl implements ClubService {
             clubMemberRepository.delete(clubMember);
 
             Optional<ChatMember> chatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(request.getMemberIdx(), chatRoom.getChatRoomId(),3);
-
-            String chatMember2 = chatMember.get().getCustomChatRoomName();
-            System.out.println("chatMember2 = " + chatMember2);
             if(!chatMember.isEmpty()) {
                 chatMemberRepository.deleteById(chatMember.get().getIdx());
             }
@@ -450,6 +453,9 @@ public class ClubServiceImpl implements ClubService {
         Member member = memberRepository.findById(request.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
+        Club club = clubRepository.findById(request.getClubId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
         ClubMember clubMember = ClubMember.builder()
                 .memberIdx(request.getMemberIdx())
                 .clubId(request.getClubId())
@@ -460,16 +466,20 @@ public class ClubServiceImpl implements ClubService {
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
         Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(), chatRoom.getDynamicId(),3);
         if(findChatMember.isEmpty()){
-            ChatMember chatMembers = chatMemberRepository.findByChatRoomIdAndChatRoomType(chatRoom.getDynamicId(), 3);
-            ChatMember chatMember = ChatMember.builder()
-                    .chatRoomId(request.getClubId())
-                    .customChatRoomName(chatMembers.getCustomChatRoomName())
-                    .chatRoomType(3)
-                    .memberIdx(request.getMemberIdx())
-                    .chatRoomImg(chatMembers.getChatRoomImg())
-                    .build();
+            List<ChatMember> chatMembers = chatMemberRepository.findByChatRoomIdAndChatRoomType(chatRoom.getChatRoomId(), 3);
+            if (!chatMembers.isEmpty()) {
+                ChatMember firstChatMember = chatMembers.get(0); // 첫 번째 ChatMember를 선택
 
-            chatMemberRepository.save(chatMember);
+                ChatMember chatMember = ChatMember.builder()
+                        .chatRoomId(firstChatMember.getChatRoomId())
+                        .customChatRoomName(firstChatMember.getCustomChatRoomName())
+                        .chatRoomType(3)
+                        .memberIdx(request.getMemberIdx())
+                        .chatRoomImg(firstChatMember.getChatRoomImg())
+                        .build();
+
+                chatMemberRepository.save(chatMember);
+            }
         }
     }
 
