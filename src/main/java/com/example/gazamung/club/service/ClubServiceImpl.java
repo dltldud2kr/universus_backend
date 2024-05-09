@@ -404,7 +404,7 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         // categoryId가 1(모집)인 게시판의 게시물을 최신순으로 가져옴
-        List<UnivBoard> univBoardList = univBoardRepository.findByCategoryIdAndUnivId(1L, member.getUnivId(), Sort.by(Sort.Direction.DESC, "regDt"));
+        List<UnivBoard> univBoardList = univBoardRepository.findByCategoryIdAndUnivId(2L, member.getUnivId(), Sort.by(Sort.Direction.DESC, "regDt"));
 
         if (univBoardList.isEmpty()) {
             throw new CustomException(CustomExceptionCode.NOT_FOUND_BOARD);

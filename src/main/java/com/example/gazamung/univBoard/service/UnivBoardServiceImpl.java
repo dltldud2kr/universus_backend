@@ -198,6 +198,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
             // 게시글의 상세 정보 생성
             InfoPost infoPost = InfoPost.builder()
+                    .univBoardId(univBoard.getUnivBoardId())
                     .nickname(member.getNickname())
                     .clubName(club != null ? club.getClubName() : null)
                     .categoryName(category.getCategoryName())

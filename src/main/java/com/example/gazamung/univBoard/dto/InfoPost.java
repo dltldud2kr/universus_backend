@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 public class InfoPost {
 
-
+    private Long univBoardId;
     private String nickname;
     private String categoryName;
     private String clubName;
