@@ -441,8 +441,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
         return true;
     }
 

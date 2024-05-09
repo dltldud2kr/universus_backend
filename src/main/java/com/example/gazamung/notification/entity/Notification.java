@@ -1,5 +1,6 @@
 package com.example.gazamung.notification.entity;
 
+import com.example.gazamung._enum.MsgType;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,9 +25,18 @@ public class Notification {
     private Long caller;    // 발신자
 
     private String content;     // 내용
-    private Long type;          // 유형 ... 0 : 댓글, 1 : 경기
-    private LocalDateTime timeStamp;    // 발생 시간
-    private Long isRead;        // 읽음 여부
+
+    @Enumerated(EnumType.STRING)
+    private MsgType type;          // 유형   0:대학  1:과  2: 댓글
+
+
+    private LocalDateTime regDt;    // 발생 시간
+
+    @Column(name = "IS_READ", nullable = false)
+    private boolean isRead;  // 자동으로 0과 1을 매핑
+
+    @Column(name = "TARGET_URL")
+    private String targetUrl;  // 사용자를 이동시킬 URL
 
     private Long relatedItemId; // 관련 항목 ... ?????
 }

@@ -15,9 +15,9 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/deptBattle")
+@RequestMapping("/api/v1/fcm")
 @CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
-@Tag(name = "대항전(과 vs 과) API", description = "")
+@Tag(name = "FCM API", description = "")
 public class FcmController {
 
     private final FcmService fcmService;
