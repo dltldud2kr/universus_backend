@@ -24,6 +24,7 @@ public class Notification {
     private Long receiver;     // 수신자
     private Long caller;    // 발신자
 
+    private String title;
     private String content;     // 내용
 
     @Enumerated(EnumType.STRING)

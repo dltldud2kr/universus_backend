@@ -2,6 +2,7 @@ package com.example.gazamung.univBattle.service;
 
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.MatchStatus;
+import com.example.gazamung._enum.MsgType;
 import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatMember.ChatMemberRepository;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
@@ -11,6 +12,8 @@ import com.example.gazamung.fcmSend.FcmSendDto;
 import com.example.gazamung.fcmSend.FcmService;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
+import com.example.gazamung.notification.dto.NotifyCreateReq;
+import com.example.gazamung.notification.service.NotificationService;
 import com.example.gazamung.participant.entity.Participant;
 import com.example.gazamung.participant.repository.ParticipantRepository;
 import com.example.gazamung.univBattle.dto.*;
@@ -43,6 +46,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final ParticipantRepository participantRepository;
     private final ChatMemberRepository chatMemberRepository;
     private final FcmService fcmService;
+    private final NotificationService notificationService;
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     // 예약 작업 관리를 위한 ConcurrentHashMap
@@ -441,6 +445,26 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        for (Participant participants : participantList){
+            Member member = memberRepository.findById(participants.getMemberIdx())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+            NotifyCreateReq dto = NotifyCreateReq.builder()
+                    .type(MsgType.UNIV_BATTLE)
+                    .isRead(false)
+                    .receiver(member.getMemberIdx())
+                    .title("대항전 시작! 경기를 확인하세요.")
+                    .content(univBattle.getGuestUnivName() + "VS" + univBattle.getHostUnivName() + "경기 시작")
+                    .relatedItemId(univBattle.getUnivBattleId())
+                    .build();
+            notificationService.sendNotify(dto);
+
+        }
+
+
+
+
         return true;
     }
 

@@ -30,6 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .relatedItemId(request.getRelatedItemId())
                 .regDt(LocalDateTime.now())
                 .targetUrl(generateTargetUrl(request.getType(),request.getRelatedItemId()))
+                .title(request.getTitle())
                 .build();
 
         notificationRepository.save(notification);
