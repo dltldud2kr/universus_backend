@@ -31,7 +31,7 @@ public interface ClubService {
     void delete(Long moimId, Long memberIdx);
 
 
-    List<ClubDto> list();
+    List<ClubListDto> list(Long memberIdx);
 
     ClubDto info(Long clubId);
 

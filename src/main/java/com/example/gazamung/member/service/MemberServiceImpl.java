@@ -431,12 +431,20 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Map<String, Object> uploadImage(UpdateProfileDto dto) {
 
-        memberRepository.findById(dto.getMemberIdx()).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        Member member = memberRepository.findById(dto.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         List<Map<String, Object>> uploadImage = uploadService.upload(dto.getProfileImage(), dto.getMemberIdx(), AttachmentType.PROFILE, dto.getMemberIdx());
 
         Map<String, Object> result = new HashMap<>();
         result.put("uploadedImages", uploadImage);
+
+        List<UploadImage> profileImages = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+        if (!profileImages.isEmpty()) {
+            member.setProfileImgUrl(profileImages.get(0).getImageUrl());
+        }
+
+        memberRepository.save(member);
 
         return result;
     }
@@ -444,8 +452,9 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void updateImage(UpdateProfileDto dto) {
+        Member member = memberRepository.findById(dto.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         try {
-            //해당 모임에 업로드 등록되어있는 이미지를 검색합니다.
             List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
             String[] removeTarget = new String[imageByAttachmentType.size() + 1];
 
@@ -473,7 +482,12 @@ public class MemberServiceImpl implements MemberService {
             uploadService.upload(dto.getProfileImage(), dto.getMemberIdx(), AttachmentType.PROFILE, dto.getMemberIdx());
 
             //업로드된 이미지 정보를 데이터베이스
-            List<UploadImage> getRepresentIdx = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+            List<UploadImage> profileImages = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+
+            if (!profileImages.isEmpty()){
+                member.setProfileImgUrl(profileImages.get(0).getImageUrl());
+            }
+            memberRepository.save(member);
         }
         catch (CustomException e) {
             System.err.println("modifyJournal Exception : " + e);

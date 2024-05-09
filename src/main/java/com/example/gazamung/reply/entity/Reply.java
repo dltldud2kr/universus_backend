@@ -16,8 +16,8 @@ import java.time.LocalDateTime;
 public class Reply {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PARTICIPANT_SEQ")
-    @SequenceGenerator(name = "PARTICIPANT_SEQ", sequenceName = "participant_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REPLY_SEQ")
+    @SequenceGenerator(name = "REPLY_SEQ", sequenceName = "reply_sequence", allocationSize = 1)
     private Long replyId;       // 댓글 ID
 
     private Long memberIdx;     // 회원 ID

@@ -132,12 +132,12 @@ public class ClubController {
     }
 
     @GetMapping("/list")    /** 모임 리스트 조회 **/
-    public List<ClubDto> list(){
+    public Object list(Long memberIdx){
         try{
-            List<ClubDto> requestDtoList = clubService.list();
-            return requestDtoList;
+            List<ClubListDto> requestDtoList = clubService.list(memberIdx);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "모임 수정 완료.", requestDtoList);
         } catch (CustomException e) {
-            return (List<ClubDto>) ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 전체 리스트 조회 완료");
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 전체 리스트 조회 완료");
         }
     }
 

@@ -17,11 +17,11 @@ import java.util.List;
 @NoArgsConstructor
 public class ClubDto {
 
-    private Long clubId;            // 모임 ID
+    private String nickname;         // 대표자 명
+    private String memberImageUrl;
+    private String oneLineIntro;    // 한 줄 소개
 
-    private Long memberIdx;         // 대표자
-    private Long eventId;           // 종목 ID
-    private Long univId;            // 대학 ID
+    private String  eventName;           // 종목 ID
 
     private String clubName;        // 모임명
     private String introduction;    // 모임 소개
@@ -31,9 +31,8 @@ public class ClubDto {
     private Long maximumMembers;   // 총 인원
     private Long currentMembers;   // 현재 인원
 
-    private List<UploadImage> clubImage;
-    
-    private String LeaderNickname; // 리더 닉네임
-    private String LeaderProfileImg; // 리더 프로필사진
+    private List<String> clubImageUrls;
+
+
 }
 

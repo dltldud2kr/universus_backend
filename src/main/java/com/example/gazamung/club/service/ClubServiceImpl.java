@@ -223,10 +223,37 @@ public class ClubServiceImpl implements ClubService {
      * @description Entity 객체를 Dto 로 변환하여 리턴합니다.
      */
     @Override
-    public List<ClubDto> list() {
-        List<Club> clubList = clubRepository.findAll();
-        return convertToDto(clubList);
+    public List<ClubListDto> list(Long memberIdx) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        List<Club> clubList = clubRepository.findByUnivId(member.getUnivId());
+
+        if (clubList.isEmpty()) {
+            return Collections.emptyList(); // 빈 리스트를 반환합니다.
+        }
+
+        return clubList.stream()
+                .map(club -> {
+                    Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
+                    List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
+                    Event event = eventRepository.findById(club.getEventId())
+                            .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
+
+                    String clubImageUrl = clubImage.isEmpty() ? "" : clubImage.get(0).getImageUrl();
+
+                    return ClubListDto.builder()
+                            .eventName(event.getEventName())
+                            .clubName(club.getClubName())
+                            .introduction(club.getIntroduction())
+                            .currentMembers(currentMembers + 1) // 모임장 포함
+                            .clubImageUrl(clubImageUrl)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
+
+
 
     /**
      * @param clubId
@@ -238,34 +265,28 @@ public class ClubServiceImpl implements ClubService {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
-        // 클럽에 연결된 이미지 정보 조회
         List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, clubId);
 
-        // 현재 멤버 수 계산 (모임장 포함)
         Long currentMembers = calculateCurrentMembers(club.getClubId());
 
-        Member LeaderMember = memberRepository.findById(club.getMemberIdx())
-                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+        Member member = memberRepository.findById(club.getMemberIdx())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-        String LeaderNickname = LeaderMember.getNickname();
-        String LeaderProfileImg = LeaderMember.getProfileImgUrl();
+        Event event = eventRepository.findById(club.getEventId())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
 
-
-        // 클럽 정보를 Dto로 변환하여 반환
         return ClubDto.builder()
-                .clubId(club.getClubId())
-                .memberIdx(club.getMemberIdx())
-                .eventId(club.getEventId())
-                .univId(club.getUnivId())
+                .nickname(member.getNickname())
+                .memberImageUrl(member.getProfileImgUrl())
+                .oneLineIntro(member.getOneLineIntro())
                 .clubName(club.getClubName())
                 .introduction(club.getIntroduction())
+                .eventName(event.getEventName())
                 .regDt(club.getRegDt())
                 .price(club.getPrice())
                 .maximumMembers(club.getMaximumMembers())
                 .currentMembers(currentMembers + 1) // 모임장 포함
-                .clubImage(clubImage) // 클럽 이미지 정보 추가
-                .LeaderNickname(LeaderNickname)
-                .LeaderProfileImg(LeaderProfileImg)
+                .clubImageUrls(clubImage.stream().map(UploadImage::getImageUrl).collect(Collectors.toList()))
                 .build();
     }
 
@@ -444,31 +465,6 @@ public class ClubServiceImpl implements ClubService {
         member.setFcmToken(fcmToken);
         memberRepository.save(member);
 
-    }
-
-
-    private List<ClubDto> convertToDto(List<Club> clubList) {
-
-        return clubList.stream()
-                .map(club -> {
-                    Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
-                    List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
-
-                    return ClubDto.builder()
-                            .clubId(club.getClubId())
-                            .memberIdx(club.getMemberIdx())
-                            .eventId(club.getEventId())
-                            .univId(club.getUnivId())
-                            .clubName(club.getClubName())
-                            .introduction(club.getIntroduction())
-                            .regDt(club.getRegDt())
-                            .price(club.getPrice())
-                            .maximumMembers(club.getMaximumMembers())
-                            .currentMembers(currentMembers + 1) // 모임장 포함
-                            .clubImage(clubImage) // 클럽 이미지 정보 추가
-                            .build();
-                })
-                .collect(Collectors.toList());
     }
 
     // 현재 멤버 수 계산 메서드
