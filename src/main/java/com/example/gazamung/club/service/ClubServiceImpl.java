@@ -343,6 +343,9 @@ public class ClubServiceImpl implements ClubService {
             clubMemberRepository.delete(clubMember);
 
             Optional<ChatMember> chatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(request.getMemberIdx(), chatRoom.getChatRoomId(),3);
+
+            String chatMember2 = chatMember.get().getCustomChatRoomName();
+            System.out.println("chatMember2 = " + chatMember2);
             if(!chatMember.isEmpty()) {
                 chatMemberRepository.deleteById(chatMember.get().getIdx());
             }
