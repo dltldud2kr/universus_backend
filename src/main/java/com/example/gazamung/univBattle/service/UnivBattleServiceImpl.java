@@ -315,7 +315,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     }
 
     @Override
-    public List<UnivBattle> list(int status) {
+    public List<UnivBattle> uList(int status) {
 
         return switch (status) {
             case 0 -> univBattleRepository.findAll();
@@ -326,6 +326,45 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             default -> throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         };
 
+    }
+
+    @Override
+    public List<UnivBattleListRes> uList(Long univId) {
+
+        List<UnivBattle> univBattleList = univBattleMapper.findByUnivId(univId);
+
+        List<UnivBattleListRes> univBattleListResList = new ArrayList<>();
+
+        for (UnivBattle x : univBattleList){
+            String result = "";
+
+            // 해당 대학의 승패여부 확인
+            if(Objects.equals(x.getWinUniv(), univId)){
+                result = "win";
+            } else{
+                result = "lose";
+            }
+
+            UnivBattleListRes univBattleListRes = UnivBattleListRes.builder()
+                    .univBattleId(x.getUnivBattleId())
+                    .eventId(x.getEventId())
+                    .hostUnivName(x.getHostUnivName())
+                    .guestUnivName(x.getGuestUnivName())
+                    .hostUnivLogo(x.getHostUnivLogo())
+                    .guestUnivLogo(x.getGuestUnivLogo())
+                    .battleDate(x.getBattleDate())
+                    .matchStartDt(x.getMatchStartDt())
+                    .matchEndDt(x.getMatchEndDt())
+                    .hostScore(x.getHostScore())
+                    .guestScore(x.getGuestScore())
+                    .result(result)
+                    .build();
+
+            univBattleListResList.add(univBattleListRes);
+        }
+
+
+        return univBattleListResList;
     }
 
     /**

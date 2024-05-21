@@ -13,5 +13,10 @@
         WHERE id IN (#{winUniv}, #{loseUniv})
     </update>
 
+    <!-- 해당 대학의 UnivBattle 목록을 반환하는 쿼리 -->
+    <select id="findByUnivId" resultType="com.example.gazamung.univBattle.entity.UnivBattle">
+        SELECT * FROM univ_battle
+        WHERE win_univ = #{univId} OR lose_univ = #{univId}
+    </select>
 
 </mapper>

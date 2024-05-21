@@ -36,7 +36,16 @@ public interface UnivBattleService {
      * @param status
      * @return
      */
-    List<UnivBattle> list (int status);
+    List<UnivBattle> uList(int status);
+
+
+    /**
+     * 해당 대학교 대항전 리스트
+     * @param univId
+     * @return
+     */
+    List<UnivBattleListRes> uList(Long univId);
+
 
     /**
      * 대항전 정보

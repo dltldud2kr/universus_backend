@@ -97,7 +97,7 @@ public class UnivBattleController {
     }
 
 
-    @Operation(summary = "대항전 리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
+    @Operation(summary = "대항전 카테고리 별 리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
@@ -110,15 +110,39 @@ public class UnivBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/list")
-    public ResultDTO battleList(@RequestParam(required = false)int status ){
+    public ResultDTO categoryBattleList(@RequestParam(required = false)int status ){
 
-        List<UnivBattle> univBattleList = univBattleService.list(status);
+        List<UnivBattle> univBattleList = univBattleService.uList(status);
         try {
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대항전리스트 조회 성공.", univBattleList);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "상태별 대항전 리스트 조회 성공.", univBattleList);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
+
+    @Operation(summary = "해당 대학 경기 리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- 0 (ALL): 전체 리스트" +
+            "\n- 1 (WAITING): 대기중 리스트" +
+            "\n- 2 (IN_PROGRESS): 진행중 리스트" +
+            "\n- 3 (COMPLETED): 종료 리스트" )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/ulist")
+    public ResultDTO eachUnivBattleList(@RequestParam(required = false)Long univId ){
+
+        try {
+            List<UnivBattleListRes> univBattleListResList = univBattleService.uList(univId);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "해당 대항전 매치 리스트 조회 성공.", univBattleListResList);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
 
 
     @Operation(summary = "대항전 정보 ", description = "" +
@@ -202,6 +226,8 @@ public class UnivBattleController {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
+
+
 
 
 }
