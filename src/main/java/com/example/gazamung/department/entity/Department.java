@@ -21,4 +21,6 @@ public class Department {
 
     private Long univId;            // 학교명
     private String deptName;        // 학과명
+
+    private Long rankPoint;
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gazamung.mapper.UnivBattleMapper">
+
+
+    <update id="updateRankPoints">
+        UPDATE University
+        SET rank_point = CASE
+                             WHEN id = #{winUniv} THEN rank_point + 10
+                             WHEN id = #{loseUniv} THEN GREATEST(rank_point - 5, 0)
+            END
+        WHERE id IN (#{winUniv}, #{loseUniv})
+    </update>
+
+
+</mapper>

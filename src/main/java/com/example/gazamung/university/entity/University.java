@@ -2,6 +2,7 @@ package com.example.gazamung.university.entity;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
@@ -25,5 +26,8 @@ public class University {
 
     @Column(name = "logo_img")
     private String logoImg;
+
+    @ColumnDefault("0")
+    private Long rankPoint;
 
 }

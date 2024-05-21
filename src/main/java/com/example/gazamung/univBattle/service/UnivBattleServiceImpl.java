@@ -10,6 +10,7 @@ import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.fcmSend.FcmSendDto;
 import com.example.gazamung.fcmSend.FcmService;
+import com.example.gazamung.mapper.UnivBattleMapper;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.notification.dto.NotifyCreateReq;
@@ -45,6 +46,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final ChatMemberRepository chatMemberRepository;
     private final FcmService fcmService;
     private final NotificationService notificationService;
+    private final UnivBattleMapper univBattleMapper;
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     // 예약 작업 관리를 위한 ConcurrentHashMap
@@ -235,6 +237,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     @Transactional
     public boolean attend(AttendRequest request) {
 
+        boolean last = false;
+
         // 참가자 정보 조회
         Member member = memberRepository.findById(request.getMemberIdx())
                 .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -302,6 +306,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(univBattle.getHostLeader(), chatRoom.getChatRoomId());
         hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + " 대항전");
         chatMemberRepository.save(hostChatMember);
+
+        if (last) {
+            //@TODO  마지막 참가자일 경우 모든 참가자가 참가했다고 전송할것.
+        }
 
         return true;
     }
@@ -464,7 +472,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         }
 
-
         return true;
     }
 
@@ -482,6 +489,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         UnivBattle univBattle = univBattleRepository.findById(dto.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
+
+
         // 경기 상태가 진행 중이 아닐 경우 예외처리
         if (univBattle.getMatchStatus() != MatchStatus.IN_PROGRESS) {
             throw new CustomException(CustomExceptionCode.NOT_IN_PROGRESS);
@@ -491,8 +500,15 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         univBattle.setGuestScore(dto.getGuestScore());
         univBattle.setHostScore(dto.getHostScore());
         univBattle.setWinUniv(dto.getWinUniv());
+        if(dto.getGuestScore() > dto.getHostScore()){
+            univBattle.setLoseUniv(univBattle.getHostUniv());
+        } else {
+            univBattle.setLoseUniv(univBattle.getGuestUniv());
+        }
 
         univBattleRepository.save(univBattle);
+
+
 
         /**
          * 주최자측 대항전 결과 전송에 대한 참가자 동의를 1시간 동안 안 받을 시
@@ -539,6 +555,9 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // true 로 반응한 경우 경기결과에 문제가 없으니 COMPLETED 처리
         if (dto.isResultYN()) {
+
+            // 대학 랭킹 점수 update
+            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
         }
         // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
@@ -567,6 +586,9 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
             univBattle.setEndDt(LocalDateTime.now());
             univBattleRepository.save(univBattle);
+
+            // 랭크 점수 업데이트 mapper
+            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
             log.info("경기 종료 처리 완료");
         }
     }

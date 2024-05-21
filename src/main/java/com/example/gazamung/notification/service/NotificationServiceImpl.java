@@ -1,7 +1,10 @@
 package com.example.gazamung.notification.service;
 
+import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.MsgType;
+import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.notification.dto.NotifyCreateReq;
+import com.example.gazamung.notification.dto.NotifyRes;
 import com.example.gazamung.notification.entity.Notification;
 import com.example.gazamung.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,26 @@ public class NotificationServiceImpl implements NotificationService {
         return true;
     }
 
+    @Override
+    public NotifyRes readNotify(Long receiver,Long notifId) {
+        Notification notification = notificationRepository.findByReceiverAndNotifId(receiver,notifId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
+
+        notification.setRead(true);
+
+        notificationRepository.save(notification);
+
+        NotifyRes notifRes = NotifyRes.builder()
+                .isRead(notification.isRead())
+                .title(notification.getTitle())
+                .type(notification.getType())
+                .caller(notification.getCaller())
+                .content(notification.getContent())
+                .receiver(notification.getReceiver())
+                .relatedItemId(notification.getRelatedItemId())
+                .build();
+        return notifRes;
+    }
 
 
     public String generateTargetUrl(MsgType type, Long relatedId) {

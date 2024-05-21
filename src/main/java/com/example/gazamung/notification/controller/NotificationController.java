@@ -5,6 +5,7 @@ import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.notification.dto.NotifyCreateReq;
+import com.example.gazamung.notification.dto.NotifyRes;
 import com.example.gazamung.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,7 +40,17 @@ public class NotificationController {
     @PostMapping("/send")
     public ResultDTO sendNotify(@RequestBody NotifyCreateReq req){
         try {
-            return ResultDTO.of(notificationService.sendNotify(req), ApiResponseCode.SUCCESS.getCode(), "대항전 정보", null);
+            return ResultDTO.of(notificationService.sendNotify(req), ApiResponseCode.SUCCESS.getCode(), "알림 전송", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @GetMapping("/read")
+    public ResultDTO readNotify(@RequestParam Long receiver ,@RequestParam Long notifId){
+        try {
+            NotifyRes notifyRes = notificationService.readNotify(receiver,notifId);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "알림 조회", notifyRes);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
