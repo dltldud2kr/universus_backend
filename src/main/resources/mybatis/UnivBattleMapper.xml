@@ -4,14 +4,14 @@
 <mapper namespace="com.example.gazamung.mapper.UnivBattleMapper">
 
 
-    <update id="updateRankPoints">
-        UPDATE University
-        SET rank_point = CASE
-                             WHEN id = #{winUniv} THEN rank_point + 10
-                             WHEN id = #{loseUniv} THEN GREATEST(rank_point - 5, 0)
-            END
-        WHERE id IN (#{winUniv}, #{loseUniv})
-    </update>
+<!--    <update id="updateRankPoints">-->
+<!--        UPDATE University-->
+<!--        SET rank_point = CASE-->
+<!--                             WHEN id = #{winUniv} THEN rank_point + 10-->
+<!--                             WHEN id = #{loseUniv} THEN GREATEST(rank_point - 5, 0)-->
+<!--            END-->
+<!--        WHERE id IN (#{winUniv}, #{loseUniv})-->
+<!--    </update>-->
 
     <!-- 해당 대학의 UnivBattle 목록을 반환하는 쿼리 -->
     <select id="findByUnivId" resultType="com.example.gazamung.univBattle.entity.UnivBattle">

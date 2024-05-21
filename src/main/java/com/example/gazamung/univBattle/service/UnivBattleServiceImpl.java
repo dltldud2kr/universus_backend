@@ -10,7 +10,9 @@ import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.fcmSend.FcmSendDto;
 import com.example.gazamung.fcmSend.FcmService;
+import com.example.gazamung.mapper.RankMapper;
 import com.example.gazamung.mapper.UnivBattleMapper;
+import com.example.gazamung.mapper.UniversityMapper;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.notification.dto.NotifyCreateReq;
@@ -47,6 +49,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final FcmService fcmService;
     private final NotificationService notificationService;
     private final UnivBattleMapper univBattleMapper;
+    private final UniversityMapper universityMapper;
+    private final RankMapper rankMapper;
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     // 예약 작업 관리를 위한 ConcurrentHashMap
@@ -367,6 +371,18 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         return univBattleListResList;
     }
 
+    @Override
+    public List<UnivRankListRes> rankList(Long eventId) {
+
+        if (eventId == null){
+            universityMapper.findAllOrderByRankPointDesc();
+        }
+
+
+
+        return null;
+    }
+
     /**
      * 대항전 정보 조회
      * @param univBattleId
@@ -576,6 +592,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
      * @return
      */
     @Override
+    @Transactional
     public boolean matchResultRes(MatchResultResponse dto) {
         UnivBattle univBattle = univBattleRepository.findById(dto.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
@@ -596,7 +613,23 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         if (dto.isResultYN()) {
 
             // 대학 랭킹 점수 update
-            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
+            // 승리 팀 업데이트
+            int winExistence = rankMapper.checkExistence(univBattle.getWinUniv(), univBattle.getEventId());
+            if (winExistence == 0) {
+                rankMapper.insertRank(univBattle.getWinUniv(), univBattle.getEventId(), 10L, 1L, 0L);
+            } else {
+                rankMapper.updateWinRank(univBattle.getWinUniv(), univBattle.getEventId());
+            }
+
+            // 패배 팀 업데이트
+            int loseExistence = rankMapper.checkExistence(univBattle.getLoseUniv(), univBattle.getEventId());
+            if (loseExistence == 0) {
+                rankMapper.insertRank(univBattle.getLoseUniv(), univBattle.getEventId(), 0L, 0L, 1L);
+            } else {
+                rankMapper.updateLoseRank(univBattle.getLoseUniv(), univBattle.getEventId());
+            }
+
+//            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
         }
         // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
@@ -627,7 +660,23 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             univBattleRepository.save(univBattle);
 
             // 랭크 점수 업데이트 mapper
-            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
+            // 승리 팀 업데이트
+            int winExistence = rankMapper.checkExistence(univBattle.getWinUniv(), univBattle.getEventId());
+            if (winExistence == 0) {
+                rankMapper.insertRank(univBattle.getWinUniv(), univBattle.getEventId(), 10L, 1L, 0L);
+            } else {
+                rankMapper.updateWinRank(univBattle.getWinUniv(), univBattle.getEventId());
+            }
+
+            // 패배 팀 업데이트
+            int loseExistence = rankMapper.checkExistence(univBattle.getLoseUniv(), univBattle.getEventId());
+            if (loseExistence == 0) {
+                rankMapper.insertRank(univBattle.getLoseUniv(), univBattle.getEventId(), 0L, 0L, 1L);
+            } else {
+                rankMapper.updateLoseRank(univBattle.getLoseUniv(), univBattle.getEventId());
+            }
+
+//            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
             log.info("경기 종료 처리 완료");
         }
     }

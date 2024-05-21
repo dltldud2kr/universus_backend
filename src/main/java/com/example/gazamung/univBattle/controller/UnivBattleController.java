@@ -120,7 +120,7 @@ public class UnivBattleController {
         }
     }
 
-    @Operation(summary = "해당 대학 경기 리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
+    @Operation(summary = "해당 대학 경기 리스트 ", description = "PARAMETER: univId " +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
@@ -143,6 +143,16 @@ public class UnivBattleController {
         }
     }
 
+    @GetMapping("/rankList")
+    public ResultDTO rankList(@RequestParam(required = false)Long eventId) {
+
+        try {
+
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대학 랭킹 조회.", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
 
 
     @Operation(summary = "대항전 정보 ", description = "" +

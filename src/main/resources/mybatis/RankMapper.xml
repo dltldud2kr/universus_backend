@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gazamung.mapper.RankMapper">
+
+    <!-- 승리 팀 업데이트 -->
+    <update id="updateWinRank">
+        UPDATE rank
+        SET rank_point = rank_point + 10, win_count = win_count + 1
+        WHERE univ_id = #{winUniv} AND event_id = #{eventId}
+    </update>
+
+
+    <!-- 패배 팀 업데이트 -->
+    <update id="updateLoseRank">
+        UPDATE rank
+        SET rank_point = GREATEST(rank_point - 5, 0), lose_count = lose_count + 1
+        WHERE univ_id = #{loseUniv} AND event_id = #{eventId}
+    </update>
+
+<!--    &lt;!&ndash; 존재하지 않는 경우 신규 생성 &ndash;&gt;-->
+<!--    <insert id="insertRank">-->
+<!--        INSERT INTO rank (univ_id, event_id, rank_point, win_count, lose_count)-->
+<!--        VALUES (#{univId}, #{eventId}, #{rankPoint}, #{winCount}, #{loseCount})-->
+<!--    </insert>-->
+
+    <!-- 존재하지 않는 경우 신규 생성 -->
+    <insert id="insertRank">
+        INSERT INTO rank (id, univ_id, event_id, rank_point, win_count, lose_count)
+        VALUES (RANK_SEQ.NEXTVAL, #{univId}, #{eventId}, #{rankPoint}, #{winCount}, #{loseCount})
+    </insert>
+
+    <!-- 존재하는지 확인 -->
+    <select id="checkExistence" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM rank
+        WHERE univ_id = #{univId,jdbcType=BIGINT} AND event_id = #{eventId,jdbcType=BIGINT}
+    </select>
+
+</mapper>
