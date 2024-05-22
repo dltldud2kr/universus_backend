@@ -1,5 +1,6 @@
 package com.example.gazamung.mapper;
 
+import com.example.gazamung.rank.dto.UnivRankRes;
 import com.example.gazamung.university.entity.University;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -17,4 +18,7 @@ public interface RankMapper {
                     @Param("rankPoint") Long rankPoint, @Param("winCount") Long winCount, @Param("loseCount") Long loseCount);
 
     int checkExistence(@Param("univId") Long univId, @Param("eventId") Long eventId);
+
+    List<UnivRankRes> findRanksByEventId(Long eventId);
+    List<UnivRankRes> findAllRanks();
 }

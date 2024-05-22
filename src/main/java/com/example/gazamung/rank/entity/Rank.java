@@ -1,4 +1,4 @@
-package com.example.gazamung.rank;
+package com.example.gazamung.rank.entity;
 
 
 import lombok.*;

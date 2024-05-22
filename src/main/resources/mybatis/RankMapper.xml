@@ -18,11 +18,7 @@
         WHERE univ_id = #{loseUniv} AND event_id = #{eventId}
     </update>
 
-<!--    &lt;!&ndash; 존재하지 않는 경우 신규 생성 &ndash;&gt;-->
-<!--    <insert id="insertRank">-->
-<!--        INSERT INTO rank (univ_id, event_id, rank_point, win_count, lose_count)-->
-<!--        VALUES (#{univId}, #{eventId}, #{rankPoint}, #{winCount}, #{loseCount})-->
-<!--    </insert>-->
+
 
     <!-- 존재하지 않는 경우 신규 생성 -->
     <insert id="insertRank">
@@ -36,5 +32,33 @@
         FROM rank
         WHERE univ_id = #{univId,jdbcType=BIGINT} AND event_id = #{eventId,jdbcType=BIGINT}
     </select>
+
+    <!-- eventID에 따른 랭킹 반환 -->
+    <select id="findRanksByEventId" resultType="com.example.gazamung.rank.dto.UnivRankRes">
+        SELECT
+            univ_id,
+            event_id,
+            rank_point,
+            win_count,
+            lose_count,
+            (win_count + lose_count) as totalCount
+        FROM Rank
+        WHERE event_id = #{eventId}
+    </select>
+
+    <!-- eventID와 상관없는 전체 랭킹 반환 -->
+
+    <select id="findAllRanks" resultType="com.example.gazamung.rank.dto.UnivRankRes">
+        SELECT
+            univ_id,
+            SUM(rank_point) as rankPoint,
+            SUM(win_count) as winCount,
+            SUM(lose_count) as loseCount,
+            (SUM(win_count) + SUM(lose_count)) as totalCount
+        FROM Rank
+        GROUP BY univ_id
+    </select>
+
+
 
 </mapper>

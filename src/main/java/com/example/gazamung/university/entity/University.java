@@ -27,7 +27,5 @@ public class University {
     @Column(name = "logo_img")
     private String logoImg;
 
-    @ColumnDefault("0")
-    private Long rankPoint;
 
 }
