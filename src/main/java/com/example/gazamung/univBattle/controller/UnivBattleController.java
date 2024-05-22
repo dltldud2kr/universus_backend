@@ -193,7 +193,8 @@ public class UnivBattleController {
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
             "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
-            "\n- NOT_IN_PROGRESS: 아직 진행되지 않은 경기입니다.")
+            "\n- NOT_IN_PROGRESS: 아직 진행되지 않은 경기입니다." +
+            "\n- UNAUTHORIZED_USER: 권한이 없는 사용자입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
@@ -213,7 +214,8 @@ public class UnivBattleController {
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
             "\n### Result Code 에 따른 요청 결과" +
             "\n- NOT_FOUND_BATTLE: 존재하지 않는 대항전입니다." +
-            "\n- ALREADY_END_MATCH: 이미 종료된 경기입니다." )
+            "\n- UNAUTHORIZED_USER: 존재하지 않는 대항전입니다." +
+            "\n- NOT_IN_PROGRESS: 아직 진행되지 않은 경기입니다." )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
