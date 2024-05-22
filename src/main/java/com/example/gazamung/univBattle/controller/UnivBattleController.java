@@ -143,17 +143,6 @@ public class UnivBattleController {
         }
     }
 
-    @GetMapping("/rankList")
-    public ResultDTO rankList(@RequestParam(required = false)Long eventId) {
-
-        try {
-
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대학 랭킹 조회.", null);
-        } catch (CustomException e) {
-            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
-        }
-    }
-
 
     @Operation(summary = "대항전 정보 ", description = "" +
             " 대항전 정보를 반환합니다." +

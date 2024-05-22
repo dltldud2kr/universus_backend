@@ -44,6 +44,7 @@
             (win_count + lose_count) as totalCount
         FROM Rank
         WHERE event_id = #{eventId}
+        ORDER BY rank_point DESC
     </select>
 
     <!-- eventID와 상관없는 전체 랭킹 반환 -->
@@ -57,6 +58,7 @@
             (SUM(win_count) + SUM(lose_count)) as totalCount
         FROM Rank
         GROUP BY univ_id
+        ORDER BY rankPoint DESC
     </select>
 
 

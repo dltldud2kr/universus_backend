@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class MatchResultResponse {
 
     private Long univBattleId;
+    private Long memberIdx;
     private boolean resultYN;
 }

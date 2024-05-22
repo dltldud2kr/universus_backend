@@ -226,6 +226,31 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         chatMemberRepository.save(hostChatMember);
 
+        // FCM 알림 전송 메서드 (주최자에게만 발송)
+        FcmSendDto fcmSendDto = FcmSendDto.builder()
+                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .title(guestUnivName + "대표자가 대항전에 참가했습니다.")
+                .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "대항전이 매칭되었습니다.")
+                .build();
+        try {
+            fcmService.sendMessageTo(fcmSendDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 알림 전송 메서드 (주최자에게만 발송)
+        NotifyCreateReq dto = NotifyCreateReq.builder()
+                .type(MsgType.UNIV_BATTLE)
+                .isRead(false)
+                .receiver(univBattle.getHostLeader())
+                .title(guestUnivName + "대표가자 대항전에 참가했습니다. ")
+                .content(univBattle.getGuestUnivName() + "VS" + univBattle.getHostUnivName() + "대항전이 매칭되었습니다.")
+                .relatedItemId(univBattle.getUnivBattleId())
+                .build();
+        notificationService.sendNotify(dto);
+
+
         return true;
 
     }
@@ -282,6 +307,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 마지막 참가자일 경우 준비중으로 변경.
         if(totalParticipant == univBattle.getTeamPtcLimit() * 2  - 1){
             univBattle.setMatchStatus(MatchStatus.PREPARED);
+            last = true;
         }
 
         // 참가자 저장
@@ -313,6 +339,31 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         if (last) {
             //@TODO  마지막 참가자일 경우 모든 참가자가 참가했다고 전송할것.
+
+            // FCM 알림 전송 메서드 (주최자에게만 발송)
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .title(univBattle.getGuestUnivName() + "대항전 전원 참가 완료!")
+                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "참가자 전원 참여완료!")
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // 알림 전송 메서드 (주최자에게만 발송)
+            NotifyCreateReq dto = NotifyCreateReq.builder()
+                    .type(MsgType.UNIV_BATTLE)
+                    .isRead(false)
+                    .receiver(univBattle.getHostLeader())
+                    .title(univBattle.getGuestUnivName() + "대항전 전원 참가 완료!")
+                    .content(univBattle.getGuestUnivName() + "VS" + univBattle.getHostUnivName() + "참가자 전원 참여완료!")
+                    .relatedItemId(univBattle.getUnivBattleId())
+                    .build();
+            notificationService.sendNotify(dto);
+
         }
 
         return true;
@@ -371,17 +422,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         return univBattleListResList;
     }
 
-    @Override
-    public List<UnivRankListRes> rankList(Long eventId) {
-
-        if (eventId == null){
-            universityMapper.findAllOrderByRankPointDesc();
-        }
-
-
-
-        return null;
-    }
 
     /**
      * 대항전 정보 조회
@@ -540,10 +580,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
      */
 
     @Override
+    @Transactional
     public boolean matchResultReq(MatchResultRequest dto) {
         UnivBattle univBattle = univBattleRepository.findById(dto.getUnivBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
+        if (!Objects.equals(univBattle.getHostLeader(), dto.getHostLeader())){
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+        }
 
 
         // 경기 상태가 진행 중이 아닐 경우 예외처리
@@ -564,7 +608,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         univBattleRepository.save(univBattle);
 
 
-
         /**
          * 주최자측 대항전 결과 전송에 대한 참가자 동의를 1시간 동안 안 받을 시
          * checkIncompleteMatch 메서드 실행 후 대항전 상태를 COMPLETE 로 변경.
@@ -577,6 +620,32 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // 예약된 작업을 관리 목록에 추가
         scheduledTasks.put(univBattle.getUnivBattleId(), scheduledFuture);
+
+        Optional<Member> member = memberRepository.findById(univBattle.getGuestLeader());
+        String fcmToken = member.get().getFcmToken();
+
+        // FCM 알림 전송 메서드 (참가자대표에게 발송)
+        FcmSendDto fcmSendDto = FcmSendDto.builder()
+                .token(fcmToken)
+                .title(univBattle.getHostUnivName() +  "경기 결과를 확인해주세요.")
+                .body("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
+                .build();
+        try {
+            fcmService.sendMessageTo(fcmSendDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 알림 전송 메서드 (주최자에게만 발송)
+        NotifyCreateReq req = NotifyCreateReq.builder()
+                .type(MsgType.UNIV_BATTLE)
+                .isRead(false)
+                .receiver(univBattle.getHostLeader())
+                .title(univBattle.getHostUnivName() +  "경기 결과를 확인해주세요.")
+                .content("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
+                .relatedItemId(univBattle.getUnivBattleId())
+                .build();
+        notificationService.sendNotify(req);
 
         return true;
     }
@@ -600,6 +669,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         // 이미 경기가 완료된 상태일 경우 예외 처리
         if (univBattle.getMatchStatus() == MatchStatus.COMPLETED) {
             throw new CustomException(CustomExceptionCode.ALREADY_END_MATCH);
+        }
+
+        if (!Objects.equals(univBattle.getGuestLeader(), dto.getMemberIdx())){
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
         }
 
         // 주최자측 결과 보고에 응답했는 경우 관리 목록에서 해당 경기의 스케줄링 작업을 가져와 취소
@@ -631,17 +704,90 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
 //            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
+
+            Optional<Member> member = memberRepository.findById(univBattle.getHostLeader());
+            String fcmToken = member.get().getFcmToken();
+
+            List<Participant> participantList = participantRepository.findByUnivBattleId(univBattle.getUnivBattleId());
+            // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
+            if(participantList.size() != univBattle.getTeamPtcLimit() * 2){
+                throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
+            }
+
+            for (Participant participants : participantList){
+                Member member2 = memberRepository.findById(participants.getMemberIdx())
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+                NotifyCreateReq req = NotifyCreateReq.builder()
+                        .type(MsgType.UNIV_BATTLE)
+                        .isRead(false)
+                        .receiver(member2.getMemberIdx())
+                        .title(univBattle.getGuestUnivName() +  "대항전이  종료되었습니다.")
+                        .content(univBattle.getGuestUnivName() + "VS" + univBattle.getHostUnivName() + "대항전이 종료되었습니다.")
+                        .relatedItemId(univBattle.getUnivBattleId())
+                        .build();
+                notificationService.sendNotify(req);
+
+            }
+
+
+            //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
+//        for (Participant participants : participantList){
+//            Member member = memberRepository.findById(participants.getMemberIdx())
+//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+//            FcmSendDto fcmSendDto = FcmSendDto.builder()
+//                    .token(member.getFcmToken())
+//                    .title("대항전이 시작되었습니다.")
+//                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+//                    .build();
+//            try {
+//                fcmService.sendMessageTo(fcmSendDto);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+
+
         }
         // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
         else {
             univBattle.setGuestScore(null);
             univBattle.setHostScore(null);
             univBattle.setWinUniv(null);
+
+            // FCM 알림 전송 메서드 (주최자에게만 발송)
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .title(univBattle.getGuestUnivName() + "대표자가 경기결과에 동의하지 않았습니다.")
+                    .body("경기 결과를 다시 제출해주세요.")
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // 알림 전송 메서드 (주최자에게만 발송)
+            NotifyCreateReq req = NotifyCreateReq.builder()
+                    .type(MsgType.UNIV_BATTLE)
+                    .isRead(false)
+                    .receiver(univBattle.getHostLeader())
+                    .title(univBattle.getGuestUnivName() + "대표자가 경기결과에 동의하지 않았습니다.")
+                    .content("경기 결과를 다시 제출해주세요.")
+                    .relatedItemId(univBattle.getUnivBattleId())
+                    .build();
+            notificationService.sendNotify(req);
+
+
         }
 
         univBattleRepository.save(univBattle);
 
+
         return true;
+
+
     }
 
     /**

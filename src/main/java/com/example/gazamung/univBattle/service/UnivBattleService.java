@@ -46,7 +46,7 @@ public interface UnivBattleService {
      */
     List<UnivBattleListRes> uList(Long univId);
 
-    List<UnivRankListRes> rankList(Long eventId);
+
 
     /**
      * 대항전 정보
