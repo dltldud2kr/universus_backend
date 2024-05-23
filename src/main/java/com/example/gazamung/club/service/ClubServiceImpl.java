@@ -571,5 +571,6 @@ public class ClubServiceImpl implements ClubService {
         return clubMemberRepository.countByClubId(clubId);
 
     }
+
 }
 

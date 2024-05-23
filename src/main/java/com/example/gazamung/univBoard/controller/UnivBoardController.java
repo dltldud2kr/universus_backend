@@ -75,7 +75,7 @@ public class UnivBoardController {
     }
 
     @Operation(summary = "게시글 리스트 조회 ", description = "" +
-            "게시글을 리스트를 조회합니다." +
+            "게시글을 리스트를 조회합니다. categoryId : 0(전체), or 해당 카테고리 게시글만 조회" +
             "\n### HTTP STATUS 에 따른 요청 결과" +
             "\n- 200: 서버요청 정상 성공" +
             "\n- 500: 서버에서 요청 처리중 문제가 발생했습니다." +
@@ -87,9 +87,9 @@ public class UnivBoardController {
             @ApiResponse(responseCode = "200", description = "게시글 리스트 조회 성공"),
     })
     @GetMapping("/list")
-    public Object listPost(@RequestParam Long memberIdx, Long clubId){
+    public Object listPost(@RequestParam Long memberIdx, Long clubId, Long categoryId){
         try{
-            List<InfoPost> listPosts = univBoardService.listPost(memberIdx, clubId);
+            List<InfoPost> listPosts = univBoardService.listPost(memberIdx, clubId, categoryId);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "게시글 리스트 조회 완료", listPosts);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);

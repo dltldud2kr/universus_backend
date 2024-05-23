@@ -14,7 +14,7 @@ public interface UnivBoardService {
 
     Map<String, Object> createPost(PostDto dto);
 
-    List<InfoPost> listPost(Long memberIdx, Long clubId);
+    List<InfoPost> listPost(Long memberIdx, Long clubId, Long categoryId);
 
     void deletePost(Long univBoardId, Long memberIdx);
 

@@ -171,15 +171,21 @@ public class UnivBoardServiceImpl implements UnivBoardService {
      * @description 커뮤니티 게시글 리스트 조회
      */
     @Override
-    public List<InfoPost> listPost(Long memberIdx, Long clubId) {
+    public List<InfoPost> listPost(Long memberIdx, Long clubId, Long categoryId) {
 
         // 멤버 조회
         Member member = memberRepository.findById(memberIdx)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-        // 게시글 목록 조회
-        List<UnivBoard> univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivId(member.getUnivId())
-                : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
+        // 카테고리 별 게시글 목록 조회
+        List<UnivBoard> univBoards;
+        if (categoryId == 0) { // 카테고리가 0이면 전체 게시글 조회
+            univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivId(member.getUnivId())
+                    : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
+        } else { // 카테고리가 1 : 자유, 2 : 모집, 3 : 정보 등 요청이 있으면 해당 카테고리의 리스트만 반환
+            univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivIdAndCategoryId(member.getUnivId(), categoryId)
+                    : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
+        }
 
         List<InfoPost> infoPosts = new ArrayList<>();
         for (UnivBoard univBoard : univBoards) {

@@ -18,6 +18,8 @@ public interface UnivBoardRepository extends JpaRepository<UnivBoard, Long> {
 
     List<UnivBoard> findByCategoryIdAndUnivId(Long i, Long univId, Sort regDt);
 
+    List<UnivBoard> findByClubIdIsNullAndUnivIdAndCategoryId(Long univId, Long categoryId);
+
     List<UnivBoard> findByClubIdIsNullAndUnivId(Long univId);
 
     List<UnivBoard> findByClubIdAndUnivId(Long clubId, Long univId);

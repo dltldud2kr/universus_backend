@@ -46,4 +46,5 @@ public interface ClubService {
     void fcmToken(String fcmToken, Long memberIdx);
 
     void expelMember(ExpelClub request);
+
 }
