@@ -112,7 +112,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
             univBoard = UnivBoard.builder()
                     .memberIdx(dto.getMemberIdx())
-                    .categoryId(0L) // 잠재적으로 이 부분도 개선이 필요할 수 있습니다.
+                    .categoryId(1L) // 잠재적으로 이 부분도 개선이 필요할 수 있습니다.
                     .univId(member.getUnivId())
                     .deptId(member.getDeptId())
                     .clubId(dto.getClubId())

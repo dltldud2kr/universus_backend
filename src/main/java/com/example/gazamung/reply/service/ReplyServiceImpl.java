@@ -19,7 +19,19 @@ import com.example.gazamung.univBoard.entity.UnivBoard;
 import com.example.gazamung.univBoard.repository.UnivBoardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.Map;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -46,12 +58,15 @@ public class ReplyServiceImpl implements ReplyService{
         UnivBoard univBoard = univBoardRepository.findById(dto.getUnivBoardId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
 
+        // 댓글 내용 필터링
+        String filteredContent = filterContent(dto.getContent());
+
         // 댓글 생성
         Reply reply = Reply.builder()
                 .memberIdx(dto.getMemberIdx())
                 .univBoardId(dto.getUnivBoardId())
                 .lastDt(LocalDateTime.now())
-                .content(dto.getContent())
+                .content(filteredContent)
                 .build();
 
         replyRepository.save(reply);
@@ -71,9 +86,46 @@ public class ReplyServiceImpl implements ReplyService{
             }
         }
 
-
-
         return true;
+    }
+
+    // 댓글 필터링 API 통신 부분
+    private String filterContent(String content) {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse response) throws IOException {
+                return false;
+            }
+        });
+
+        String url = "http://localhost:5000/predict";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> requestBody = Map.of("text", content);
+        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.exchange(
+                url, HttpMethod.POST, requestEntity, String.class);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Double> responseMap = objectMapper.readValue(responseEntity.getBody(), Map.class);
+
+            // "None"을 제외하고 모든 항목에서 비속어 확률 퍼센트가 50% 넘으면 댓글을 필터링하고 DB에 저장함
+            for (Map.Entry<String, Double> entry : responseMap.entrySet()) {
+                if (!entry.getKey().equals("None") && entry.getValue() >= 0.5) {
+                    return entry.getKey() + " 비속어 필터링 되었습니다.";
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // 만약 비속어 필터링에 걸리지 않으면 원본 저장
+        return content;
     }
 
     @Override
