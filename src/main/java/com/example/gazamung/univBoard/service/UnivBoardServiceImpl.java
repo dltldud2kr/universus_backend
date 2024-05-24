@@ -77,7 +77,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                 .regDt(post.getRegDt())
                 .postImageUrls(postImageUrls)
                 .profileImgUrl(member.getProfileImgUrl())
-                .univBoardId(post.getUnivBoardId());
+                .univBoardId(post.getUnivBoardId())
+                .memberIdx(post.getMemberIdx()); // 지우지마세요! 지우면 캡스톤 다지움
 
         // categoryId가 1인 경우, 위치 정보도 반환 객체에 포함
         if (post.getCategoryId() == 1) {
@@ -179,7 +180,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
         // 카테고리 별 게시글 목록 조회
         List<UnivBoard> univBoards;
-        if (categoryId == 0) { // 카테고리가 0이면 전체 게시글 조회
+        if (categoryId != null && categoryId == 0) { // 카테고리가 0이면 전체 게시글 조회
             univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivId(member.getUnivId())
                     : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
         } else { // 카테고리가 1 : 자유, 2 : 모집, 3 : 정보 등 요청이 있으면 해당 카테고리의 리스트만 반환
@@ -190,8 +191,11 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         List<InfoPost> infoPosts = new ArrayList<>();
         for (UnivBoard univBoard : univBoards) {
             // 카테고리 정보 조회
-            Category category = categoryRepository.findById(univBoard.getCategoryId())
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CATEGORY));
+            Category category = null;
+            if (categoryId != null) {
+                category = categoryRepository.findById(univBoard.getCategoryId())
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CATEGORY));
+            }
 
             // 클럽 정보 조회, 클럽 ID가 null이면 조회하지 않음
             Club club = null;

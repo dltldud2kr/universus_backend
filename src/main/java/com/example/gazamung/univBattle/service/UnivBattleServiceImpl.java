@@ -165,7 +165,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         String guestUnivName = university.get().getSchoolName();
 
         // 주최자와 같은 학교는 참가 불가능.
-        if (univBattle.getHostUniv() == guest.getUnivId()) {
+        if (Objects.equals(univBattle.getHostUniv(), guest.getUnivId())) {
             throw new CustomException(CustomExceptionCode.SAME_UNIVERSITY);
         }
 
