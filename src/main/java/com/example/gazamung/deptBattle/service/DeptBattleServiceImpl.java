@@ -367,6 +367,8 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
     @Override
     public boolean attend(DeptBattleAttendRequest request) {
 
+        boolean last = false;
+
         // 참가자 정보 조회
         Member member = memberRepository.findById(request.getMemberIdx())
                 .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -406,6 +408,7 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         // 마지막 참가자일 경우 대기중으로 변경.
         if(totalParticipant == deptBattle.getTeamPtcLimit() * 2 - 1){
             deptBattle.setMatchStatus(MatchStatus.PREPARED);
+            last = true;
         }
 
         // 참가자 저장
@@ -433,6 +436,35 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         ChatMember hostChatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(deptBattle.getHostLeader(), chatRoom.getChatRoomId());
         hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + "대항전");
         chatMemberRepository.save(hostChatMember);
+
+        if (last) {
+            //@TODO  마지막 참가자일 경우 모든 참가자가 참가했다고 전송할것.
+
+            // FCM 알림 전송 메서드 (주최자에게만 발송)
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .title("대항전 전원 참가 완료!")
+                    .body(deptBattle.getHostDept() + "vs" + deptBattle.getGuestDept() + "참가자 전원 참여완료!")
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // 알림 전송 메서드 (주최자에게만 발송)
+            NotifyCreateReq dto = NotifyCreateReq.builder()
+                    .type(MsgType.UNIV_BATTLE)
+                    .isRead(false)
+                    .receiver(deptBattle.getHostLeader())
+                    .title("대항전 전원 참가 완료!")
+                    .content(deptBattle.getGuestDept() + "VS" + deptBattle.getHostDept() + "참가자 전원 참여완료!")
+                    .relatedItemId(deptBattle.getDeptBattleId())
+                    .build();
+            notificationService.sendNotify(dto);
+
+        }
 
         return true;
     }

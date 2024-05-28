@@ -337,6 +337,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + " 대항전");
         chatMemberRepository.save(hostChatMember);
 
+
         if (last) {
             //@TODO  마지막 참가자일 경우 모든 참가자가 참가했다고 전송할것.
 
