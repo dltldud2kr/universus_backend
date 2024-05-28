@@ -13,4 +13,5 @@ public class DeptMatchResultRes {
 
     private Long deptBattleId;
     private boolean resultYN;
+    private Long memberIdx;
 }

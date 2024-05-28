@@ -627,7 +627,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         // FCM 알림 전송 메서드 (참가자대표에게 발송)
         FcmSendDto fcmSendDto = FcmSendDto.builder()
-                .token(fcmToken)
+                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                 .title(univBattle.getHostUnivName() +  "경기 결과를 확인해주세요.")
                 .body("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
                 .build();
@@ -672,6 +673,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new CustomException(CustomExceptionCode.ALREADY_END_MATCH);
         }
 
+        // 대표자가 맞는지 검사.
         if (!Objects.equals(univBattle.getGuestLeader(), dto.getMemberIdx())){
             throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
         }

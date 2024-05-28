@@ -333,6 +333,10 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         DeptBattle deptBattle = deptBattleRepository.findById(dto.getDeptBattleId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BATTLE));
 
+        if (!Objects.equals(deptBattle.getHostLeader(), dto.getHostLeader())){
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+        }
+
         // 경기 상태가 진행 중이 아닐 경우 예외처리
         if (deptBattle.getMatchStatus() != MatchStatus.IN_PROGRESS) {
             throw new CustomException(CustomExceptionCode.NOT_IN_PROGRESS);
@@ -342,10 +346,19 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         deptBattle.setGuestScore(dto.getGuestScore());
         deptBattle.setHostScore(dto.getHostScore());
         deptBattle.setWinDept(dto.getWinDept());
+        if(dto.getGuestScore() > dto.getHostScore()){
+            deptBattle.setLoseDept(deptBattle.getHostDept());
+        } else {
+            deptBattle.setLoseDept(deptBattle.getGuestDept());
+        }
 
         deptBattleRepository.save(deptBattle);
 
-        // 1분 후에 실행될 스케줄링 작업을 생성합니다. (테스트용)
+        /**
+         * 주최자측 대항전 결과 전송에 대한 참가자 동의를 1시간 동안 안 받을 시
+         * checkIncompleteMatch 메서드 실행 후 대항전 상태를 COMPLETE 로 변경.
+         */
+        // 1시간 이후에 실행될 스케줄링 작업을 생성합니다. (테스트용 1분 설정)
         ScheduledFuture<?> scheduledFuture = scheduler2.schedule(() -> {
             log.info("Scheduled Task 실행");
             checkIncompleteMatch(deptBattle.getDeptBattleId());
@@ -354,8 +367,46 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         // 예약된 작업을 관리 목록에 추가
         scheduledTasks2.put(deptBattle.getDeptBattleId(), scheduledFuture);
 
+        Optional<Member> member = memberRepository.findById(deptBattle.getGuestLeader());
+        String fcmToken = member.get().getFcmToken();
+
+        // FCM 알림 전송 메서드 (참가자대표에게 발송)
+        FcmSendDto fcmSendDto = FcmSendDto.builder()
+                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .title(deptBattle.getHostDeptName() +  "경기 결과를 확인해주세요.")
+                .body("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
+                .build();
+        try {
+            fcmService.sendMessageTo(fcmSendDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 알림 전송 메서드 (주최자에게만 발송)
+        NotifyCreateReq req = NotifyCreateReq.builder()
+                .type(MsgType.DEPT_BATTLE)
+                .isRead(false)
+                .receiver(deptBattle.getHostLeader())
+                .title(deptBattle.getHostDeptName() +  "경기 결과를 확인해주세요.")
+                .content("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
+                .relatedItemId(deptBattle.getDeptBattleId())
+                .build();
+        notificationService.sendNotify(req);
+
         return true;
     }
+
+    /**
+     * 경기 결과 응답 (참가팀)
+     * 주최자의 경기기록에 대해 응답함.
+     * < resultYN 값에 따른 결과 >
+     * true: 경기 종료 (MatchStatus.COMPLETE)로 변경
+     * false: 주최측에 경기결과 재요청 (MatchStatus.IN_PROGRESS)유지
+     * 어떠한 결과값이든 스케줄 작업을 삭제 및 취소함.
+     * @param dto
+     * @return
+     */
 
     @Override
     public boolean matchResultRes(DeptMatchResultRes dto) {
@@ -367,6 +418,12 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
         if (deptBattle.getMatchStatus() == MatchStatus.COMPLETED) {
             throw new CustomException(CustomExceptionCode.ALREADY_END_MATCH);
         }
+
+        // 대표자가 맞는지 검사.
+        if (!Objects.equals(deptBattle.getGuestLeader(), dto.getMemberIdx())){
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+        }
+
 
         // 주최자측 결과 보고에 응답했는 경우 관리 목록에서 해당 경기의 스케줄링 작업을 가져와 취소
         ScheduledFuture<?> future = scheduledTasks2.remove(deptBattle.getDeptBattleId());
@@ -526,7 +583,9 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
                 .cost(request.getCost())
                 .battleDate(request.getBattleDate())
                 .teamPtcLimit(request.getTeamPtcLimit())
-                .location(request.getLocation())
+                .lat(request.getLat())
+                .lng(request.getLng())
+                .place(request.getPlace())
                 .matchStatus(MatchStatus.RECRUIT)
                 .regDt(LocalDateTime.now())
                 .hostDeptName(department.getDeptName())

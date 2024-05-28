@@ -13,7 +13,9 @@ public class DeptBattleCreateRequest {
 
     private long hostLeader ;   // 대표자 memberIdx
     private long eventId;       // 종목ID
-    private String location;    // 장소
+    private String lat;             // 위도
+    private String lng;             // 경도
+    private String place;           // 위치
     private String battleDate;  // 일정
     private String content;     // 내용
     private long teamPtcLimit;

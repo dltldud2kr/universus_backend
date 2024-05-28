@@ -28,14 +28,19 @@ public class DeptBattle {
     private String guestDeptName;   // 참가팀 학과명
     private Long guestDept;         // 참가팀 학과
     private Long winDept;           // 승리팀 학과
+    private Long loseDept;
     private Long eventId;           // 대결 종목
     private String content;         // 내용
     private String cost;
     private long teamPtcLimit;
 
     private String battleDate;     // 일정
-    private String location;        // 장소
-    private LocalDateTime matchStartDt;
+    private LocalDateTime matchStartDt; // 경기 시작시간
+    private LocalDateTime matchEndDt;   // 경기 종료시간
+
+    private String lat;             // 위도
+    private String lng;             // 경도
+    private String place;           // 위치
 
     @Enumerated(EnumType.STRING)
     private MatchStatus matchStatus;            // 상태
