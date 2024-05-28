@@ -244,7 +244,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .type(MsgType.UNIV_BATTLE)
                 .isRead(false)
                 .receiver(univBattle.getHostLeader())
-                .title(guestUnivName + "대표가자 대항전에 참가했습니다. ")
+                .title(guestUnivName + "대표자가 대항전에 참가했습니다. ")
                 .content(univBattle.getGuestUnivName() + "VS" + univBattle.getHostUnivName() + "대항전이 매칭되었습니다.")
                 .relatedItemId(univBattle.getUnivBattleId())
                 .build();
