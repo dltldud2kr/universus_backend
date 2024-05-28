@@ -157,7 +157,7 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
             .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
                     "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
             .title(deptBattle.getGuestDeptName() + "대표자가 대항전에 참가했습니다.")
-            .body(deptBattle.getHostDept() + "vs" + deptBattle.getGuestDept() + "대항전이 매칭되었습니다.")
+            .body(deptBattle.getHostDeptName() + "vs" + deptBattle.getGuestDeptName() + "대항전이 매칭되었습니다.")
             .build();
     try {
         fcmService.sendMessageTo(fcmSendDto);
@@ -285,15 +285,44 @@ public boolean GuestLeaderAttend(DeptGuestLeaderAttendRequest request) {
             throw new CustomException(CustomExceptionCode.CANNOT_START_MATCH);
         }
         // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
-        int ptcCount = participantRepository.countByUnivBattleId(deptBattleId);
-        if(ptcCount != deptBattle.getTeamPtcLimit() * 2){
+        List<Participant> participantList = participantRepository.findByDeptBattleId(deptBattleId);
+        if(participantList.size() != deptBattle.getTeamPtcLimit() * 2){
             throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
         }
 
         deptBattle.setMatchStatus(MatchStatus.IN_PROGRESS);
         deptBattle.setMatchStartDt(LocalDateTime.now());
-
         deptBattleRepository.save(deptBattle);
+
+        // FCM 알림 전송 메서드
+        FcmSendDto fcmSendDto = FcmSendDto.builder()
+                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .title("대항전이 시작되었습니다.")
+                .body(deptBattle.getHostDeptName() + "vs" + deptBattle.getGuestDeptName() + "경기가 시작되었습니다!")
+                .build();
+        try {
+            fcmService.sendMessageTo(fcmSendDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        //@TODO 배포 전에 위 주석 메서드 부분에 추가할것. 지금은 따로 빼서 TEST
+        for (Participant participants : participantList){
+            Member member = memberRepository.findById(participants.getMemberIdx())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+            NotifyCreateReq dto = NotifyCreateReq.builder()
+                    .type(MsgType.DEPT_BATTLE)
+                    .isRead(false)
+                    .receiver(member.getMemberIdx())
+                    .title("대항전이 시작되었습니다.")
+                    .content(deptBattle.getGuestDeptName() + "VS" + deptBattle.getHostDeptName() + "경기 시작")
+                    .relatedItemId(deptBattle.getDeptBattleId())
+                    .build();
+            notificationService.sendNotify(dto);
+
+        }
 
         return true;
     }
