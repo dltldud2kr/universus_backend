@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 public class InfoDto {
 
 
+    private Long replyId;       // 댓글 ID
+
     private String content;     // 내용
 
     private LocalDateTime lastDt;

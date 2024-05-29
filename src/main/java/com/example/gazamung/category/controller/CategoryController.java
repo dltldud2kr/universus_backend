@@ -33,10 +33,10 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "카테고리 생성 성공"),
     })
     @PostMapping("/create")
-    public ResultDTO createCategory(@RequestParam String categoryName){
+    public ResultDTO createCategory(@RequestParam String categoryName, Long memberIdx){
 
         try {
-            return ResultDTO.of(categoryService.create(categoryName), ApiResponseCode.SUCCESS.getCode(), "카테고리 생성", null);
+            return ResultDTO.of(categoryService.create(categoryName, memberIdx), ApiResponseCode.SUCCESS.getCode(), "카테고리 생성", null);
         } catch (CustomException e) {
             return  ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

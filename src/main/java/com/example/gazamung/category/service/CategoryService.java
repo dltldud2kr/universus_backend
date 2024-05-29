@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public interface CategoryService {
 
-    boolean create(String categoryName);
+    boolean create(String categoryName, Long memberIdx);
     boolean deleteCategory(Long categoryId, Long memberIdx);
 
     List<CategoryDto> getCategoryList();

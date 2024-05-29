@@ -147,6 +147,7 @@ public class ReplyServiceImpl implements ReplyService{
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
             InfoDto infoDto = InfoDto.builder()
+                    .replyId(reply.getReplyId())
                     .nickname(member.getNickname())
                     .profileImgUrl(member.getProfileImgUrl())
                     .content(reply.getContent())

@@ -25,7 +25,14 @@ public class CategoryServiceImpl implements CategoryService {
 
 
     @Override
-    public boolean create(String categoryName) {
+    public boolean create(String categoryName, Long memberIdx) {
+
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        if (member.getRole() == 0){
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+        }
 
         Category category = new Category();
         category.setCategoryName(categoryName);
