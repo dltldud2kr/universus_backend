@@ -33,7 +33,7 @@ public interface ClubService {
 
     List<ClubListDto> list(Long memberIdx);
 
-    ClubDto info(Long clubId);
+    ClubDto info(Long clubId, Long memberIdx);
 
     void secession(ClubJoinRequest request);
 
@@ -47,4 +47,5 @@ public interface ClubService {
 
     void expelMember(ExpelClub request);
 
+    List<ClubListDto> joinedClubsList(Long memberIdx);
 }

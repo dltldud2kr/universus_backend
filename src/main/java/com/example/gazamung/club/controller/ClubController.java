@@ -147,9 +147,9 @@ public class ClubController {
     public Object list(Long memberIdx){
         try{
             List<ClubListDto> requestDtoList = clubService.list(memberIdx);
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "모임 수정 완료.", requestDtoList);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "모임 리스트 조회 완료.", requestDtoList);
         } catch (CustomException e) {
-            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), "모임 전체 리스트 조회 완료");
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }
 
@@ -165,9 +165,9 @@ public class ClubController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/info")
-    public ResultDTO info(@RequestParam Long clubId){
+    public ResultDTO info(@RequestParam Long clubId, Long memberIdx){
         try {
-            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 정보 조회 완료.", clubService.info(clubId));
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"모임 정보 조회 완료.", clubService.info(clubId, memberIdx));
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
@@ -265,6 +265,28 @@ public class ClubController {
             clubService.expelMember(request);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(),"모임에서 회원을 추방했습니다.", null);
         }catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "가입된 모임 리스트 조회", description = "" +
+            " 가입된 모임 리스트 조회 " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- NOT_FOUND_USER: 가입되지 않은 회원입니다." +
+            "\n- NOT_FOUND_EVENT: 해당 이벤트를 확인할 수 없습니다." +
+            "\n- ")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/joinedClubsList")
+    public Object joinedClubsList(Long memberIdx){
+        try{
+            List<ClubListDto> requestDtoList = clubService.joinedClubsList(memberIdx);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "가입된 모임 조회 완료.", requestDtoList);
+        } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
     }

@@ -274,6 +274,9 @@ public class ClubServiceImpl implements ClubService {
                             .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
 
                     String clubImageUrl = clubImage.isEmpty() ? "" : clubImage.get(0).getImageUrl();
+                    boolean isJoined = clubMemberRepository.findByClubIdAndMemberIdx(club.getClubId(), memberIdx).isPresent();
+
+
 
                     return ClubListDto.builder()
                             .eventName(event.getEventName())
@@ -281,6 +284,7 @@ public class ClubServiceImpl implements ClubService {
                             .introduction(club.getIntroduction())
                             .currentMembers(currentMembers + 1) // 모임장 포함
                             .clubImageUrl(clubImageUrl)
+                            .joinedStatus(isJoined ? 1L : 0L)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -294,7 +298,7 @@ public class ClubServiceImpl implements ClubService {
      * @created 24.03.27 이승열
      * @description Entity 객체를 Dto 로 변환하여 리턴합니다.
      */
-    public ClubDto info(Long clubId) {
+    public ClubDto info(Long clubId, Long memberIdx) {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
@@ -307,6 +311,8 @@ public class ClubServiceImpl implements ClubService {
 
         Event event = eventRepository.findById(club.getEventId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
+
+        boolean isClubMember = clubMemberRepository.findByClubIdAndMemberIdx(clubId, memberIdx).isPresent();
 
         return ClubDto.builder()
                 .clubId(club.getClubId())
@@ -321,6 +327,7 @@ public class ClubServiceImpl implements ClubService {
                 .maximumMembers(club.getMaximumMembers())
                 .currentMembers(currentMembers + 1) // 모임장 포함
                 .clubImageUrls(clubImage.stream().map(UploadImage::getImageUrl).collect(Collectors.toList()))
+                .joinedStatus(isClubMember ? 1L : 0L)
                 .build();
     }
 
@@ -564,6 +571,51 @@ public class ClubServiceImpl implements ClubService {
                 throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
             }
         }
+    }
+
+    /**
+     * @param memberIdx
+     * @title 가입된 모임 조회
+     * @created 24.05. 29 이승열
+     */
+    @Override
+    public List<ClubListDto> joinedClubsList(Long memberIdx) {
+        memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        List<ClubMember> clubMemberList = clubMemberRepository.findByMemberIdx(memberIdx);
+        if (clubMemberList.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        List<Long> clubIds = clubMemberList.stream()
+                .map(ClubMember::getClubId)
+                .collect(Collectors.toList());
+
+        List<Club> clubList = clubRepository.findByclubIdIn(clubIds);
+        if (clubList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return clubList.stream()
+                .map(club -> {
+                    Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
+                    List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
+                    Event event = eventRepository.findById(club.getEventId())
+                            .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
+
+                    String clubImageUrl = clubImage.isEmpty() ? "" : clubImage.get(0).getImageUrl();
+
+                    return ClubListDto.builder()
+                            .eventName(event.getEventName())
+                            .clubName(club.getClubName())
+                            .introduction(club.getIntroduction())
+                            .currentMembers(currentMembers + 1) // 모임장 포함
+                            .clubImageUrl(clubImageUrl)
+                            .joinedStatus(1L)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     // 현재 멤버 수 계산 메서드

@@ -34,6 +34,8 @@ public class ClubDto {
 
     private List<String> clubImageUrls;
 
+    private Long joinedStatus; // 0 미가입, 1 가입
+
 
 }
 

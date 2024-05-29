@@ -20,4 +20,6 @@ public class ClubListDto {
 
     private String clubImageUrl; //파일 이미지 URL
 
+    private Long joinedStatus; // 0 미가입, 1 가입
+
 }
