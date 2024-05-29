@@ -33,7 +33,7 @@ public class RankServiceImpl implements RankService {
         if (eventId != null) {
             return rankMapper.findDeptRanksByEventId(eventId, univId);
         } else {
-            return rankMapper.findAllDeptRanks();
+            return rankMapper.findAllDeptRanks(univId);
         }
     }
 }

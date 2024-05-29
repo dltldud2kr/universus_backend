@@ -78,6 +78,24 @@
         ORDER BY r.rank_point DESC
     </select>
 
+    <!-- (과)eventID에 따른 랭킹 반환 -->
+    <select id="findDeptRanksByEventId" resultType="com.example.gazamung.rank.dto.DeptRankRes">
+        SELECT
+            r.dept_id,
+            d.dept_name,
+            r.univ_id,
+            r.event_id,
+            r.rank_point,
+            r.win_count,
+            r.lose_count,
+            (r.win_count + r.lose_count) as totalCount
+        FROM Rank r
+                 JOIN department d ON r.dept_id = d.dept_id
+        WHERE r.event_id = #{eventId}
+          AND r.univ_id = #{univId}
+        ORDER BY r.rank_point DESC
+    </select>
+
 
 
 
@@ -95,6 +113,22 @@
                  JOIN university u ON r.univ_id = u.id
         WHERE r.dept_id IS NULL
         GROUP BY r.univ_id, u.school_name
+        ORDER BY rankPoint DESC
+    </select>
+
+    <!-- (대학)대학 ID에 따른 전체 학과 랭킹 반환 -->
+    <select id="findAllDeptRanks" resultType="com.example.gazamung.rank.dto.DeptRankRes">
+        SELECT
+            r.dept_id,
+            d.dept_name,
+            SUM(r.rank_point) as rankPoint,
+            SUM(r.win_count) as winCount,
+            SUM(r.lose_count) as loseCount,
+            (SUM(r.win_count) + SUM(r.lose_count)) as totalCount
+        FROM Rank r
+                 JOIN department d ON r.dept_id = d.dept_id
+        WHERE r.univ_id = #{univId}
+        GROUP BY r.dept_id, d.dept_name
         ORDER BY rankPoint DESC
     </select>
 

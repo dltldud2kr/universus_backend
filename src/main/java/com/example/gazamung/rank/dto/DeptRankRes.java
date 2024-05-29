@@ -14,6 +14,7 @@ public class DeptRankRes {
     private Long deptId;
     private Long univId;
     private Long eventId;
+    private String deptName;
 
     private Long rankPoint;
 
