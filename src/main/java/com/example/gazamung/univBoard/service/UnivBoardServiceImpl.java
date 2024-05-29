@@ -216,11 +216,12 @@ public class UnivBoardServiceImpl implements UnivBoardService {
             // 게시글의 이미지 정보 조회
             List<UploadImage> postImages = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoard.getUnivBoardId());
 
-            String nickOrAnon = univBoard.getAnonymous() == 1 ? "익명" : member.getNickname();
+            String nickOrAnon = univBoard.getAnonymous() == 1 ? "익명" : PostMember.getNickname();
 
             // 게시글의 상세 정보 생성
             InfoPost infoPost = InfoPost.builder()
                     .univBoardId(univBoard.getUnivBoardId())
+                    .memberIdx(univBoard.getMemberIdx())
                     .nickOrAnon(nickOrAnon)
                     .clubName(club != null ? club.getClubName() : null)
                     .categoryName(category.getCategoryName())
@@ -228,9 +229,9 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .content(univBoard.getContent())
                     .regDt(univBoard.getRegDt())
                     .postImageUrls(postImages.stream().map(UploadImage::getImageUrl).collect(Collectors.toList()))
-                    .profileImgUrl(univBoard.getAnonymous() == 1 ?
+                    .profileImgUrl(univBoard.getAnonymous() != null && univBoard.getAnonymous().equals(1) ?
                             "https://jhuniversus.s3.ap-northeast-2.amazonaws.com/default/df_profile.jpg" :
-                            member.getProfileImgUrl())
+                            PostMember.getProfileImgUrl())
                     .build();
 
             infoPosts.add(infoPost);
