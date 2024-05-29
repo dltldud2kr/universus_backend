@@ -317,6 +317,7 @@ public class ClubServiceImpl implements ClubService {
 
         return ClubDto.builder()
                 .clubId(club.getClubId())
+                .memberIdx(club.getMemberIdx())
                 .nickname(member.getNickname())
                 .memberImageUrl(member.getProfileImgUrl())
                 .oneLineIntro(member.getOneLineIntro())

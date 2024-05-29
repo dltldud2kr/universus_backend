@@ -18,6 +18,7 @@ import java.util.List;
 public class ClubDto {
 
     private Long clubId; // 클럽 id
+    private Long memberIdx;
     private String nickname;         // 대표자 명
     private String memberImageUrl;
     private String oneLineIntro;    // 한 줄 소개
