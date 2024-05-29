@@ -26,4 +26,12 @@ public interface UnivBoardRepository extends JpaRepository<UnivBoard, Long> {
 
 
     String findEventNameByEventId(Long eventId);
+
+    List<UnivBoard> findByClubIdIsNullAndUnivIdAndCategoryIdOrderByRegDtAsc(Long univId, Long categoryId);
+
+    List<UnivBoard> findByClubIdAndUnivIdAndCategoryIdOrderByRegDtAsc(Long clubId, Long univId, Long categoryId);
+
+    List<UnivBoard> findByClubIdAndUnivIdOrderByRegDtAsc(Long clubId, Long univId);
+
+    List<UnivBoard> findByClubIdIsNullAndUnivIdOrderByRegDtAsc(Long univId);
 }

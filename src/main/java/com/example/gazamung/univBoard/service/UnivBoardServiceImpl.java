@@ -187,11 +187,11 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         // 카테고리 별 게시글 목록 조회
         List<UnivBoard> univBoards;
         if (categoryId != null && categoryId == 0) { // 카테고리가 0이면 전체 게시글 조회
-            univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivId(member.getUnivId())
-                    : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
-        } else { // 카테고리가 1 : 자유, 2 : 모집, 3 : 정보 등 요청이 있으면 해당 카테고리의 리스트만 반환
-            univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivIdAndCategoryId(member.getUnivId(), categoryId)
-                    : univBoardRepository.findByClubIdAndUnivId(clubId, member.getUnivId());
+            univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivIdOrderByRegDtAsc(member.getUnivId())
+                    : univBoardRepository.findByClubIdAndUnivIdOrderByRegDtAsc(clubId, member.getUnivId());
+        } else { // 특정 카테고리의 리스트만 반환
+            univBoards = (clubId == null) ? univBoardRepository.findByClubIdIsNullAndUnivIdAndCategoryIdOrderByRegDtAsc(member.getUnivId(), categoryId)
+                    : univBoardRepository.findByClubIdAndUnivIdAndCategoryIdOrderByRegDtAsc(clubId, member.getUnivId(), categoryId);
         }
 
         List<InfoPost> infoPosts = new ArrayList<>();
