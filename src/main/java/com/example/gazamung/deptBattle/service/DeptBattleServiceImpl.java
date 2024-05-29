@@ -15,6 +15,7 @@ import com.example.gazamung.deptBattle.repository.DeptBattleRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.fcmSend.FcmSendDto;
 import com.example.gazamung.fcmSend.FcmService;
+import com.example.gazamung.mapper.RankMapper;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
 import com.example.gazamung.notification.dto.NotifyCreateReq;
@@ -49,6 +50,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     private final DepartmentRepository departmentRepository;
     private final FcmService fcmService;
     private final NotificationService notificationService;
+    private final RankMapper rankMapper;
 
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler2 = Executors.newScheduledThreadPool(1);
@@ -125,6 +127,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 .nickName(guest.getNickname())
                 .userName(guest.getName())
                 .deptBattleId(deptBattle.getDeptBattleId())
+                .deptId(guest.getDeptId())
                 .univId(deptBattle.getUnivId())
                 .build();
         participantRepository.save(participant);
@@ -420,6 +423,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         }
 
         // 대표자가 맞는지 검사.
+        System.out.println("guestLeader : " + deptBattle.getGuestLeader() + " memberIdx : " + dto.getMemberIdx() );
         if (!Objects.equals(deptBattle.getGuestLeader(), dto.getMemberIdx())){
             throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
         }
@@ -434,13 +438,109 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
         // true 로 반응한 경우 경기결과에 문제가 없으니 COMPLETED 처리
         if (dto.isResultYN()) {
+            // 대학 랭킹 점수 update
+            // 승리 팀 업데이트
+            int winExistence = rankMapper.checkDeptExistence(deptBattle.getUnivId(), deptBattle.getWinDept(), deptBattle.getEventId());
+            if (winExistence == 0) {
+                rankMapper.insertDeptRank(deptBattle.getUnivId(), deptBattle.getWinDept(), deptBattle.getEventId(), 10L, 1L, 0L);
+                System.out.println("Inserted new winning department rank");
+            } else {
+                rankMapper.updateDeptWinRank(deptBattle.getUnivId(), deptBattle.getWinDept(), deptBattle.getEventId());
+                System.out.println("Updated existing winning department rank");
+            }
+
+            // 패배 팀 업데이트
+            int loseExistence = rankMapper.checkDeptExistence(deptBattle.getUnivId(), deptBattle.getLoseDept(), deptBattle.getEventId());
+            if (loseExistence == 0) {
+                rankMapper.insertDeptRank(deptBattle.getUnivId(), deptBattle.getLoseDept(), deptBattle.getEventId(), 0L, 0L, 1L);
+                System.out.println("Inserted new losing department rank");
+            } else {
+                rankMapper.updateDeptLoseRank(deptBattle.getUnivId(), deptBattle.getLoseDept(), deptBattle.getEventId());
+                System.out.println("Updated existing losing department rank");
+            }
+
+
+
             deptBattle.setMatchStatus(MatchStatus.COMPLETED);
+
+
+            Optional<Member> member = memberRepository.findById(deptBattle.getHostLeader());
+            String fcmToken = member.get().getFcmToken();
+
+            List<Participant> participantList = participantRepository.findByDeptBattleId(deptBattle.getDeptBattleId());
+            // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
+
+            System.out.println("partp.size = " + participantList.size() + " dept ptcmember : " + deptBattle.getTeamPtcLimit() * 2);
+            if(participantList.size() != deptBattle.getTeamPtcLimit() * 2){
+                throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
+            }
+
+            for (Participant participants : participantList){
+                Member member2 = memberRepository.findById(participants.getMemberIdx())
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+
+                NotifyCreateReq req = NotifyCreateReq.builder()
+                        .type(MsgType.DEPT_BATTLE)
+                        .isRead(false)
+                        .receiver(member2.getMemberIdx())
+                        .title("대항전이  종료되었습니다.")
+                        .content(deptBattle.getGuestDeptName() + "VS" + deptBattle.getHostDeptName() + "대항전이 종료되었습니다.")
+                        .relatedItemId(deptBattle.getDeptBattleId())
+                        .build();
+                notificationService.sendNotify(req);
+
+            }
+
+
+            //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
+//        for (Participant participants : participantList){
+//            Member member = memberRepository.findById(participants.getMemberIdx())
+//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+//            FcmSendDto fcmSendDto = FcmSendDto.builder()
+//                    .token(member.getFcmToken())
+//                    .title("대항전이 시작되었습니다.")
+//                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+//                    .build();
+//            try {
+//                fcmService.sendMessageTo(fcmSendDto);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+
         }
         // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
         else {
             deptBattle.setGuestScore(null);
             deptBattle.setHostScore(null);
             deptBattle.setWinDept(null);
+
+
+            // FCM 알림 전송 메서드 (주최자에게만 발송)
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .title(deptBattle.getGuestDeptName() + "대표자가 경기결과에 동의하지 않았습니다.")
+                    .body("경기 결과를 다시 제출해주세요.")
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            // 알림 전송 메서드 (주최자에게만 발송)
+            NotifyCreateReq req = NotifyCreateReq.builder()
+                    .type(MsgType.DEPT_BATTLE)
+                    .isRead(false)
+                    .receiver(deptBattle.getHostLeader())
+                    .title(deptBattle.getGuestDeptName() + "대표자가 경기결과에 동의하지 않았습니다.")
+                    .content("경기 결과를 다시 제출해주세요.")
+                    .relatedItemId(deptBattle.getDeptBattleId()
+                    )
+                    .build();
+            notificationService.sendNotify(req);
         }
 
         deptBattleRepository.save(deptBattle);
@@ -719,6 +819,24 @@ public class DeptBattleServiceImpl implements DeptBattleService {
             deptBattle.setMatchStatus(MatchStatus.COMPLETED);
             deptBattle.setEndDt(LocalDateTime.now());
             deptBattleRepository.save(deptBattle);
+
+            // 승리 팀 업데이트
+            int winExistence = rankMapper.checkDeptExistence(deptBattle.getUnivId(), deptBattle.getWinDept(), deptBattle.getEventId());
+            if (winExistence == 0) {
+                rankMapper.insertDeptRank(deptBattle.getUnivId(), deptBattle.getWinDept(), deptBattle.getEventId(), 10L, 1L, 0L);
+            } else {
+                rankMapper.updateDeptWinRank(deptBattle.getUnivId(),deptBattle.getWinDept() ,deptBattle.getEventId());
+            }
+
+            // 패배 팀 업데이트
+            int loseExistence = rankMapper.checkDeptExistence(deptBattle.getUnivId(), deptBattle.getLoseDept(), deptBattle.getEventId());
+            if (loseExistence == 0) {
+                rankMapper.insertDeptRank(deptBattle.getUnivId(), deptBattle.getLoseDept(), deptBattle.getEventId(), 0L, 0L, 1L);
+            } else {
+                rankMapper.updateDeptLoseRank(deptBattle.getUnivId(), deptBattle.getLoseDept(), deptBattle.getEventId());
+            }
+
+
             log.info("경기 종료 처리 완료");
         }
     }

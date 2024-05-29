@@ -22,6 +22,7 @@ public class Rank {
     private Long id;
 
     private Long univId;
+    private Long deptId;
     private Long eventId;
 
     @ColumnDefault("0")

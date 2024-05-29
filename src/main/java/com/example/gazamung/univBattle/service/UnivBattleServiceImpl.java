@@ -690,22 +690,21 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
             // 대학 랭킹 점수 update
             // 승리 팀 업데이트
-            int winExistence = rankMapper.checkExistence(univBattle.getWinUniv(), univBattle.getEventId());
+            int winExistence = rankMapper.checkUnivExistence(univBattle.getWinUniv(),  univBattle.getEventId());
             if (winExistence == 0) {
-                rankMapper.insertRank(univBattle.getWinUniv(), univBattle.getEventId(), 10L, 1L, 0L);
+                rankMapper.insertUnivRank(univBattle.getWinUniv(), univBattle.getEventId(), 10L, 1L, 0L);
             } else {
-                rankMapper.updateWinRank(univBattle.getWinUniv(), univBattle.getEventId());
+                rankMapper.updateUnivWinRank(univBattle.getWinUniv(), univBattle.getEventId());
             }
 
             // 패배 팀 업데이트
-            int loseExistence = rankMapper.checkExistence(univBattle.getLoseUniv(), univBattle.getEventId());
+            int loseExistence = rankMapper.checkUnivExistence(univBattle.getLoseUniv(),   univBattle.getEventId());
             if (loseExistence == 0) {
-                rankMapper.insertRank(univBattle.getLoseUniv(), univBattle.getEventId(), 0L, 0L, 1L);
+                rankMapper.insertUnivRank(univBattle.getLoseUniv(), univBattle.getEventId(), 0L, 0L, 1L);
             } else {
-                rankMapper.updateLoseRank(univBattle.getLoseUniv(), univBattle.getEventId());
+                rankMapper.updateUnivLoseRank(univBattle.getLoseUniv(), univBattle.getEventId());
             }
 
-//            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
 
             Optional<Member> member = memberRepository.findById(univBattle.getHostLeader());
@@ -810,19 +809,19 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
             // 랭크 점수 업데이트 mapper
             // 승리 팀 업데이트
-            int winExistence = rankMapper.checkExistence(univBattle.getWinUniv(), univBattle.getEventId());
+            int winExistence = rankMapper.checkUnivExistence(univBattle.getWinUniv(),  univBattle.getEventId());
             if (winExistence == 0) {
-                rankMapper.insertRank(univBattle.getWinUniv(), univBattle.getEventId(), 10L, 1L, 0L);
+                rankMapper.insertUnivRank(univBattle.getWinUniv(), univBattle.getEventId(), 10L, 1L, 0L);
             } else {
-                rankMapper.updateWinRank(univBattle.getWinUniv(), univBattle.getEventId());
+                rankMapper.updateUnivWinRank(univBattle.getWinUniv(), univBattle.getEventId());
             }
 
             // 패배 팀 업데이트
-            int loseExistence = rankMapper.checkExistence(univBattle.getLoseUniv(), univBattle.getEventId());
+            int loseExistence = rankMapper.checkUnivExistence(univBattle.getLoseUniv(),  univBattle.getEventId());
             if (loseExistence == 0) {
-                rankMapper.insertRank(univBattle.getLoseUniv(), univBattle.getEventId(), 0L, 0L, 1L);
+                rankMapper.insertUnivRank(univBattle.getLoseUniv(), univBattle.getEventId(), 0L, 0L, 1L);
             } else {
-                rankMapper.updateLoseRank(univBattle.getLoseUniv(), univBattle.getEventId());
+                rankMapper.updateUnivLoseRank(univBattle.getLoseUniv(), univBattle.getEventId());
             }
 
 //            univBattleMapper.updateRankPoints(univBattle.getWinUniv(), univBattle.getLoseUniv());

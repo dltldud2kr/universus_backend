@@ -3,38 +3,66 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.gazamung.mapper.RankMapper">
 
-    <!-- 승리 팀 업데이트 -->
-    <update id="updateWinRank">
+    <!-- 대학 승리 팀 업데이트 -->
+    <update id="updateUnivWinRank">
         UPDATE rank
         SET rank_point = rank_point + 10, win_count = win_count + 1
-        WHERE univ_id = #{winUniv} AND event_id = #{eventId}
+        WHERE univ_id = #{winUniv} AND dept_id IS NULL AND event_id = #{eventId}
+    </update>
+
+    <!-- 과 승리 팀 업데이트 -->
+    <update id="updateDeptWinRank">
+        UPDATE rank
+        SET rank_point = rank_point + 10, win_count = win_count + 1
+        WHERE univ_id = #{univId} AND dept_id = #{winDept} AND event_id = #{eventId}
     </update>
 
 
-    <!-- 패배 팀 업데이트 -->
-    <update id="updateLoseRank">
+    <!-- 대학 패배 팀 업데이트 -->
+    <update id="updateUnivLoseRank">
         UPDATE rank
         SET rank_point = GREATEST(rank_point - 5, 0), lose_count = lose_count + 1
-        WHERE univ_id = #{loseUniv} AND event_id = #{eventId}
+        WHERE univ_id = #{loseUniv} AND dept_id IS NULL AND event_id = #{eventId}
+    </update>
+
+    <!-- 과 패배 팀 업데이트 -->
+    <update id="updateDeptLoseRank">
+        UPDATE rank
+        SET rank_point = GREATEST(rank_point - 5, 0), lose_count = lose_count + 1
+        WHERE univ_id = #{univId} AND dept_id = #{loseDept} AND event_id = #{eventId}
     </update>
 
 
 
-    <!-- 존재하지 않는 경우 신규 생성 -->
-    <insert id="insertRank">
+    <!-- (대학) 존재하지 않는 경우 신규 생성 -->
+    <insert id="insertUnivRank">
         INSERT INTO rank (id, univ_id, event_id, rank_point, win_count, lose_count)
         VALUES (RANK_SEQ.NEXTVAL, #{univId}, #{eventId}, #{rankPoint}, #{winCount}, #{loseCount})
     </insert>
 
-    <!-- 존재하는지 확인 -->
-    <select id="checkExistence" resultType="java.lang.Integer">
+
+    <!-- (과) 존재하지 않는 경우 신규 생성 -->
+    <insert id="insertDeptRank">
+        INSERT INTO rank (id, univ_id, dept_id, event_id, rank_point, win_count, lose_count)
+        VALUES (RANK_SEQ.NEXTVAL, #{univId}, #{deptId} , #{eventId}, #{rankPoint}, #{winCount}, #{loseCount})
+    </insert>
+
+    <!-- (대학) 존재하는지 확인 -->
+    <select id="checkUnivExistence" resultType="java.lang.Integer">
         SELECT COUNT(*)
         FROM rank
-        WHERE univ_id = #{univId,jdbcType=BIGINT} AND event_id = #{eventId,jdbcType=BIGINT}
+        WHERE univ_id = #{univId,jdbcType=BIGINT} AND event_id = #{eventId,jdbcType=BIGINT} AND COALESCE(dept_id, -1) = -1
+    </select>
+
+    <!-- (과) 존재하는지 확인 -->
+    <select id="checkDeptExistence" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM rank
+        WHERE univ_id = #{univId,jdbcType=BIGINT} AND dept_id = #{deptId} AND event_id = #{eventId,jdbcType=BIGINT}
     </select>
 
     <!-- eventID에 따른 랭킹 반환 -->
-    <select id="findRanksByEventId" resultType="com.example.gazamung.rank.dto.UnivRankRes">
+    <select id="findUnivRanksByEventId" resultType="com.example.gazamung.rank.dto.UnivRankRes">
         SELECT
             univ_id,
             event_id,
@@ -44,12 +72,13 @@
             (win_count + lose_count) as totalCount
         FROM Rank
         WHERE event_id = #{eventId}
+          AND dept_id IS NULL
         ORDER BY rank_point DESC
     </select>
 
     <!-- eventID와 상관없는 전체 랭킹 반환 -->
 
-    <select id="findAllRanks" resultType="com.example.gazamung.rank.dto.UnivRankRes">
+    <select id="findAllUnivRanks" resultType="com.example.gazamung.rank.dto.UnivRankRes">
         SELECT
             univ_id,
             SUM(rank_point) as rankPoint,
@@ -57,6 +86,7 @@
             SUM(lose_count) as loseCount,
             (SUM(win_count) + SUM(lose_count)) as totalCount
         FROM Rank
+        WHERE dept_id IS NULL
         GROUP BY univ_id
         ORDER BY rankPoint DESC
     </select>
