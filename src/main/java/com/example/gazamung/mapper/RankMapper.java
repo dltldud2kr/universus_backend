@@ -69,6 +69,7 @@ public interface RankMapper {
     List<UnivRankRes> findUnivRanksByEventId(Long eventId);
     List<UnivRankRes> findAllUnivRanks();
 
+    List<DeptRankRes> findDeptRanksByEventId(Long eventId, Long univId);
     List<DeptRankRes> findAllDeptRanks();
 
 

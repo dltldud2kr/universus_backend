@@ -61,33 +61,40 @@
         WHERE univ_id = #{univId,jdbcType=BIGINT} AND dept_id = #{deptId} AND event_id = #{eventId,jdbcType=BIGINT}
     </select>
 
-    <!-- eventID에 따른 랭킹 반환 -->
+    <!-- (대학)eventID에 따른 랭킹 반환 -->
     <select id="findUnivRanksByEventId" resultType="com.example.gazamung.rank.dto.UnivRankRes">
         SELECT
-            univ_id,
-            event_id,
-            rank_point,
-            win_count,
-            lose_count,
-            (win_count + lose_count) as totalCount
-        FROM Rank
-        WHERE event_id = #{eventId}
-          AND dept_id IS NULL
-        ORDER BY rank_point DESC
+            r.univ_id,
+            u.school_name,
+            r.event_id,
+            r.rank_point,
+            r.win_count,
+            r.lose_count,
+            (r.win_count + r.lose_count) as totalCount
+        FROM Rank r
+                 JOIN university u ON r.univ_id = u.id
+        WHERE r.event_id = #{eventId}
+          AND r.dept_id IS NULL
+        ORDER BY r.rank_point DESC
     </select>
 
-    <!-- eventID와 상관없는 전체 랭킹 반환 -->
 
+
+
+
+    <!-- (대학)eventID와 상관없는 전체 랭킹 반환 -->
     <select id="findAllUnivRanks" resultType="com.example.gazamung.rank.dto.UnivRankRes">
         SELECT
-            univ_id,
-            SUM(rank_point) as rankPoint,
-            SUM(win_count) as winCount,
-            SUM(lose_count) as loseCount,
-            (SUM(win_count) + SUM(lose_count)) as totalCount
-        FROM Rank
-        WHERE dept_id IS NULL
-        GROUP BY univ_id
+            r.univ_id,
+            u.school_name,
+            SUM(r.rank_point) as rankPoint,
+            SUM(r.win_count) as winCount,
+            SUM(r.lose_count) as loseCount,
+            (SUM(r.win_count) + SUM(r.lose_count)) as totalCount
+        FROM Rank r
+                 JOIN university u ON r.univ_id = u.id
+        WHERE r.dept_id IS NULL
+        GROUP BY r.univ_id, u.school_name
         ORDER BY rankPoint DESC
     </select>
 

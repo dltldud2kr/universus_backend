@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class DeptRankRes {
 
     private Long deptId;
+    private Long univId;
     private Long eventId;
 
     private Long rankPoint;

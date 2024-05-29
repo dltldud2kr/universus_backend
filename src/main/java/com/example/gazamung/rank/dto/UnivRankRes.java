@@ -18,6 +18,7 @@ public class UnivRankRes {
 
     private Long rankPoint;
 
+    private String schoolName;
     private Long winCount;
     private Long loseCount;
     private Long totalCount;

@@ -1,11 +1,10 @@
 package com.example.gazamung.rank.controller;
 
 import com.example.gazamung._enum.ApiResponseCode;
-import com.example.gazamung.department.entity.Department;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.rank.dto.DeptRankRes;
 import com.example.gazamung.rank.dto.UnivRankRes;
-import com.example.gazamung.rank.entity.Rank;
 import com.example.gazamung.rank.service.RankService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,11 +35,23 @@ public class RankController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
-    @GetMapping("/list")
-    public ResultDTO rankList(@RequestParam(required = false) Long eventId) {
+    @GetMapping("/univ/list")
+    public ResultDTO univRankList(@RequestParam(required = false) Long eventId) {
 
         try{
-            List<UnivRankRes> list = rankService.rankList(eventId);
+            List<UnivRankRes> list = rankService.univRankList(eventId);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"랭킹 리스트 조회 성공", list);
+        }catch(CustomException e){
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+
+        }
+    }
+
+    @GetMapping("/dept/list")
+    public ResultDTO deptRankList(@RequestParam(required = false) Long eventId, @RequestParam Long univId) {
+
+        try{
+            List<DeptRankRes> list = rankService.deptRankList(eventId,univId);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"랭킹 리스트 조회 성공", list);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
