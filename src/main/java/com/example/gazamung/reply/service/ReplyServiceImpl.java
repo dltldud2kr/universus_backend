@@ -170,6 +170,8 @@ public class ReplyServiceImpl implements ReplyService{
 
         if ((reply.getMemberIdx().equals(memberIdx)) || member.getRole() == 1){
             replyRepository.delete(reply);
+        } else {
+            return false;
         }
 
         return true;
