@@ -135,7 +135,7 @@ public class ReplyServiceImpl implements ReplyService{
         univBoardRepository.findById(univBoardId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
 
-        List<Reply> replys = replyRepository.findByUnivBoardId(univBoardId);
+        List<Reply> replys = replyRepository.findByUnivBoardIdOrderByLastDtAsc(univBoardId);
 
         List<InfoDto> infoDtoList = new ArrayList<>();
 

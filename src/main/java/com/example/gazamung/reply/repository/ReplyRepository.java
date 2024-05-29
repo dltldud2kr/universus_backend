@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
     List<Reply> findByUnivBoardId(Long univBoardId);
+
+    List<Reply> findByUnivBoardIdOrderByLastDtAsc(Long univBoardId);
 }
