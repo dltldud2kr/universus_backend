@@ -33,4 +33,6 @@ public class PostDto {
 
         private Long eventId;
 
+        private Integer anonymous; // 0 닉네임, 1 익명
+
 }

@@ -19,11 +19,10 @@ public class Reply {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "REPLY_SEQ")
     @SequenceGenerator(name = "REPLY_SEQ", sequenceName = "reply_sequence", allocationSize = 1)
     private Long replyId;       // 댓글 ID
+    private LocalDateTime lastDt;    // 마지막 작성 시간
 
     private Long memberIdx;     // 회원 ID
     private Long univBoardId;   // 게시글 ID
-
     private String content;     // 내용
-
-    private LocalDateTime lastDt;    // 마지막 작성 시간
+    private Integer anonymous; // 0 닉네임, 1 익명
 }

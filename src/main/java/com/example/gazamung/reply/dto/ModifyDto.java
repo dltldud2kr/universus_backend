@@ -17,4 +17,6 @@ public class ModifyDto {
 
     private String content;     // 내용
     private LocalDateTime lastDt;    // 마지막 작성 시간
+
+    private Integer anonymous; // 0 닉네임, 1 익명
 }

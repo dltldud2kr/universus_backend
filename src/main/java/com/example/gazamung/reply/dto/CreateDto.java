@@ -21,4 +21,6 @@ public class CreateDto {
     private String content;     // 내용
 
     private LocalDateTime lastDt;
+
+    private Integer anonymous; // 0 닉네임, 1 익명
 }

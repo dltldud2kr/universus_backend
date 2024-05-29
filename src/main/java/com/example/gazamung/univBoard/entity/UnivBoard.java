@@ -41,4 +41,6 @@ public class UnivBoard {
     private String matchDt;  // 경기 일시
 
     private Long representIdx;  // 대표 사진 idx
+
+    private Integer anonymous; // 0 닉네임, 1 익명
 }
