@@ -18,4 +18,8 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     Optional<ClubMember> findByClubIdAndMemberIdx(long clubId, long memberIdx);
 
     List<ClubMember> findByMemberIdx(Long memberIdx);
+
+    List<ClubMember> findAllByClubId(Long clubId);
+
+    boolean existsByClubIdAndMemberIdx(Long clubId, Long memberIdx);
 }

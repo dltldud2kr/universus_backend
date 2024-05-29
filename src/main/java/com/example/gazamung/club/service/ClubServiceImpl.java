@@ -24,6 +24,7 @@ import com.example.gazamung.univBoard.entity.UnivBoard;
 import com.example.gazamung.univBoard.repository.UnivBoardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -462,9 +463,15 @@ public class ClubServiceImpl implements ClubService {
         Club club = clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
+        if (clubMemberRepository.existsByClubIdAndMemberIdx(club.getClubId(), member.getMemberIdx())) {
+            throw new CustomException(CustomExceptionCode.ALREADY_REGISTERED_MEMBER);
+        }
+
+
         ClubMember clubMember = ClubMember.builder()
                 .memberIdx(request.getMemberIdx())
                 .clubId(request.getClubId())
+                .joinedDt(LocalDateTime.now())
                 .build();
 
         clubMemberRepository.save(clubMember);
@@ -613,6 +620,37 @@ public class ClubServiceImpl implements ClubService {
                             .currentMembers(currentMembers + 1) // 모임장 포함
                             .clubImageUrl(clubImageUrl)
                             .joinedStatus(1L)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClubMembersDto> clubMembersList(Long memberIdx, Long clubId) {
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
+
+        if (member.getMemberIdx() != club.getMemberIdx()){
+            throw new CustomException(CustomExceptionCode.UNAUTHORIZED_USER);
+        }
+
+        List<ClubMember> clubMembers = clubMemberRepository.findAllByClubId(clubId);
+        if (clubMembers.isEmpty()){
+            return Collections.emptyList();
+        }
+
+        return clubMembers.stream()
+                .map(clubMember -> {
+                    Member memberInfo = memberRepository.findById(clubMember.getMemberIdx())
+                            .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                    return ClubMembersDto.builder()
+                            .memberIdx(clubMember.getMemberIdx())
+                            .nickname(memberInfo.getNickname())
+                            .profileImgUrl(memberInfo.getProfileImgUrl())
+                            .joinedDt(clubMember.getJoinedDt())
                             .build();
                 })
                 .collect(Collectors.toList());

@@ -48,4 +48,6 @@ public interface ClubService {
     void expelMember(ExpelClub request);
 
     List<ClubListDto> joinedClubsList(Long memberIdx);
+
+    List<ClubMembersDto> clubMembersList(Long memberIdx, Long clubId);
 }
