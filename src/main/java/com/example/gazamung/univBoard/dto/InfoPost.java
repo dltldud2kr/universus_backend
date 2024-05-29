@@ -14,7 +14,7 @@ import java.util.List;
 public class InfoPost {
 
     private Long univBoardId;
-    private String nickname;
+    private String nickOrAnon;
     private String categoryName;
     private String clubName;
 

@@ -68,15 +68,19 @@ public class UnivBoardServiceImpl implements UnivBoardService {
             postImageUrls.add(image.getImageUrl());
         }
 
+        String nickOrAnon = post.getAnonymous() == 1 ? "익명" : member.getNickname();
+
         InfoPost.InfoPostBuilder builder = InfoPost.builder()
                 .clubName(club != null ? club.getClubName() : null)
-                .nickname(member.getNickname())
+                .nickOrAnon(nickOrAnon)
                 .categoryName(category.getCategoryName())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .regDt(post.getRegDt())
                 .postImageUrls(postImageUrls)
-                .profileImgUrl(member.getProfileImgUrl())
+                .profileImgUrl(post.getAnonymous() == 1 ?
+                        "https://jhuniversus.s3.ap-northeast-2.amazonaws.com/default/df_profile.jpg" :
+                        member.getProfileImgUrl())
                 .univBoardId(post.getUnivBoardId())
                 .memberIdx(post.getMemberIdx()); // 지우지마세요! 지우면 캡스톤 다지움
 
@@ -120,6 +124,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .content(dto.getContent())
                     .regDt(LocalDateTime.now())
                     .eventId(dto.getEventId())
+                    .anonymous(dto.getAnonymous())
                     .build();
         } else {
             univBoard = UnivBoard.builder()
@@ -132,6 +137,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .content(dto.getContent())
                     .regDt(LocalDateTime.now())
                     .eventId(dto.getEventId())
+                    .anonymous(dto.getAnonymous())
                     .build();
             // categoryId == 1 인 경우 위치 정보도 저장
             if (dto.getCategoryId() == 1) {
@@ -207,21 +213,24 @@ public class UnivBoardServiceImpl implements UnivBoardService {
             // 작성자 닉네임, 프로필이미지 반환
             Member PostMember = memberRepository.findById(univBoard.getMemberIdx()).orElse(null);
 
-
             // 게시글의 이미지 정보 조회
             List<UploadImage> postImages = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoard.getUnivBoardId());
+
+            String nickOrAnon = univBoard.getAnonymous() == 1 ? "익명" : member.getNickname();
 
             // 게시글의 상세 정보 생성
             InfoPost infoPost = InfoPost.builder()
                     .univBoardId(univBoard.getUnivBoardId())
-                    .nickname(PostMember.getNickname())
+                    .nickOrAnon(nickOrAnon)
                     .clubName(club != null ? club.getClubName() : null)
                     .categoryName(category.getCategoryName())
                     .title(univBoard.getTitle())
                     .content(univBoard.getContent())
                     .regDt(univBoard.getRegDt())
                     .postImageUrls(postImages.stream().map(UploadImage::getImageUrl).collect(Collectors.toList()))
-                    .profileImgUrl(PostMember.getProfileImgUrl())
+                    .profileImgUrl(univBoard.getAnonymous() == 1 ?
+                            "https://jhuniversus.s3.ap-northeast-2.amazonaws.com/default/df_profile.jpg" :
+                            member.getProfileImgUrl())
                     .build();
 
             infoPosts.add(infoPost);
@@ -330,6 +339,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
             univBoard.setMatchDt(dto.getMatchDt());
             univBoard.setCategoryId(dto.getCategoryId());
             univBoard.setUdtDt(LocalDateTime.now());
+            univBoard.setAnonymous(dto.getAnonymous());
             if (dto.getClubId() != null)
                 univBoard.setClubId(dto.getClubId());
             if (dto.getCategoryId() == 1L) {

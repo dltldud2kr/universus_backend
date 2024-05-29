@@ -67,6 +67,7 @@ public class ReplyServiceImpl implements ReplyService{
                 .univBoardId(dto.getUnivBoardId())
                 .lastDt(LocalDateTime.now())
                 .content(filteredContent)
+                .anonymous(dto.getAnonymous())
                 .build();
 
         replyRepository.save(reply);
@@ -145,11 +146,15 @@ public class ReplyServiceImpl implements ReplyService{
         for (Reply reply : replys){
             Member member = memberRepository.findById(reply.getMemberIdx())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+            String nickOrAnon = reply.getAnonymous() == 1 ? "익명" : member.getNickname();
 
             InfoDto infoDto = InfoDto.builder()
                     .replyId(reply.getReplyId())
-                    .nickname(member.getNickname())
-                    .profileImgUrl(member.getProfileImgUrl())
+                    .memberIdx(member.getMemberIdx())
+                    .nickOrAnon(nickOrAnon)
+                    .profileImgUrl(reply.getAnonymous() == 1 ?
+                            "https://jhuniversus.s3.ap-northeast-2.amazonaws.com/default/df_profile.jpg" :
+                            member.getProfileImgUrl())
                     .content(reply.getContent())
                     .lastDt(reply.getLastDt())
                     .build();
@@ -189,6 +194,8 @@ public class ReplyServiceImpl implements ReplyService{
         if (reply.getMemberIdx().equals(dto.getMemberIdx())){
             reply.setLastDt(dto.getLastDt());
             reply.setContent(dto.getContent());
+            reply.setAnonymous(dto.getAnonymous());
+            reply.setLastDt(LocalDateTime.now());
 
             replyRepository.save(reply);
         }

@@ -15,6 +15,7 @@ public class InfoDto {
 
 
     private Long replyId;       // 댓글 ID
+    private Long memberIdx;
 
     private String content;     // 내용
 
@@ -22,6 +23,7 @@ public class InfoDto {
 
     private String profileImgUrl;
 
-    private String nickname;
+    private String nickOrAnon;
+
 
 }
