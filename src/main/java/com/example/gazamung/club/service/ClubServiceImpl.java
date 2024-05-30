@@ -266,18 +266,19 @@ public class ClubServiceImpl implements ClubService {
         if (clubList.isEmpty()) {
             return Collections.emptyList(); // 빈 리스트를 반환합니다.
         }
-
         return clubList.stream()
                 .map(club -> {
                     Long currentMembers = calculateCurrentMembers(club.getClubId()); // 현재 멤버 수 계산
                     List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, club.getClubId());
                     Event event = eventRepository.findById(club.getEventId())
                             .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
-
                     String clubImageUrl = clubImage.isEmpty() ? "" : clubImage.get(0).getImageUrl();
-                    boolean isJoined = clubMemberRepository.findByClubIdAndMemberIdx(club.getClubId(), memberIdx).isPresent();
-
-
+                    boolean isClubMember;
+                    if (club.getMemberIdx() == memberIdx){
+                        isClubMember = true;
+                    } else {
+                        isClubMember = clubMemberRepository.findByClubIdAndMemberIdx(club.getClubId(), memberIdx).isPresent();
+                    }
 
                     return ClubListDto.builder()
                             .eventName(event.getEventName())
@@ -285,7 +286,7 @@ public class ClubServiceImpl implements ClubService {
                             .introduction(club.getIntroduction())
                             .currentMembers(currentMembers + 1) // 모임장 포함
                             .clubImageUrl(clubImageUrl)
-                            .joinedStatus(isJoined ? 1L : 0L)
+                            .joinedStatus(isClubMember ? 1L : 0L)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -313,7 +314,12 @@ public class ClubServiceImpl implements ClubService {
         Event event = eventRepository.findById(club.getEventId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
 
-        boolean isClubMember = clubMemberRepository.findByClubIdAndMemberIdx(clubId, memberIdx).isPresent();
+        boolean isClubMember;
+        if (club.getMemberIdx() == memberIdx){
+            isClubMember = true;
+        } else {
+            isClubMember = clubMemberRepository.findByClubIdAndMemberIdx(clubId, memberIdx).isPresent();
+        }
 
         return ClubDto.builder()
                 .clubId(club.getClubId())
