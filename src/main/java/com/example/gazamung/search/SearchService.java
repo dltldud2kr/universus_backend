@@ -1,10 +1,15 @@
 package com.example.gazamung.search;
 
+import com.example.gazamung.S3FileUploader.UploadImage;
+import com.example.gazamung.S3FileUploader.UploadRepository;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
 import com.example.gazamung.event.entity.Event;
 import com.example.gazamung.event.repository.EventRepository;
 import com.example.gazamung.univBoard.repository.UnivBoardRepository;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,7 @@ public class SearchService {
     private final ClubRepository clubRepository;
     private final UnivBoardRepository univBoardRepository;
     private final EventRepository eventRepository;
+    private final UploadRepository uploadRepository;
 
     public List<?> searchResult(int category, String query){
 
@@ -40,7 +46,16 @@ public class SearchService {
             Set<Club> resultSet = new HashSet<>(clubsByName);
             resultSet.addAll(clubsByEvent);
 
-            return new ArrayList<>(resultSet);
+            // 클럽 이미지도 반환
+            List<ClubSearchResult> searchResults = new ArrayList<>();
+            for (Club club : resultSet) {
+                String imageUrl = uploadRepository.findByAttachmentTypeAndMappedId("club", club.getClubId())
+                        .map(UploadImage::getImageUrl)
+                        .orElse(null);
+                searchResults.add(new ClubSearchResult(club, imageUrl));
+            }
+
+            return searchResults;
 
         } else if (category == 1){
             // 카테고리 1일 경우 대학 게시판 검색
@@ -49,5 +64,7 @@ public class SearchService {
 
         return Collections.emptyList(); // 적합한 카테고리가 없을 경우 빈 리스트 반환
     }
+
+
 
 }

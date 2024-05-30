@@ -1,6 +1,7 @@
 package com.example.gazamung.S3FileUploader;
 
 
+import com.example.gazamung._enum.AttachmentType;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
