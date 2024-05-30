@@ -15,7 +15,7 @@ public class UnivRankRes {
 
     private Long univId;
     private Long eventId;
-
+    private String logoImg;
     private Long rankPoint;
 
     private String schoolName;

@@ -66,6 +66,7 @@
         SELECT
             r.univ_id,
             u.school_name,
+            u.logo_img,
             r.event_id,
             r.rank_point,
             r.win_count,
@@ -84,6 +85,7 @@
             r.dept_id,
             d.dept_name,
             r.univ_id,
+            u.logo_img,
             r.event_id,
             r.rank_point,
             r.win_count,
@@ -91,6 +93,8 @@
             (r.win_count + r.lose_count) as totalCount
         FROM Rank r
                  JOIN department d ON r.dept_id = d.dept_id
+                 JOIN university u ON r.univ_id = u.id
+
         WHERE r.event_id = #{eventId}
           AND r.univ_id = #{univId}
         ORDER BY r.rank_point DESC
@@ -105,6 +109,7 @@
         SELECT
             r.univ_id,
             u.school_name,
+            u.logo_img,
             SUM(r.rank_point) as rankPoint,
             SUM(r.win_count) as winCount,
             SUM(r.lose_count) as loseCount,
@@ -112,23 +117,26 @@
         FROM Rank r
                  JOIN university u ON r.univ_id = u.id
         WHERE r.dept_id IS NULL
-        GROUP BY r.univ_id, u.school_name
+        GROUP BY r.univ_id, u.school_name, u.logo_img
         ORDER BY rankPoint DESC
     </select>
 
-    <!-- (대학)대학 ID에 따른 전체 학과 랭킹 반환 -->
+    <!-- (과)대학 ID에 따른 전체 학과 랭킹 반환 -->
     <select id="findAllDeptRanks" resultType="com.example.gazamung.rank.dto.DeptRankRes">
         SELECT
             r.dept_id,
             d.dept_name,
+            u.school_name,
+            u.logo_img,
             SUM(r.rank_point) as rankPoint,
             SUM(r.win_count) as winCount,
             SUM(r.lose_count) as loseCount,
             (SUM(r.win_count) + SUM(r.lose_count)) as totalCount
         FROM Rank r
                  JOIN department d ON r.dept_id = d.dept_id
+                 JOIN university u ON r.univ_id = u.id
         WHERE r.univ_id = #{univId}
-        GROUP BY r.dept_id, d.dept_name
+        GROUP BY r.dept_id, d.dept_name, u.school_name, u.logo_img
         ORDER BY rankPoint DESC
     </select>
 
