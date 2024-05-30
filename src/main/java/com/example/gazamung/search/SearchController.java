@@ -39,9 +39,10 @@ public class SearchController {
     })
     @GetMapping("/{category}")
     public List<?> search(@PathVariable int category,
-                          @RequestParam(required = false) String query) {
+                          @RequestParam(required = false) String query,
+                          @RequestParam(required = false) Long category2) {
 
-        return searchService.searchResult(category,query);
+        return searchService.searchResult(category,query, category2);
 
     }
 }

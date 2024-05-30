@@ -2,6 +2,7 @@ package com.example.gazamung.search;
 
 import com.example.gazamung.S3FileUploader.UploadImage;
 import com.example.gazamung.S3FileUploader.UploadRepository;
+import com.example.gazamung.category.repository.CategoryRepository;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
 import com.example.gazamung.event.entity.Event;
@@ -24,8 +25,9 @@ public class SearchService {
     private final UnivBoardRepository univBoardRepository;
     private final EventRepository eventRepository;
     private final UploadRepository uploadRepository;
+    private final CategoryRepository categoryRepository;
 
-    public List<?> searchResult(int category, String query){
+    public List<?> searchResult(int category, String query, Long category2){
 
         if (query == null || query.isEmpty()) {
             return Collections.emptyList();
@@ -56,10 +58,16 @@ public class SearchService {
             }
 
             return searchResults;
-
         } else if (category == 1){
-            // 카테고리 1일 경우 대학 게시판 검색
-            return univBoardRepository.findByTitleContaining(query);
+
+            if (category2 != null) {
+                return univBoardRepository.findByCategoryIdAndTitleContainingOrCategoryIdAndContentContaining(category2, query, category2, query);
+            } else {
+                return univBoardRepository.findByTitleContainingOrContentContaining(query, query);
+            }
+
+
+
         }
 
         return Collections.emptyList(); // 적합한 카테고리가 없을 경우 빈 리스트 반환
