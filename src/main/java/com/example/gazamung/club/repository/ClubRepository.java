@@ -12,7 +12,7 @@ public interface ClubRepository extends JpaRepository<Club, Long>{
 
     List<Club> findByClubNameContaining(String query);
 
-    Club findByEventId(Long eventId);
+//    Club findByEventId(Long eventId);
 
     List<Club> findByMemberIdx(Long memberIdx);
 
@@ -24,4 +24,7 @@ public interface ClubRepository extends JpaRepository<Club, Long>{
 
 
     List<Club> findByclubIdIn(List<Long> clubIds);
+
+    List<Club> findByEventId(Long eventId);
+
 }
