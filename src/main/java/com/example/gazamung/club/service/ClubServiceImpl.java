@@ -281,6 +281,7 @@ public class ClubServiceImpl implements ClubService {
                     }
 
                     return ClubListDto.builder()
+                            .clubId(club.getClubId())
                             .eventName(event.getEventName())
                             .clubName(club.getClubName())
                             .introduction(club.getIntroduction())

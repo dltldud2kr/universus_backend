@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClubListDto {
+    
+    
+    private Long clubId; // 삭제 ㄴㄴㄴㄴㄴㄴㄴㄴ
 
     private String eventName;           // 종목 ID
 
