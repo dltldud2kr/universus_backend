@@ -6,6 +6,7 @@ import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.notification.dto.NotifyCreateReq;
 import com.example.gazamung.notification.dto.NotifyRes;
+import com.example.gazamung.notification.entity.Notification;
 import com.example.gazamung.notification.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -46,11 +48,42 @@ public class NotificationController {
         }
     }
 
+    @Operation(summary = "단일 알림 조회", description = "" +
+            "알림 리스트에서 선택 조회." +
+            "\n### HTTP STATUS 에 따른 요청 결과" +
+            "\n- 200: 서버요청 정상 성공" +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생했습니다." +
+            "\n### Result Code 에 따른 요청 결과"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
     @GetMapping("/read")
     public ResultDTO readNotify(@RequestParam Long receiver ,@RequestParam Long notifId){
         try {
             NotifyRes notifyRes = notificationService.readNotify(receiver,notifId);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "알림 조회", notifyRes);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+    @Operation(summary = "알림 리스트 조회", description = "" +
+            "알림 리스트 조회." +
+            "\n### HTTP STATUS 에 따른 요청 결과" +
+            "\n- 200: 서버요청 정상 성공" +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생했습니다." +
+            "\n### Result Code 에 따른 요청 결과"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/list")
+    public ResultDTO notifyList(@RequestParam Long memberIdx) {
+
+        try {
+            List<Notification> notificationList = notificationService.notifyList(memberIdx);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "알림 리스트 조회", notificationList);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

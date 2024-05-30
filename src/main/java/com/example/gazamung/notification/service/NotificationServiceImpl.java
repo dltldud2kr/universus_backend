@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -60,6 +61,13 @@ public class NotificationServiceImpl implements NotificationService {
                 .relatedItemId(notification.getRelatedItemId())
                 .build();
         return notifRes;
+    }
+
+    @Override
+    public List<Notification> notifyList(Long memberIdx) {
+
+        return notificationRepository.findByReceiver(memberIdx);
+
     }
 
 
