@@ -467,7 +467,6 @@ public class ClubServiceImpl implements ClubService {
 
         Member member = memberRepository.findById(request.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-
         Club club = clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
@@ -484,7 +483,9 @@ public class ClubServiceImpl implements ClubService {
 
         clubMemberRepository.save(clubMember);
 
+
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
+
         Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(), chatRoom.getDynamicId(),3);
         if(findChatMember.isEmpty()){
             List<ChatMember> chatMembers = chatMemberRepository.findByChatRoomIdAndChatRoomType(chatRoom.getChatRoomId(), 3);
