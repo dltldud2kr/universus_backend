@@ -622,6 +622,15 @@ public class ClubServiceImpl implements ClubService {
 
                     String clubImageUrl = clubImage.isEmpty() ? "" : clubImage.get(0).getImageUrl();
 
+                    LocalDateTime joinedDt;
+                    if (club.getMemberIdx().equals(memberIdx)){
+                        joinedDt = club.getRegDt();
+                    } else {
+                        ClubMember clubMember = clubMemberRepository.findByClubIdAndMemberIdx(club.getClubId(), memberIdx)
+                                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                        joinedDt = clubMember.getJoinedDt();
+                    }
+
                     return ClubListDto.builder()
                             .eventName(event.getEventName())
                             .clubName(club.getClubName())
@@ -629,6 +638,7 @@ public class ClubServiceImpl implements ClubService {
                             .currentMembers(currentMembers + 1) // 모임장 포함
                             .clubImageUrl(clubImageUrl)
                             .joinedStatus(1L)
+                            .joinedDt(joinedDt)
                             .build();
                 })
                 .collect(Collectors.toList());
