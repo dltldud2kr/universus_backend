@@ -381,7 +381,14 @@ public class MemberServiceImpl implements MemberService {
         if (!member.getPassword().equals(password)) {
             throw new CustomException(CustomExceptionCode.DIFFERENT_PASSWORD);
         }
-        memberRepository.delete(member);
+
+        // 연관된 데이터 삭제
+        memberMapper.deleteClubMembersByMemberId(memberIdx);
+        memberMapper.deleteChatMembersByMemberId(memberIdx);
+
+        // 회원 삭제
+        memberMapper.deleteMemberById(memberIdx);
+
         return true;
     }
 
@@ -496,18 +503,6 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-    @Override
-    public void delete(Long memberIdx) {
-        Member member = memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND));
-
-        // 연관된 데이터 삭제
-        memberMapper.deleteClubMembersByMemberId(memberIdx);
-        memberMapper.deleteChatMembersByMemberId(memberIdx);
-
-        // 회원 삭제
-        memberMapper.deleteMemberById(memberIdx);
-
-    }
 
 
     /**

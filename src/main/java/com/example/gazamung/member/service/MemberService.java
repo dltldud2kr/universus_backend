@@ -103,5 +103,4 @@ public interface MemberService {
 
     void updateImage(UpdateProfileDto dto);
 
-    void delete(Long memberIdx);
 }

@@ -407,16 +407,7 @@ public class MemberController {
         }
     }
 
-    @DeleteMapping("/member/delete")
-    public ResultDTO deleteMember(@RequestParam Long memberIdx){
 
-        try{
-            memberService.delete(memberIdx);
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "회원탈퇴.", null);
-        } catch (CustomException e) {
-            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
-        }
-    }
 
 
 
