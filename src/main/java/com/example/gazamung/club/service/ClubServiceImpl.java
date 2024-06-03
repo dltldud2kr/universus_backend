@@ -600,15 +600,15 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         List<ClubMember> clubMemberList = clubMemberRepository.findByMemberIdx(memberIdx);
-        if (clubMemberList.isEmpty()){
-            return Collections.emptyList();
-        }
 
         List<Long> clubIds = clubMemberList.stream()
                 .map(ClubMember::getClubId)
                 .collect(Collectors.toList());
 
+        List<Club> clubs = clubRepository.findByMemberIdx(memberIdx);
+
         List<Club> clubList = clubRepository.findByclubIdIn(clubIds);
+        clubList.addAll(clubs);
         if (clubList.isEmpty()) {
             return Collections.emptyList();
         }
