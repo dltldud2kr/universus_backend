@@ -102,4 +102,6 @@ public interface MemberService {
     Map<String, Object> uploadImage(UpdateProfileDto dto);
 
     void updateImage(UpdateProfileDto dto);
+
+    void delete(Long memberIdx);
 }
