@@ -16,6 +16,7 @@ public class InfoPost {
     private Long univBoardId;
     private String nickOrAnon;
     private String categoryName;
+    private Long categoryId;
     private String clubName;
 
     private String title;

@@ -82,7 +82,9 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                         "https://jhuniversus.s3.ap-northeast-2.amazonaws.com/default/df_profile.jpg" :
                         member.getProfileImgUrl())
                 .univBoardId(post.getUnivBoardId())
-                .memberIdx(post.getMemberIdx()); // 지우지마세요! 지우면 캡스톤 다지움
+                .memberIdx(post.getMemberIdx()) // 지우지마세요! 지우면 캡스톤 다지움
+                .categoryId(post.getCategoryId());
+
 
         // categoryId가 1인 경우, 위치 정보도 반환 객체에 포함
         if (post.getCategoryId() == 1) {
