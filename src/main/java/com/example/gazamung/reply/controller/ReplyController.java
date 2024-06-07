@@ -114,6 +114,15 @@ public class ReplyController {
         }
     }
 
+    @PostMapping("/deleteReplyAdmin/{replyId}")
+    public ResultDTO deleteReplyAdmin(@PathVariable Long replyId){
+        try {
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "댓글 삭제 완료.", replyService.deleteReplyAdmin(replyId));
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
 
 
 }

@@ -103,4 +103,5 @@ public interface MemberService {
 
     void updateImage(UpdateProfileDto dto);
 
+    boolean withDrawAdmin(Long memberIdx);
 }

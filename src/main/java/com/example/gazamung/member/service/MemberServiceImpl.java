@@ -382,6 +382,7 @@ public class MemberServiceImpl implements MemberService {
             throw new CustomException(CustomExceptionCode.DIFFERENT_PASSWORD);
         }
 
+
         // 연관된 데이터 삭제
         memberMapper.deleteClubMembersByMemberId(memberIdx);
         memberMapper.deleteChatMembersByMemberId(memberIdx);
@@ -389,6 +390,17 @@ public class MemberServiceImpl implements MemberService {
         // 회원 삭제
         memberMapper.deleteMemberById(memberIdx);
 
+        return true;
+    }
+
+    @Override
+    public boolean withDrawAdmin(Long memberIdx) {
+
+        memberMapper.deleteClubMembersByMemberId(memberIdx);
+        memberMapper.deleteChatMembersByMemberId(memberIdx);
+
+        // 회원 삭제
+        memberMapper.deleteMemberById(memberIdx);
         return true;
     }
 
@@ -502,7 +514,6 @@ public class MemberServiceImpl implements MemberService {
             System.err.println("modifyJournal Exception : " + e);
         }
     }
-
 
 
     /**

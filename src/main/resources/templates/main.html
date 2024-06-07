@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery 라이브러리 추가 -->
+</head>
+<body>
+<div class="container">
+    <div class="main-content">
+        <h1>관리자 페이지</h1>
+    </div>
+    <hr>
+    <div class="sidebar">
+        <h2>목록</h2>
+        <ul>
+            <li><a href="#" onclick="showMemberList()">회원 관리</a></li>
+            <li><a href="#" onclick="showUnivBoardList()">게시글 관리</a></li>
+            <li><a href="#" onclick="showReplyList()">댓글 관리</a></li>
+            <!-- 추가 메뉴 항목을 여기 추가할 수 있습니다 -->
+        </ul>
+    </div>
+    <div id="content"></div>
+</div>
+
+<script>
+    function showMemberList() {
+        $.get("/api/v1/admin/member", function (data) {
+            $("#content").html(data);
+        });
+    }
+    function showUnivBoardList() {
+        $.get("/api/v1/admin/univBoard", function (data) {
+            $("#content").html(data);
+        });
+    }
+    function showReplyList() {
+        $.get("/api/v1/admin/reply", function (data) {
+            $("#content").html(data);
+        });
+    }
+</script>
+</body>
+</html>

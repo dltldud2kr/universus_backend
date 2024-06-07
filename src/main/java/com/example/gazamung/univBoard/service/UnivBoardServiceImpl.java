@@ -360,6 +360,36 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
     }
 
+    @Override
+    public boolean deletePostAdmin(Long univBoardId) {
+        UnivBoard univBoard = univBoardRepository.findById(univBoardId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
+        univBoardRepository.delete(univBoard);
+
+        List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.POST, univBoardId);
+        String[] removeTarget = new String[imageByAttachmentType.size() + 1];
+
+        int removeCount = 0;
+        //업로드된 이미지가 잇는 경우
+        try {
+            if (imageByAttachmentType.size() > 0) {
+                for (UploadImage file : imageByAttachmentType) {
+                    // 문자열에서 ".com/" 다음의 정보를 추출
+                    int startIndex = file.getImageUrl().indexOf(".com/") + 5;
+                    String result = file.getImageUrl().substring(startIndex);
+                    removeTarget[removeCount] = result;
+                    removeCount++;
+                }
+                //등록되어있는 파일 정보 삭제 요청.
+                uploadService.removeS3Files(removeTarget);
+                //데이터베이스에 맵핑되어있는 정보삭제
+                uploadService.removeDatabaseByReviewIdx(univBoardId);
+            }
+        } catch (CustomException e) {
+            throw new CustomException(CustomExceptionCode.SERVER_ERROR);
+        }
+        return true;
+    }
 }
 
 

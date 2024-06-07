@@ -17,4 +17,5 @@ public interface ReplyService {
 
     Object modifyReply(ModifyDto dto);
 
+    Object deleteReplyAdmin(Long replyId);
 }

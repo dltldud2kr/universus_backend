@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 페이지 - 댓글 관리</title>
+</head>
+<body>
+<h1>댓글 목록</h1>
+
+<table border="1">
+    <tr>
+        <th>댓글 ID</th>
+        <th>회원 ID</th>
+        <th>게시글 ID</th>
+        <th>내용</th>
+        <th>익명 여부</th>
+        <th>마지막 작성 시간</th>
+        <th></th>
+    </tr>
+    <!-- 회원 목록을 반복해서 표시 -->
+    <tr th:each="reply : ${replies}">
+        <td th:text="${reply.replyId}"></td>
+        <td th:text="${reply.memberIdx}"></td>
+        <td th:text="${reply.univBoardId}"></td>
+        <td th:text="${reply.content}"></td>
+        <td th:text="${reply.anonymous}"></td>
+        <td th:text="${reply.lastDt}"></td>
+        <td>
+            <!-- 회원 삭제 요청을 보내는 폼 -->
+            <form th:action="@{'/api/v1/reply/deleteReplyAdmin/' + ${reply.replyId}}" method="post"
+                  onsubmit="return confirm('정말로 삭제하시겠습니까?');">
+                <button type="submit">삭제</button>
+            </form>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

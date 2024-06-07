@@ -19,4 +19,6 @@ public interface UnivBoardService {
     void deletePost(Long univBoardId, Long memberIdx);
 
     void modifyPost(PostDto dto);
+
+    boolean deletePostAdmin(Long univBoardId);
 }

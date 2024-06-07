@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import oracle.jdbc.proxy.annotation.Post;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -402,6 +403,16 @@ public class MemberController {
         try{
             memberService.updateImage(dto);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "프로필 사진 수정 완료.", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+    @PostMapping("/member/withDrawAdmin/{memberIdx}")
+    public ResultDTO withDrawAdmin(@PathVariable Long memberIdx) {
+        try {
+            return ResultDTO.of(memberService.withDrawAdmin(memberIdx), ApiResponseCode.SUCCESS.getCode(), "회원 탈퇴 완료", null);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
