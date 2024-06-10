@@ -8,6 +8,8 @@ import com.example.gazamung.category.entity.Category;
 import com.example.gazamung.category.repository.CategoryRepository;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
+import com.example.gazamung.event.entity.Event;
+import com.example.gazamung.event.repository.EventRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -21,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +36,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
     private final UploadService uploadService;
     private final CategoryRepository categoryRepository;
     private final ClubRepository clubRepository;
+    private final EventRepository eventRepository;
 
 
     /**
@@ -67,6 +67,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         for (UploadImage image : postImage) {
             postImageUrls.add(image.getImageUrl());
         }
+        Optional<Event> event;
 
         String nickOrAnon = post.getAnonymous() == 1 ? "익명" : member.getNickname();
 
@@ -83,7 +84,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                         member.getProfileImgUrl())
                 .univBoardId(post.getUnivBoardId())
                 .memberIdx(post.getMemberIdx()) // 지우지마세요! 지우면 캡스톤 다지움
-                .categoryId(post.getCategoryId());
+                .categoryId(post.getCategoryId())
+                .eventId(post.getEventId());
 
 
         // categoryId가 1인 경우, 위치 정보도 반환 객체에 포함
@@ -92,6 +94,11 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .lng(post.getLng())
                     .place(post.getPlace())
                     .matchDt(post.getMatchDt());
+        }
+
+        if(post.getEventId() != null) {
+            event = eventRepository.findById(post.getEventId());
+            event.ifPresent(value -> builder.eventName(value.getEventName()));
         }
 
         return builder.build();
@@ -299,8 +306,9 @@ public class UnivBoardServiceImpl implements UnivBoardService {
             memberRepository.findById(dto.getMemberIdx())
                     .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
+
             //수정을 요청한 사용자와 작성자가 다른 경우 : (본인인지의 대한 유효성 검사)
-            if (dto.getMemberIdx() != univBoard.getMemberIdx()) {
+            if (!Objects.equals(dto.getMemberIdx(), univBoard.getMemberIdx())) {
                 throw new CustomException(CustomExceptionCode.ACCESS_DENIED);
             }
             if (dto.getPostImage() != null && !dto.getPostImage().isEmpty()) {
@@ -339,18 +347,18 @@ public class UnivBoardServiceImpl implements UnivBoardService {
 
             univBoard.setTitle(dto.getTitle());
             univBoard.setContent(dto.getContent());
-            univBoard.setMatchDt(dto.getMatchDt());
             univBoard.setCategoryId(dto.getCategoryId());
             univBoard.setUdtDt(LocalDateTime.now());
             univBoard.setAnonymous(dto.getAnonymous());
             if (dto.getClubId() != null)
                 univBoard.setClubId(dto.getClubId());
-            if (dto.getCategoryId() == 1L) {
+            if (dto.getCategoryId() == 2L) {
                 univBoard.setLat(dto.getLat());
                 univBoard.setLng(dto.getLng());
                 univBoard.setPlace(dto.getPlace());
                 univBoard.setMatchDt(dto.getMatchDt());
                 univBoard.setEventId(dto.getEventId());
+                univBoard.setMatchDt(dto.getMatchDt());
             }
 
             univBoardRepository.save(univBoard);

@@ -37,4 +37,5 @@ public class InfoPost {
     private String matchDt;  // 경기 일시
     private Long memberIdx; // 글쓴이 memberIdx 삭제 금지!
 
+    private Long eventId;
 }
