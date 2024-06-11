@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gazamung.mapper.MemberMapper">
+
+
+    <!-- 연관된 클럽 멤버 삭제 -->
+    <delete id="deleteClubMembersByMemberId">
+        DELETE FROM club_member WHERE member_idx = #{memberIdx}
+    </delete>
+
+    <!-- 연관된 채팅 멤버 삭제 -->
+    <delete id="deleteChatMembersByMemberId">
+        DELETE FROM chat_member WHERE member_idx = #{memberIdx}
+    </delete>
+
+    <!-- 회원 삭제 -->
+    <delete id="deleteMemberById">
+        DELETE FROM member WHERE member_idx = #{memberIdx}
+    </delete>
+
+</mapper>

@@ -281,6 +281,7 @@ public class ClubServiceImpl implements ClubService {
                     }
 
                     return ClubListDto.builder()
+                            .clubId(club.getClubId())
                             .eventName(event.getEventName())
                             .clubName(club.getClubName())
                             .introduction(club.getIntroduction())
@@ -466,7 +467,6 @@ public class ClubServiceImpl implements ClubService {
 
         Member member = memberRepository.findById(request.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-
         Club club = clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
@@ -483,7 +483,9 @@ public class ClubServiceImpl implements ClubService {
 
         clubMemberRepository.save(clubMember);
 
+
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
+
         Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(), chatRoom.getDynamicId(),3);
         if(findChatMember.isEmpty()){
             List<ChatMember> chatMembers = chatMemberRepository.findByChatRoomIdAndChatRoomType(chatRoom.getChatRoomId(), 3);
@@ -598,15 +600,15 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         List<ClubMember> clubMemberList = clubMemberRepository.findByMemberIdx(memberIdx);
-        if (clubMemberList.isEmpty()){
-            return Collections.emptyList();
-        }
 
         List<Long> clubIds = clubMemberList.stream()
                 .map(ClubMember::getClubId)
                 .collect(Collectors.toList());
 
+        List<Club> clubs = clubRepository.findByMemberIdx(memberIdx);
+
         List<Club> clubList = clubRepository.findByclubIdIn(clubIds);
+        clubList.addAll(clubs);
         if (clubList.isEmpty()) {
             return Collections.emptyList();
         }
@@ -620,13 +622,24 @@ public class ClubServiceImpl implements ClubService {
 
                     String clubImageUrl = clubImage.isEmpty() ? "" : clubImage.get(0).getImageUrl();
 
+                    LocalDateTime joinedDt;
+                    if (club.getMemberIdx().equals(memberIdx)){
+                        joinedDt = club.getRegDt();
+                    } else {
+                        ClubMember clubMember = clubMemberRepository.findByClubIdAndMemberIdx(club.getClubId(), memberIdx)
+                                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                        joinedDt = clubMember.getJoinedDt();
+                    }
+
                     return ClubListDto.builder()
+                            .clubId(club.getClubId())
                             .eventName(event.getEventName())
                             .clubName(club.getClubName())
                             .introduction(club.getIntroduction())
                             .currentMembers(currentMembers + 1) // 모임장 포함
                             .clubImageUrl(clubImageUrl)
                             .joinedStatus(1L)
+                            .joinedDt(joinedDt)
                             .build();
                 })
                 .collect(Collectors.toList());

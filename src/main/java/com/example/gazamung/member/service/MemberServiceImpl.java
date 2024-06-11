@@ -12,6 +12,7 @@ import com.example.gazamung.dto.TokenDto;
 import com.example.gazamung.emailAuth.entity.EmailAuth;
 import com.example.gazamung.emailAuth.repository.EmailAuthRepository;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.mapper.MemberMapper;
 import com.example.gazamung.member.dto.JoinRequestDto;
 import com.example.gazamung.member.dto.MemberDto;
 import com.example.gazamung.member.dto.ProfileDto;
@@ -61,6 +62,7 @@ public class MemberServiceImpl implements MemberService {
     private final UniversityRepository universityRepository;
 
     private final DepartmentRepository departmentRepository;
+    private final MemberMapper memberMapper;
     /**
      * 1. 로그인 요청으로 들어온 ID, PWD 기반으로 Authentication 객체 생성
      * 2. authenticate() 메서드를 통해 요청된 Member 에 대한 검증이 진행 => loadUserByUsername 메서드를 실행.
@@ -379,7 +381,26 @@ public class MemberServiceImpl implements MemberService {
         if (!member.getPassword().equals(password)) {
             throw new CustomException(CustomExceptionCode.DIFFERENT_PASSWORD);
         }
-        memberRepository.delete(member);
+
+
+        // 연관된 데이터 삭제
+        memberMapper.deleteClubMembersByMemberId(memberIdx);
+        memberMapper.deleteChatMembersByMemberId(memberIdx);
+
+        // 회원 삭제
+        memberMapper.deleteMemberById(memberIdx);
+
+        return true;
+    }
+
+    @Override
+    public boolean withDrawAdmin(Long memberIdx) {
+
+        memberMapper.deleteClubMembersByMemberId(memberIdx);
+        memberMapper.deleteChatMembersByMemberId(memberIdx);
+
+        // 회원 삭제
+        memberMapper.deleteMemberById(memberIdx);
         return true;
     }
 

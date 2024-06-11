@@ -2,11 +2,13 @@ package com.example.gazamung.search;
 
 import com.example.gazamung.S3FileUploader.UploadImage;
 import com.example.gazamung.S3FileUploader.UploadRepository;
+import com.example.gazamung.category.entity.Category;
 import com.example.gazamung.category.repository.CategoryRepository;
 import com.example.gazamung.club.entity.Club;
 import com.example.gazamung.club.repository.ClubRepository;
 import com.example.gazamung.event.entity.Event;
 import com.example.gazamung.event.repository.EventRepository;
+import com.example.gazamung.univBoard.entity.UnivBoard;
 import com.example.gazamung.univBoard.repository.UnivBoardRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,12 +62,26 @@ public class SearchService {
             return searchResults;
         } else if (category == 1){
 
+            List<searchRes> results = new ArrayList<>();
             if (category2 != null) {
-                return univBoardRepository.findByCategoryIdAndTitleContainingOrCategoryIdAndContentContaining(category2, query, category2, query);
+                // 이 부분에서 받은 UnivBoard 객체 내의 category_id 값을 가지고 category 테이블의 categoryName 을 같이 노출해야함.
+                List<UnivBoard> univBoards = univBoardRepository.findByCategoryIdAndTitleContainingOrCategoryIdAndContentContaining(category2, query, category2, query);
+                for (UnivBoard board : univBoards) {
+                    String categoryName = categoryRepository.findById(board.getCategoryId())
+                            .map(Category::getCategoryName)
+                            .orElse(null);
+                    results.add(new searchRes(board.getUnivBoardId(), board.getTitle(), board.getContent(), board.getCategoryId(), categoryName, board.getRegDt()));
+                }
             } else {
-                return univBoardRepository.findByTitleContainingOrContentContaining(query, query);
+                List<UnivBoard> univBoards = univBoardRepository.findByTitleContainingOrContentContaining(query, query);
+                for (UnivBoard board : univBoards) {
+                    String categoryName = categoryRepository.findById(board.getCategoryId())
+                            .map(Category::getCategoryName)
+                            .orElse(null);
+                    results.add(new searchRes(board.getUnivBoardId(), board.getTitle(), board.getContent(), board.getCategoryId(), categoryName, board.getRegDt()));
+                }
             }
-
+            return results;
 
 
         }

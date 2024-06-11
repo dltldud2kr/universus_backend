@@ -602,6 +602,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 .memberIdx(request.getMemberIdx())
                 .deptBattleId(request.getDeptBattleId())
                 .univId(member.getUnivId())
+                .deptId(member.getDeptId()) // 해당 회원 deptId 추가
                 .userName(member.getName())
                 .nickName(member.getNickname())
                 .build();

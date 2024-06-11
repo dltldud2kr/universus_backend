@@ -143,5 +143,14 @@ public class UnivBoardController {
         }
     }
 
+    @PostMapping("/deletePostAdmin/{univBoardId}")
+    public ResultDTO deletePostAdmin(@PathVariable Long univBoardId) {
+        try {
+            return ResultDTO.of(univBoardService.deletePostAdmin(univBoardId), ApiResponseCode.SUCCESS.getCode(), "게시글 삭제 완료", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
 
 }

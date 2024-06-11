@@ -41,7 +41,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ReplyServiceImpl implements ReplyService{
+public class ReplyServiceImpl implements ReplyService {
 
     private final ReplyRepository replyRepository;
     private final MemberRepository memberRepository;
@@ -139,11 +139,11 @@ public class ReplyServiceImpl implements ReplyService{
 
         List<InfoDto> infoDtoList = new ArrayList<>();
 
-        if (replys.isEmpty()){
+        if (replys.isEmpty()) {
             return null;
         }
 
-        for (Reply reply : replys){
+        for (Reply reply : replys) {
             Member member = memberRepository.findById(reply.getMemberIdx())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
             String nickOrAnon = reply.getAnonymous() == 1 ? "익명" : member.getNickname();
@@ -173,11 +173,22 @@ public class ReplyServiceImpl implements ReplyService{
         Reply reply = replyRepository.findById(replyId)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_REPLY));
 
-        if ((reply.getMemberIdx().equals(memberIdx)) || member.getRole() == 1){
+        if ((reply.getMemberIdx().equals(memberIdx)) || member.getRole() == 1) {
             replyRepository.delete(reply);
         } else {
             return false;
         }
+
+        return true;
+
+    }
+
+    @Override
+    public Object deleteReplyAdmin(Long replyId) {
+        Reply reply = replyRepository.findById(replyId)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_REPLY));
+
+        replyRepository.delete(reply);
 
         return true;
 
@@ -191,7 +202,7 @@ public class ReplyServiceImpl implements ReplyService{
         memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-        if (reply.getMemberIdx().equals(dto.getMemberIdx())){
+        if (reply.getMemberIdx().equals(dto.getMemberIdx())) {
             reply.setLastDt(dto.getLastDt());
             reply.setContent(dto.getContent());
             reply.setAnonymous(dto.getAnonymous());
