@@ -33,7 +33,7 @@ public class SearchService {
             return Collections.emptyList();
         }
         if (category == 0) {
-            // 카테고리 0일 경우 클럽 검색
+            // 카테고리 0일 경우 클럽 검색d
             List<Club> clubsByName = clubRepository.findByClubNameContaining(query);
             List<Event> eventsByName = eventRepository.findByEventNameContaining(query);
 
