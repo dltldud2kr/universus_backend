@@ -211,7 +211,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         ChatMember chatMember = ChatMember.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
-                .chatRoomType(1)
+                .chatRoomType(0)
                 .customChatRoomName(univBattle.getHostUnivName() + "대항전")
                 .memberIdx(guest.getMemberIdx())
                 .chatRoomImg(host.getUnivLogoImg())
