@@ -379,6 +379,8 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                         "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                 .title(deptBattle.getHostDeptName() +  "경기 결과를 확인해주세요.")
                 .body("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
+                .target("univBattle/resultRes")
+                .data(deptBattle.getDeptBattleId().toString())
                 .build();
         try {
             fcmService.sendMessageTo(fcmSendDto);

@@ -763,6 +763,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                             "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                     .title(univBattle.getGuestUnivName() + "대표자가 경기결과에 동의하지 않았습니다.")
                     .body("경기 결과를 다시 제출해주세요.")
+                    .target("univBattle/resultRes")
+                    .data(univBattle.getUnivBattleId().toString())
                     .build();
             try {
                 fcmService.sendMessageTo(fcmSendDto);

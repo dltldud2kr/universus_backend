@@ -15,7 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RankServiceImpl implements RankService {
 
-    private final RankRepository rankRepository;
     private final RankMapper rankMapper;
 
     @Override
