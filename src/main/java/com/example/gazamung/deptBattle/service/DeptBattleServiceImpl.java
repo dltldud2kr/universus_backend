@@ -155,10 +155,11 @@ public class DeptBattleServiceImpl implements DeptBattleService {
             }
         }
 
+        Member member = memberRepository.findById(deptBattle.getHostLeader())
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         // FCM 알림 전송 메서드 (주최자에게만 발송)
         FcmSendDto fcmSendDto = FcmSendDto.builder()
-                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .token(member.getFcmToken())
                 .title(deptBattle.getGuestDeptName() + "대표자가 대항전에 참가했습니다.")
                 .body(deptBattle.getHostDeptName() + "vs" + deptBattle.getGuestDeptName() + "대항전이 매칭되었습니다.")
                 .target("deptBattle/info")
@@ -299,19 +300,22 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         deptBattle.setMatchStartDt(LocalDateTime.now());
         deptBattleRepository.save(deptBattle);
 
-        // FCM 알림 전송 메서드
-        FcmSendDto fcmSendDto = FcmSendDto.builder()
-                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
-                .title("대항전이 시작되었습니다.")
-                .target("deptBattle/info")
-                .data(String.valueOf(deptBattle.getDeptBattleId()))
-                .body(deptBattle.getHostDeptName() + "vs" + deptBattle.getGuestDeptName() + "경기가 시작되었습니다!")
-                .build();
-        try {
-            fcmService.sendMessageTo(fcmSendDto);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
+        for (Participant participants : participantList){
+            Member member = memberRepository.findById(participants.getMemberIdx())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token(member.getFcmToken())
+                    .title("대항전이 시작되었습니다.")
+                    .body(deptBattle.getHostDept() + "vs" + deptBattle.getGuestDept() + "경기가 시작되었습니다!")
+                    .target("deptBattle/info")
+                    .data(String.valueOf(deptBattle.getDeptBattleId()))
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         //@TODO 배포 전에 위 주석 메서드 부분에 추가할것. 지금은 따로 빼서 TEST
@@ -374,13 +378,12 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         // 예약된 작업을 관리 목록에 추가
         scheduledTasks2.put(deptBattle.getDeptBattleId(), scheduledFuture);
 
-        Optional<Member> member = memberRepository.findById(deptBattle.getGuestLeader());
-        String fcmToken = member.get().getFcmToken();
+        Member member = memberRepository.findById(deptBattle.getGuestLeader())
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         // FCM 알림 전송 메서드 (참가자대표에게 발송)
         FcmSendDto fcmSendDto = FcmSendDto.builder()
-                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .token(member.getFcmToken())
                 .title(deptBattle.getHostDeptName() +  "경기 결과를 확인해주세요.")
                 .body("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
                 .target("deptBattle/resultRes")
@@ -465,13 +468,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 System.out.println("Updated existing losing department rank");
             }
 
-
-
             deptBattle.setMatchStatus(MatchStatus.COMPLETED);
-
-
-            Optional<Member> member = memberRepository.findById(deptBattle.getHostLeader());
-            String fcmToken = member.get().getFcmToken();
 
             List<Participant> participantList = participantRepository.findByDeptBattleId(deptBattle.getDeptBattleId());
             // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
@@ -500,20 +497,22 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
 
             //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
-//        for (Participant participants : participantList){
-//            Member member = memberRepository.findById(participants.getMemberIdx())
-//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-//            FcmSendDto fcmSendDto = FcmSendDto.builder()
-//                    .token(member.getFcmToken())
-//                    .title("대항전이 시작되었습니다.")
-//                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
-//                    .build();
-//            try {
-//                fcmService.sendMessageTo(fcmSendDto);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
+            for (Participant participants : participantList){
+                Member partiMember = memberRepository.findById(participants.getMemberIdx())
+                        .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                FcmSendDto fcmSendDto = FcmSendDto.builder()
+                        .token(partiMember.getFcmToken())
+                        .title("대항전 결과를 확인해주세요!")
+                        .body("경기 결과를 확인해주세요!")
+                        .target("deptBattle/info")
+                        .data(String.valueOf(deptBattle.getDeptBattleId()))
+                        .build();
+                try {
+                    fcmService.sendMessageTo(fcmSendDto);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
         }
         // false 로 반응한 경우 점수 및 승리팀 기록 초기화.
@@ -523,10 +522,11 @@ public class DeptBattleServiceImpl implements DeptBattleService {
             deptBattle.setWinDept(null);
 
 
+            Member member = memberRepository.findById(deptBattle.getHostLeader())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
             // FCM 알림 전송 메서드 (주최자에게만 발송)
             FcmSendDto fcmSendDto = FcmSendDto.builder()
-                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .token(member.getFcmToken())
                     .title(deptBattle.getGuestDeptName() + "대표자가 경기결과에 동의하지 않았습니다.")
                     .body("경기 결과를 다시 제출해주세요.")
                     .target("deptBattle/info")
@@ -637,8 +637,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
             // FCM 알림 전송 메서드 (주최자에게만 발송)
             FcmSendDto fcmSendDto = FcmSendDto.builder()
-                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .token(member.getFcmToken())
                     .title("대항전 전원 참가 완료!")
                     .body(deptBattle.getHostDept() + "vs" + deptBattle.getGuestDept() + "참가자 전원 참여완료!")
                     .target("deptBattle/info")

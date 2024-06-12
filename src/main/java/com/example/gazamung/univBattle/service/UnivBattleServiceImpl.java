@@ -226,10 +226,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         chatMemberRepository.save(hostChatMember);
 
+        Member member = memberRepository.findById(univBattle.getHostLeader())
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         // FCM 알림 전송 메서드 (주최자에게만 발송)
         FcmSendDto fcmSendDto = FcmSendDto.builder()
-                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                .token(member.getFcmToken())
                 .title(guestUnivName + "대표자가 대항전에 참가했습니다.")
                 .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "대항전이 매칭되었습니다.")
                 .target("univBattle/info")
@@ -345,8 +346,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
             // FCM 알림 전송 메서드 (주최자에게만 발송)
             FcmSendDto fcmSendDto = FcmSendDto.builder()
-                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .token(member.getFcmToken())
                     .title(univBattle.getGuestUnivName() + "대항전 전원 참가 완료!")
                     .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "참가자 전원 참여완료!")
                     .target("univBattle/info")
@@ -716,8 +716,6 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
             univBattle.setMatchStatus(MatchStatus.COMPLETED);
 
-            Optional<Member> member = memberRepository.findById(univBattle.getHostLeader());
-            String fcmToken = member.get().getFcmToken();
 
             List<Participant> participantList = participantRepository.findByUnivBattleId(univBattle.getUnivBattleId());
             // 경기 참여 인원 수와 경기 인원 수가 같을 경우에만 경기 시작.
