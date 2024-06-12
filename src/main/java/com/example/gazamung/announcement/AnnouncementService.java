@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -35,6 +36,9 @@ public class AnnouncementService {
         return announcementOptional.orElse(null);
     }
 
+    public List<Announcement> list() {
+        return announcementRepository.findAll();
+    }
 
 
     public boolean update(Long announcementId, AnnouncementUpdateReq req) {
