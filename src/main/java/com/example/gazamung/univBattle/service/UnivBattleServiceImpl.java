@@ -522,42 +522,43 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         }
 
         //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
-//        for (Participant participants : participantList){
-//            Member member = memberRepository.findById(participants.getMemberIdx())
-//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-//            FcmSendDto fcmSendDto = FcmSendDto.builder()
-//                    .token(member.getFcmToken())
-//                    .title("대항전이 시작되었습니다.")
-//                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
-//                    .build();
-//            try {
-//                fcmService.sendMessageTo(fcmSendDto);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
+        for (Participant participants : participantList){
+            Member member = memberRepository.findById(participants.getMemberIdx())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token(member.getFcmToken())
+                    .title("대항전이 시작되었습니다.")
+                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+                    .target("univBattle/info")
+                    .data(String.valueOf(univBattle.getUnivBattleId()))
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
         // 대항전 상태를 "진행중" 으로 업데이트
         univBattle.setMatchStatus(MatchStatus.IN_PROGRESS);
         univBattle.setMatchStartDt(LocalDateTime.now());
         univBattleRepository.save(univBattle);
 
-        // FCM 알림 전송 메서드
-        FcmSendDto fcmSendDto = FcmSendDto.builder()
-                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
-                .title("대항전이 시작되었습니다.")
-                .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
-                .target("univBattle/info")
-                .data(String.valueOf(univBattle.getUnivBattleId()))
-                .build();
-        try {
-            fcmService.sendMessageTo(fcmSendDto);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // 테스트 FCM 알림 전송 메서드
+//        FcmSendDto fcmSendDto = FcmSendDto.builder()
+//                .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+//                        "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+//                .title("대항전이 시작되었습니다.")
+//                .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+//                .target("univBattle/info")
+//                .data(String.valueOf(univBattle.getUnivBattleId()))
+//                .build();
+//        try {
+//            fcmService.sendMessageTo(fcmSendDto);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
-        //@TODO 배포 전에 위 주석 메서드 부분에 추가할것. 지금은 따로 빼서 TEST
         for (Participant participants : participantList){
             Member member = memberRepository.findById(participants.getMemberIdx())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -742,20 +743,22 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
 
             //@TODO 테스트를 위해 주석처리 실 배포때 사용할 메서드.
-//        for (Participant participants : participantList){
-//            Member member = memberRepository.findById(participants.getMemberIdx())
-//                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-//            FcmSendDto fcmSendDto = FcmSendDto.builder()
-//                    .token(member.getFcmToken())
-//                    .title("대항전이 시작되었습니다.")
-//                    .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
-//                    .build();
-//            try {
-//                fcmService.sendMessageTo(fcmSendDto);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
+        for (Participant participants : participantList){
+            Member partiMember = memberRepository.findById(participants.getMemberIdx())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+            FcmSendDto fcmSendDto = FcmSendDto.builder()
+                    .token(partiMember.getFcmToken())
+                    .title("대항전 결과를 확인해주세요!")
+                    .body("경기 결과를 확인해주세요!")
+                    .target("univBattle/info")
+                    .data(String.valueOf(univBattle.getUnivBattleId()))
+                    .build();
+            try {
+                fcmService.sendMessageTo(fcmSendDto);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
 
         }
@@ -765,10 +768,11 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             univBattle.setHostScore(null);
             univBattle.setWinUniv(null);
 
+            Member member = memberRepository.findById(univBattle.getHostLeader())
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
             // FCM 알림 전송 메서드 (주최자에게만 발송)
             FcmSendDto fcmSendDto = FcmSendDto.builder()
-                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                    .token(member.getFcmToken())
                     .title(univBattle.getGuestUnivName() + "대표자가 경기결과에 동의하지 않았습니다.")
                     .body("경기 결과를 다시 제출해주세요.")
                     .target("univBattle/info")
