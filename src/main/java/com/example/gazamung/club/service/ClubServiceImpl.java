@@ -204,9 +204,6 @@ public class ClubServiceImpl implements ClubService {
             Club club = clubRepository.findById(clubId)
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
-            // 모임을 DB 에서 삭제.
-            clubRepository.delete(club);
-
             //모임장과 삭제 요청 회원이 동일한지 확인.
             if (club.getMemberIdx().equals(memberIdx)) {
 
@@ -234,7 +231,12 @@ public class ClubServiceImpl implements ClubService {
                 } catch (CustomException e) {
                     throw new CustomException(CustomExceptionCode.SERVER_ERROR);
                 }
+            } else {
+                throw new CustomException(CustomExceptionCode.ACCESS_DENIED);
             }
+
+            // 모임을 DB 에서 삭제.
+            clubRepository.delete(club);
 
             ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, clubId);
             List<ChatMember> chatMember = chatMemberRepository.findAllByChatRoomIdAndChatRoomType(chatRoom.getChatRoomId(), 3);

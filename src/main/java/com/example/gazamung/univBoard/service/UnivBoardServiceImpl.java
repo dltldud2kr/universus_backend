@@ -88,8 +88,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                 .eventId(post.getEventId());
 
 
-        // categoryId가 1인 경우, 위치 정보도 반환 객체에 포함
-        if (post.getCategoryId() == 1) {
+        // categoryId가 2인 경우, 위치 정보도 반환 객체에 포함
+        if (post.getCategoryId() == 2) {
             builder.lat(post.getLat())
                     .lng(post.getLng())
                     .place(post.getPlace())
@@ -149,7 +149,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .anonymous(dto.getAnonymous())
                     .build();
             // categoryId == 1 인 경우 위치 정보도 저장
-            if (dto.getCategoryId() == 1) {
+            if (dto.getCategoryId() == 2) {
                 univBoard.setLat(dto.getLat());
                 univBoard.setLng(dto.getLng());
                 univBoard.setPlace(dto.getPlace());
