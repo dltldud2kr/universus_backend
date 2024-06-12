@@ -3,6 +3,7 @@ package com.example.gazamung.fcmSend;
 import com.example.gazamung.exception.ApiResponseWrapper;
 import com.example.gazamung.fcmSend.FcmSendDto;
 import com.example.gazamung.fcmSend.FcmService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/fcm")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", exposedHeaders = {"Content-Disposition"}, allowedHeaders = "*")
+@Tag(name = "FCM API", description = "")
 public class FcmController {
 
     private final FcmService fcmService;

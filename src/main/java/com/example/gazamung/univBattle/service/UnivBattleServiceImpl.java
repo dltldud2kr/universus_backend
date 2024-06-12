@@ -232,6 +232,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                         "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                 .title(guestUnivName + "대표자가 대항전에 참가했습니다.")
                 .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "대항전이 매칭되었습니다.")
+                .target("univBattle/info")
+                .data(String.valueOf(univBattle.getUnivBattleId()))
                 .build();
         try {
             fcmService.sendMessageTo(fcmSendDto);
@@ -325,7 +327,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(0, univBattle.getUnivBattleId());
         ChatMember chatMember = ChatMember.builder()
                 .chatRoomId(chatRoom.getChatRoomId())
-                .chatRoomType(1)
+                .chatRoomType(0)
                 .customChatRoomName(univBattle.getHostUnivName() + " 대항전")
                 .memberIdx(request.getMemberIdx())
                 .build();
@@ -347,6 +349,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                             "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                     .title(univBattle.getGuestUnivName() + "대항전 전원 참가 완료!")
                     .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "참가자 전원 참여완료!")
+                    .target("univBattle/info")
+                    .data(String.valueOf(univBattle.getUnivBattleId()))
                     .build();
             try {
                 fcmService.sendMessageTo(fcmSendDto);
@@ -544,6 +548,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                         "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                 .title("대항전이 시작되었습니다.")
                 .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "경기가 시작되었습니다!")
+                .target("univBattle/info")
+                .data(String.valueOf(univBattle.getUnivBattleId()))
                 .build();
         try {
             fcmService.sendMessageTo(fcmSendDto);
@@ -631,6 +637,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                         "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                 .title(univBattle.getHostUnivName() +  "경기 결과를 확인해주세요.")
                 .body("1시간 안에 경기 결과에 대한 응답이 없을 시 주최측 경기결과로 경기가 종료됩니다.")
+                .target("univBattle/resultRes")
+                .data(String.valueOf(univBattle.getUnivBattleId()))
                 .build();
         try {
             fcmService.sendMessageTo(fcmSendDto);
@@ -763,8 +771,8 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                             "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                     .title(univBattle.getGuestUnivName() + "대표자가 경기결과에 동의하지 않았습니다.")
                     .body("경기 결과를 다시 제출해주세요.")
-                    .target("univBattle/resultRes")
-                    .data(univBattle.getUnivBattleId().toString())
+                    .target("univBattle/info")
+                    .data(String.valueOf(univBattle.getUnivBattleId()))
                     .build();
             try {
                 fcmService.sendMessageTo(fcmSendDto);

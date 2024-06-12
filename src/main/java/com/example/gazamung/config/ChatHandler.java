@@ -6,7 +6,11 @@ import com.example.gazamung.chat.chatMessage.ChatMessage;
 import com.example.gazamung.chat.chatMessage.ChatMessageService;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.exception.CustomException;
+import com.example.gazamung.fcmSend.FcmSendDto;
+import com.example.gazamung.fcmSend.FcmService;
+import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
+import com.example.gazamung.participant.repository.ParticipantRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -18,6 +22,8 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import javax.mail.Part;
+import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,6 +40,7 @@ public class ChatHandler extends TextWebSocketHandler {
     private final ChatMessageService chatMessageService;
     private final MemberRepository memberRepository;
     private final ChatMemberRepository chatMemberRepository;
+    private final FcmService fcmService;
 
     private final Map<String, List<WebSocketSession>> chatRooms = new ConcurrentHashMap<>();
 
@@ -120,6 +127,34 @@ public class ChatHandler extends TextWebSocketHandler {
         if (roomSessions != null) {
             for (WebSocketSession sess : roomSessions) {
                 sess.sendMessage(new TextMessage(chatMessageJson));
+            }
+        }
+        Long LRoomId = Long.parseLong(roomId);
+
+        List<ChatMember> chatMemberList = chatMemberRepository.findAllByChatRoomIdAndChatRoomType(LRoomId,battleType);
+
+        for (ChatMember chatMember : chatMemberList) {
+            // 자신을 제외한 사람들에게 푸시 알림 발송
+            if (!chatMember.getMemberIdx().equals(memberIdx)) {
+                Optional<Member> memberOptional = memberRepository.findById(chatMember.getMemberIdx());
+                if (memberOptional.isPresent()) {
+                    FcmSendDto fcmSendDto = FcmSendDto.builder()
+                            .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
+                                    "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
+                            .title(nickname + "님의 메세지")
+                            .body(payload)
+                            .target(" ")
+                            .data(" ")
+                            .build();
+                    try {
+                        fcmService.sendMessageTo(fcmSendDto);
+                    } catch (IOException e) {
+                        log.error("Error sending FCM message: ", e);
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    log.error("Member not found for memberIdx: " + chatMember.getMemberIdx());
+                }
             }
         }
 
