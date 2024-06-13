@@ -291,15 +291,33 @@ public class ChatHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         // 세션의 URI에서 roomId를 추출합니다.
-        String roomId = extractRoom(session.getUri());
+        String room = extractRoom(session.getUri());
 
         // 해당 roomId에 대한 채팅방에서 세션을 제거합니다.
-        List<WebSocketSession> roomSessions = chatRooms.get(roomId);
+        List<WebSocketSession> roomSessions = chatRooms.get(room);
         if (roomSessions != null) {
             roomSessions.remove(session);
+
+            // WebSocket 세션의 속성에서 memberIdx 값을 추출.
+            String memberIdx = (String) session.getAttributes().get("memberIdx");
+
+            if (memberIdx != null) {
+                long parseIdx = Long.parseLong(memberIdx);
+                String nickname = memberRepository.findById(parseIdx).get().getNickname();
+
+                // 퇴장 메시지 생성
+                String exitMessage = nickname + "님이 퇴장하셨습니다.";
+                TextMessage exitTextMessage = new TextMessage(exitMessage);
+
+                // 해당 채팅방에 참가한 모든 세션에 퇴장 메시지 전송
+                for (WebSocketSession sess : roomSessions) {
+                    sess.sendMessage(exitTextMessage);
+                }
+            }
         }
-        log.info(session + " 클라이언트 접속 해제 (roomId: " + roomId + ")");
+        log.info(session + " 클라이언트 접속 해제 (roomId: " + room + ")");
     }
+
 
     private String extractRoom(URI uri) {
         String path = uri.getPath();
