@@ -62,6 +62,16 @@ public class ChatController {
 
     }
 
+    @DeleteMapping("/delete")
+    public ResultDTO deleteChatRoom(@RequestParam Integer chatRoomType, @RequestParam Long chatRoomId ){
+
+        try {
+            chatRoomService.deleteChatRoom(chatRoomType, chatRoomId);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "1대1 채팅방 생성", null);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
 
 
 }

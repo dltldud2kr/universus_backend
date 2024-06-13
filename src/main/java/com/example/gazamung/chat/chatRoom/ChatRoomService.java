@@ -18,4 +18,6 @@ public interface ChatRoomService {
      * @return
      */
     Map<String, Object> myChatRoomList(Long memberIdx);
+
+    boolean deleteChatRoom(int chatRoomType, Long chatRoomId);
 }

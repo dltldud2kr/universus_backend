@@ -143,8 +143,8 @@ public class ChatHandler extends TextWebSocketHandler {
                                     "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
                             .title(nickname + "님의 메세지")
                             .body(payload)
-                            .target(" ")
-                            .data(" ")
+                            .target("chat")
+                            .data(battleType + "/" + roomId)
                             .build();
                     try {
                         fcmService.sendMessageTo(fcmSendDto);

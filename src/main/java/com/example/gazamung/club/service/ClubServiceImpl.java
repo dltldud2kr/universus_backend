@@ -359,6 +359,7 @@ public class ClubServiceImpl implements ClubService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_CLUB));
 
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
+
         // 가입된 회원인지 확인 후 탈퇴
         Optional<ClubMember> clubMemberOptional = clubMemberRepository.findByClubIdAndMemberIdx(request.getClubId(), request.getMemberIdx());
         if (clubMemberOptional.isPresent()) {
@@ -487,6 +488,7 @@ public class ClubServiceImpl implements ClubService {
 
 
         ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3, request.getClubId());
+
 
         Optional<ChatMember> findChatMember = chatMemberRepository.findByMemberIdxAndChatRoomIdAndChatRoomType(member.getMemberIdx(), chatRoom.getDynamicId(),3);
         if(findChatMember.isEmpty()){
