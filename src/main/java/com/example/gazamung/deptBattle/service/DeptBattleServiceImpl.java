@@ -5,6 +5,8 @@ import com.example.gazamung._enum.MatchStatus;
 import com.example.gazamung._enum.MsgType;
 import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatMember.ChatMemberRepository;
+import com.example.gazamung.chat.chatMessage.ChatMessage;
+import com.example.gazamung.chat.chatMessage.ChatMessageRepository;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.department.entity.Department;
@@ -51,6 +53,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     private final FcmService fcmService;
     private final NotificationService notificationService;
     private final RankMapper rankMapper;
+    private final ChatMessageRepository chatMessageRepository;
 
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler2 = Executors.newScheduledThreadPool(1);
@@ -154,6 +157,16 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 chatMemberRepository.save(hostChatMember);
             }
         }
+
+        ChatMessage chatMessage =  ChatMessage.builder()
+                .chatRoomType(chatRoom.getChatRoomType())
+                .chatRoomId(chatRoom.getChatRoomId())
+                .content(guest.getNickname() + "님이 입장하셨습니다.")
+                .nickname(" ")
+                .regDt(LocalDateTime.now())
+                .build();
+
+        chatMessageRepository.save(chatMessage);
 
         Member member = memberRepository.findById(deptBattle.getHostLeader())
                 .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -644,6 +657,16 @@ public class DeptBattleServiceImpl implements DeptBattleService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         String fcmToken = HostMember.getFcmToken();
+
+        ChatMessage chatMessage =  ChatMessage.builder()
+                .chatRoomType(chatRoom.getChatRoomType())
+                .chatRoomId(chatRoom.getChatRoomId())
+                .content(member.getNickname() + "님이 입장하셨습니다.")
+                .nickname(" ")
+                .regDt(LocalDateTime.now())
+                .build();
+
+        chatMessageRepository.save(chatMessage);
 
         if (last) {
             //@TODO  마지막 참가자일 경우 모든 참가자가 참가했다고 전송할것.

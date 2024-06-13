@@ -6,6 +6,8 @@ import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatMember.ChatMemberRepository;
+import com.example.gazamung.chat.chatMessage.ChatMessage;
+import com.example.gazamung.chat.chatMessage.ChatMessageRepository;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.club.dto.*;
@@ -48,8 +50,9 @@ public class ClubServiceImpl implements ClubService {
     private final ClubMapper clubMapper;
     private final EventRepository eventRepository;
     private final UnivBoardRepository univBoardRepository;
-    public final ChatRoomRepository chatRoomRepository;
-    public final ChatMemberRepository chatMemberRepository;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMemberRepository chatMemberRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     /**
      * @param dto
@@ -547,6 +550,17 @@ public class ClubServiceImpl implements ClubService {
                 chatMemberRepository.save(chatMember);
             }
         }
+
+        ChatMessage chatMessage =  ChatMessage.builder()
+                .chatRoomType(chatRoom.getChatRoomType())
+                .chatRoomId(chatRoom.getChatRoomId())
+                .content(member.getNickname() + "님이 입장하셨습니다.")
+                .nickname(" ")
+                .regDt(LocalDateTime.now())
+                .build();
+
+        chatMessageRepository.save(chatMessage);
+
     }
 
     /**
