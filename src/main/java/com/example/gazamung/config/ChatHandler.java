@@ -259,6 +259,16 @@ public class ChatHandler extends TextWebSocketHandler {
         ArrayNode chatMessageArray = mapper.createArrayNode();
         for (ChatMessage chatMessage : chatMessageList) {
 
+            if (chatMessage.getMemberIdx() == null){
+                ObjectNode messageNode = mapper.createObjectNode();
+                messageNode.put("nickname", chatMessage.getNickname());
+                messageNode.put("content", chatMessage.getContent());
+                messageNode.put("memberIdx", chatMessage.getMemberIdx());
+                messageNode.put("profileImg", "system");
+                // LocalDateTime을 문자열로 변환하여 JSON에 추가합니다.
+                messageNode.put("regDt", formatLocalDateTime(chatMessage.getRegDt()));
+                chatMessageArray.add(messageNode);
+            }
             //프로필 이미지 값을 가져옴.
             long memberIdx = chatMessage.getMemberIdx();
             String profileImgUrl = memberRepository.findById(memberIdx).get().getProfileImgUrl();
@@ -311,7 +321,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
                 // 해당 채팅방에 참가한 모든 세션에 퇴장 메시지 전송
                 for (WebSocketSession sess : roomSessions) {
-                    sess.sendMessage(exitTextMessage);
+//                    sess.sendMessage(exitTextMessage);
                 }
             }
         }

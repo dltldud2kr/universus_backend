@@ -3,6 +3,7 @@ package com.example.gazamung.chat.chatRoom;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatMember.ChatMemberRepository;
+import com.example.gazamung.chat.chatMessage.ChatMessage;
 import com.example.gazamung.chat.chatMessage.ChatMessageRepository;
 import com.example.gazamung.chat.dto.DirectMessageReq;
 import com.example.gazamung.dto.ResultDTO;
@@ -158,8 +159,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_CHATROOM));
 
-        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        Member member = memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         chatMemberRepository.deleteByChatRoomIdAndMemberIdx(chatRoomId, memberIdx);
+
+        ChatMessage chatMessage =  ChatMessage.builder()
+                .chatRoomType(chatRoom.getChatRoomType())
+                .chatRoomId(chatRoom.getChatRoomId())
+                .content(member.getNickname() + "님이 퇴장하셨습니다.")
+                .nickname(" ")
+                .regDt(LocalDateTime.now())
+                .build();
+
+        chatMessageRepository.save(chatMessage);
+
         return true;
     }
 
