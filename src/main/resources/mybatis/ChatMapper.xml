@@ -27,14 +27,26 @@
         WHERE ROWNUM = 1
     </select>
 
-    <select id="countChatRoomsByMembersAndType" resultType="int">
-        SELECT COUNT(*) FROM chat_member
-        WHERE chat_room_id IN (
-            SELECT cm1.chat_room_id
-            FROM chat_member cm1
-                     JOIN chat_member cm2 ON cm1.chat_room_id = cm2.chat_room_id
-            WHERE cm1.member_idx = #{senderIdx} AND cm2.member_idx = #{receiverIdx}
-        ) AND chat_room_type = #{chatRoomType}
+<!--    <select id="countChatRoomsByMembersAndType" resultType="int">-->
+<!--        SELECT COUNT(*) FROM chat_member-->
+<!--        WHERE chat_room_id IN (-->
+<!--            SELECT cm1.chat_room_id-->
+<!--            FROM chat_member cm1-->
+<!--                     JOIN chat_member cm2 ON cm1.chat_room_id = cm2.chat_room_id-->
+<!--            WHERE cm1.member_idx = #{senderIdx} AND cm2.member_idx = #{receiverIdx}-->
+<!--        ) AND chat_room_type = #{chatRoomType}-->
+<!--    </select>-->
+
+
+    <select id="countChatRoomsByMembersAndType" resultType="long">
+        SELECT NVL(
+                       (SELECT cm1.chat_room_id
+                        FROM chat_member cm1
+                                 JOIN chat_member cm2 ON cm1.chat_room_id = cm2.chat_room_id
+                        WHERE cm1.member_idx = #{senderIdx} AND cm2.member_idx = #{receiverIdx}
+                          AND cm1.chat_room_type = #{chatRoomType} AND ROWNUM = 1),
+                       -1) AS chatRoomId
+        FROM DUAL
     </select>
 
 

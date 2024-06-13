@@ -44,11 +44,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public Map<String, Object> directMessage(DirectMessageReq dto) {
 
-        int count = chatMapper.countChatRoomsByMembersAndType(dto.getSenderIdx(), dto.getReceiverIdx(), 0); // 0: 1:1 채팅
+        long chatRoomId = chatMapper.countChatRoomsByMembersAndType(dto.getSenderIdx(), dto.getReceiverIdx(), 2); // 0: 1:1 채팅
 
-        if (count > 0) {
-            // 이미 1:1 채팅방이 존재함
-            throw new CustomException(CustomExceptionCode.ALREADY_EXIST_CHATROOM);
+        // 이미 1:1 채팅방이 존재함
+        if (chatRoomId != -1) {
+            Map<String, Object> existingData = new HashMap<>();
+
+            existingData.put("chatRoomId", chatRoomId);
+
+            ChatMember chatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(dto.getSenderIdx(), chatRoomId);
+            existingData.put("customChatRoomName", chatMember.getCustomChatRoomName());
+
+
+            throw new CustomException(CustomExceptionCode.ALREADY_EXIST_CHATROOM, existingData);
         }
 
         Member sender = memberRepository.findById(dto.getSenderIdx())

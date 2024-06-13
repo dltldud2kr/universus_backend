@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +58,8 @@ public class ChatController {
             Map<String, Object> result = chatRoomService.directMessage(dto);
             return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "1대1 채팅방 생성", result);
         } catch (CustomException e) {
-            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+            Map<String, Object> data = e.getData() != null ? e.getData() : Collections.emptyMap();
+            return ResultDTO.of(true, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), data);
         }
 
     }
