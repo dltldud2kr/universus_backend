@@ -22,8 +22,9 @@ public class ClubDto {
     private String nickname;         // 대표자 명
     private String memberImageUrl;
     private String oneLineIntro;    // 한 줄 소개
-
-    private String  eventName;           // 종목 ID
+    
+    private String  eventName;           // 종목 이름
+    private Long eventId; // 종목 ID
 
     private String clubName;        // 모임명
     private String introduction;    // 모임 소개

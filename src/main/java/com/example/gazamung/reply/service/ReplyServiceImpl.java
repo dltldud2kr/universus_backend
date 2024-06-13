@@ -88,7 +88,7 @@ public class ReplyServiceImpl implements ReplyService {
                         .token(fcmToken)
                         .title("새로운 댓글이 달렸습니다")
                         .body(member.getNickname() + "님이 댓글을 작성하셨습니다")
-                        .target("/univBoard/info")
+                        .target("univBoard/info")
                         .data(String.valueOf(univBoard.getUnivBoardId()))
                         .build();
                 try {
@@ -214,9 +214,12 @@ public class ReplyServiceImpl implements ReplyService {
         memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
+        // 댓글 내용 필터링
+        String filteredContent = filterContent(dto.getContent());
+
         if (reply.getMemberIdx().equals(dto.getMemberIdx())) {
             reply.setLastDt(dto.getLastDt());
-            reply.setContent(dto.getContent());
+            reply.setContent(filteredContent);
             reply.setAnonymous(dto.getAnonymous());
             reply.setLastDt(LocalDateTime.now());
 
