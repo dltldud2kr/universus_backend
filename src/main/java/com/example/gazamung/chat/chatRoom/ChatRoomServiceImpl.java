@@ -92,6 +92,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatMemberRepository.save(senderChatMember);
         chatMemberRepository.save(receiverChatMember);
 
+
         ChatMember chatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(dto.getSenderIdx(),chatRoom.getChatRoomId());
 
         Map<String, Object> response = new HashMap<>();

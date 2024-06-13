@@ -5,6 +5,8 @@ import com.example.gazamung._enum.MatchStatus;
 import com.example.gazamung._enum.MsgType;
 import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatMember.ChatMemberRepository;
+import com.example.gazamung.chat.chatMessage.ChatMessage;
+import com.example.gazamung.chat.chatMessage.ChatMessageRepository;
 import com.example.gazamung.chat.chatRoom.ChatRoom;
 import com.example.gazamung.chat.chatRoom.ChatRoomRepository;
 import com.example.gazamung.exception.CustomException;
@@ -51,6 +53,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     private final UnivBattleMapper univBattleMapper;
     private final UniversityMapper universityMapper;
     private final RankMapper rankMapper;
+    private final ChatMessageRepository chatMessageRepository;
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     // 예약 작업 관리를 위한 ConcurrentHashMap
@@ -226,9 +229,15 @@ public class UnivBattleServiceImpl implements UnivBattleService {
 
         chatMemberRepository.save(hostChatMember);
 
-        Member member = memberRepository.findById(univBattle.getHostLeader())
-                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        ChatMessage chatMessage =  ChatMessage.builder()
+                .chatRoomType(chatRoom.getChatRoomType())
+                .chatRoomId(chatRoom.getChatRoomId())
+                .content(guest.getNickname() + "님이 입장하셨습니다.")
+                .nickname(" ")
+                .regDt(LocalDateTime.now())
+                .build();
 
+        chatMessageRepository.save(chatMessage);
 
         // 알림 전송 메서드 (주최자에게만 발송)
         NotifyCreateReq dto = NotifyCreateReq.builder()
@@ -242,7 +251,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         notificationService.sendNotify(dto);
 
         // FCM 알림 전송 메서드 (주최자에게만 발송)
-        String fcmToken = member.getFcmToken();
+        String fcmToken = host.getFcmToken();
         if (fcmToken != null && !fcmToken.isEmpty()) {
             FcmSendDto fcmSendDto = FcmSendDto.builder()
                     .token(fcmToken)
@@ -257,6 +266,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 throw new RuntimeException(e);
             }
         }
+
+
+
+
 
         return true;
 
@@ -348,6 +361,17 @@ public class UnivBattleServiceImpl implements UnivBattleService {
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         String fcmToken = HostMember.getFcmToken();
+
+
+        ChatMessage chatMessage =  ChatMessage.builder()
+                .chatRoomType(chatRoom.getChatRoomType())
+                .chatRoomId(chatRoom.getChatRoomId())
+                .content(member.getNickname() + "님이 입장하셨습니다.")
+                .nickname(" ")
+                .regDt(LocalDateTime.now())
+                .build();
+
+        chatMessageRepository.save(chatMessage);
 
 
         if (last) {
