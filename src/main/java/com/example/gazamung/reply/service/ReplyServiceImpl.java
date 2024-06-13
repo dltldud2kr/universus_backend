@@ -88,6 +88,8 @@ public class ReplyServiceImpl implements ReplyService {
                         .token(fcmToken)
                         .title("새로운 댓글이 달렸습니다")
                         .body(member.getNickname() + "님이 댓글을 작성하셨습니다")
+                        .target("/univBoard/info")
+                        .data(String.valueOf(univBoard.getUnivBoardId()))
                         .build();
                 try {
                     fcmService.sendMessageTo(fcmSendDto);
