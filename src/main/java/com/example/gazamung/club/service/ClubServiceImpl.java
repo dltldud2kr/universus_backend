@@ -378,6 +378,7 @@ public class ClubServiceImpl implements ClubService {
     }
 
 
+
     /**
      * @param memberIdx
      * @title 모임 추천
@@ -455,12 +456,49 @@ public class ClubServiceImpl implements ClubService {
 
         Collections.shuffle(suggestedClubs); // 리스트 섞기
 
+// 5개가 안 되면 나머지를 채우기
+        if (suggestedClubs.size() < 5) {
+            List<Long> suggestedClubIds = suggestedClubs.stream()
+                    .map(SuggestClub::getClubId)
+                    .collect(Collectors.toList());
+
+            List<Club> additionalClubs = clubRepository.findAllByClubIdNotIn(suggestedClubIds);
+            Collections.shuffle(additionalClubs);
+
+            for (Club additionalClub : additionalClubs) {
+                if (suggestedClubs.size() >= 5) {
+                    break;
+                }
+
+                Long currentMembers = clubMemberRepository.countByClubId(additionalClub.getClubId());
+                List<UploadImage> clubImage = uploadService.getImageByAttachmentType(AttachmentType.CLUB, additionalClub.getClubId());
+
+                String imageUrl;
+                if (!clubImage.isEmpty()) {
+                    imageUrl = clubImage.get(0).getImageUrl();
+                } else {
+                    imageUrl = "";
+                }
+
+                Optional<Event> event = eventRepository.findById(additionalClub.getEventId());
+                if (event.isEmpty()) {
+                    throw new CustomException(CustomExceptionCode.NOT_FOUND_EVENT);
+                }
+
+                suggestedClubs.add(SuggestClub.builder()
+                        .clubId(additionalClub.getClubId())
+                        .clubName(additionalClub.getClubName())
+                        .eventName(event.get().getEventName())
+                        .currentMembers(currentMembers + 1)
+                        .imageUrl(imageUrl)
+                        .build());
+            }
+        }
 
 
-
-        return suggestedClubs;
+        // 최대 5개의 클럽만 반환
+        return suggestedClubs.stream().limit(5).collect(Collectors.toList());
     }
-
 
     /**
      * @param request
