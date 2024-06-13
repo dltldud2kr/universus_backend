@@ -21,4 +21,5 @@ public interface ChatRoomService {
     Map<String, Object> myChatRoomList(Long memberIdx);
 
     boolean deleteChatRoom( Long chatRoomId, Long memberIdx);
+
 }

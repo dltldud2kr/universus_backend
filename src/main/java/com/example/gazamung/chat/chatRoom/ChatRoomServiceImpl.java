@@ -145,17 +145,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public boolean deleteChatRoom(Long chatRoomId, Long memberIdx) {
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
-                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
-        System.out.println("chatroomid = " + chatRoom.getChatRoomId());
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_CHATROOM));
 
         memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-
-
-        chatRoomRepository.delete(chatRoom);
-        log.info("delete chatroom");
-        chatMemberRepository.deleteByChatRoomId(chatRoomId);
-        log.info("delete ChatMember") ;
+        chatMemberRepository.deleteByChatRoomIdAndMemberIdx(chatRoomId, memberIdx);
         return true;
     }
+
+
 
 }
