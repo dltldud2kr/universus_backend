@@ -36,4 +36,6 @@ public interface UnivBoardRepository extends JpaRepository<UnivBoard, Long> {
     List<UnivBoard> findByClubIdIsNullAndUnivIdOrderByRegDtAsc(Long univId);
     List<UnivBoard> findByCategoryIdAndTitleContainingOrCategoryIdAndContentContaining(Long categoryId, String title, Long categoryId2, String content);
     List<UnivBoard> findByTitleContainingOrContentContaining(String title, String content);
+
+    List<UnivBoard> findByEventId(Long eventId);
 }

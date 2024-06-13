@@ -532,24 +532,25 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             throw new CustomException(CustomExceptionCode.INSUFFICIENT_MATCH_PLAYERS);
         }
 
-        for (Participant participants : participantList){
-            Member member = memberRepository.findById(participants.getMemberIdx())
-                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
-            // FCM 토큰이 있는 경우에만 FCM 알림 전송
-            if (member.getFcmToken() != null && !member.getFcmToken().isEmpty()) {
-                FcmSendDto fcmSendDto = FcmSendDto.builder()
-                        .token(member.getFcmToken())
-                        .title("대항전이 시작되었습니다.")
-                        .body(univBattle.getHostUnivName() + " vs " + univBattle.getGuestUnivName() + " 경기가 시작되었습니다!")
-                        .target("univBattle/info")
-                        .data(String.valueOf(univBattle.getUnivBattleId()))
-                        .build();
-                try {
-                    fcmService.sendMessageTo(fcmSendDto);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+        // FCM 알림 전송 메서드(참가자 전원에게 발송)
+        for (Participant participant : participantList) {
+            memberRepository.findById(participant.getMemberIdx()).ifPresent(member -> {
+                String fcmToken = member.getFcmToken();
+                if (fcmToken != null && !fcmToken.isEmpty()) {
+                    FcmSendDto fcmSendDto = FcmSendDto.builder()
+                            .token(fcmToken)
+                            .title("대항전이 시작되었습니다.")
+                            .body(univBattle.getHostUnivName() + " vs " + univBattle.getGuestUnivName() + " 경기가 시작되었습니다!")
+                            .target("univBattle/info")
+                            .data(String.valueOf(univBattle.getUnivBattleId()))
+                            .build();
+                    try {
+                        fcmService.sendMessageTo(fcmSendDto);
+                    } catch (IOException e) {
+                        throw new CustomException(CustomExceptionCode.NOT_FOUND_USER);
+                    }
                 }
-            }
+            });
         }
 
         // 대항전 상태를 "진행중" 으로 업데이트
