@@ -57,15 +57,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         Member receiver = memberRepository.findById(dto.getReceiverIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-        // 생성된 채팅방이 이미 있는 경우
+
         ChatRoom chatRoom = ChatRoom.builder()
-                .chatRoomType(0)
+                .chatRoomType(2)
                 .build();
         chatRoomRepository.save(chatRoom);
 
         // 상대방의 닉네임 및 프로필사진으로 채팅방명과 사진을 저장.
         ChatMember senderChatMember = ChatMember.builder()
-                .chatRoomType(0)
+                .chatRoomType(2)
                 .chatRoomId(chatRoom.getChatRoomId())
                 .memberIdx(dto.getSenderIdx())
                 .customChatRoomName(receiver.getNickname())
@@ -73,7 +73,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
 
         ChatMember receiverChatMember = ChatMember.builder()
-                .chatRoomType(0)
+                .chatRoomType(2)
                 .chatRoomId(chatRoom.getChatRoomId())
                 .memberIdx(dto.getReceiverIdx())
                 .customChatRoomName(sender.getNickname())
@@ -83,8 +83,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatMemberRepository.save(senderChatMember);
         chatMemberRepository.save(receiverChatMember);
 
+        ChatMember chatMember = chatMemberRepository.findByMemberIdxAndChatRoomId(dto.getSenderIdx(),chatRoom.getChatRoomId());
+
         Map<String, Object> response = new HashMap<>();
         response.put("chatRoomId", chatRoom.getChatRoomId());
+        response.put("customChatRoomName", chatMember.getCustomChatRoomName());
         return response;
     }
 
