@@ -640,16 +640,20 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         hostChatMember.setCustomChatRoomName(deptBattle.getGuestDeptName() + "대항전");
         chatMemberRepository.save(hostChatMember);
 
+        Member HostMember = memberRepository.findById(deptBattle.getHostLeader())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        String fcmToken = HostMember.getFcmToken();
+
         if (last) {
             //@TODO  마지막 참가자일 경우 모든 참가자가 참가했다고 전송할것.
 
-            String fcmToken = member.getFcmToken();
 
             // FCM 알림 전송 메서드 (주최자에게만 발송)
             if (fcmToken != null && !fcmToken.isEmpty()) {
 
                 FcmSendDto fcmSendDto = FcmSendDto.builder()
-                        .token(member.getFcmToken())
+                        .token(fcmToken)
                         .title("대항전 전원 참가 완료!")
                         .body(deptBattle.getHostDept() + "vs" + deptBattle.getGuestDept() + "참가자 전원 참여완료!")
                         .target("deptBattle/info")

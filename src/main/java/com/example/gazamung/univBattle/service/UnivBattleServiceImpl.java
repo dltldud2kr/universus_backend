@@ -344,7 +344,10 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         hostChatMember.setCustomChatRoomName(univBattle.getGuestUnivName() + " 대항전");
         chatMemberRepository.save(hostChatMember);
 
-        String fcmToken = member.getFcmToken();
+        Member HostMember = memberRepository.findById(univBattle.getHostLeader())
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        String fcmToken = HostMember.getFcmToken();
 
 
         if (last) {
@@ -352,7 +355,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             if (fcmToken != null && !fcmToken.isEmpty()) {
                 // FCM 알림 전송 메서드 (주최자에게만 발송)
                 FcmSendDto fcmSendDto = FcmSendDto.builder()
-                        .token(member.getFcmToken())
+                        .token(fcmToken)
                         .title(univBattle.getGuestUnivName() + "대항전 전원 참가 완료!")
                         .body(univBattle.getHostUnivName() + "vs" + univBattle.getGuestUnivName() + "참가자 전원 참여완료!")
                         .target("univBattle/info")
