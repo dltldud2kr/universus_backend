@@ -72,18 +72,28 @@ public class ReplyServiceImpl implements ReplyService {
 
         replyRepository.save(reply);
 
+        Long createMember = univBoard.getMemberIdx();
+
+        Member createMember2 = memberRepository.findById(createMember).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        String fcmToken = createMember2.getFcmToken();
+
+
         // 게시글 작성자에게 알림 보내기
         if (!member.getMemberIdx().equals(univBoard.getMemberIdx())) { // 자신의 게시글에 댓글을 달 경우 알림을 보내지 않음
-            FcmSendDto fcmSendDto = FcmSendDto.builder()
-                    .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                            "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
-                    .title("새로운 댓글이 달렸습니다")
-                    .body(member.getNickname() + "님이 댓글을 작성하셨습니다")
-                    .build();
-            try {
-                fcmService.sendMessageTo(fcmSendDto);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+
+            if (fcmToken != null && !fcmToken.isEmpty()) {
+
+                FcmSendDto fcmSendDto = FcmSendDto.builder()
+                        .token(fcmToken)
+                        .title("새로운 댓글이 달렸습니다")
+                        .body(member.getNickname() + "님이 댓글을 작성하셨습니다")
+                        .build();
+                try {
+                    fcmService.sendMessageTo(fcmSendDto);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 

@@ -138,19 +138,22 @@ public class ChatHandler extends TextWebSocketHandler {
             if (!chatMember.getMemberIdx().equals(memberIdx)) {
                 Optional<Member> memberOptional = memberRepository.findById(chatMember.getMemberIdx());
                 if (memberOptional.isPresent()) {
-                    FcmSendDto fcmSendDto = FcmSendDto.builder()
-                            .token("dWVpAXGoS0-qW8txlowMKt:APA91bEUdfKJYNQYLTDppQVhwQtXoUfwhgYLnTEgoLhZmTXfY8YbK" +
-                                    "HeAhiTDoMxXHChr2mhb-eA3eNb0MPUpAHHwceXciW4FZhck-AfWSbHQmwkTHRljIuTFZAhhDYDRKqF2WIZMnpYL")
-                            .title(nickname + "님의 메세지")
-                            .body(payload)
-                            .target("chat")
-                            .data(battleType + "/" + roomId)
-                            .build();
-                    try {
-                        fcmService.sendMessageTo(fcmSendDto);
-                    } catch (IOException e) {
-                        log.error("Error sending FCM message: ", e);
-                        throw new RuntimeException(e);
+                    String fcmToken = memberOptional.get().getFcmToken();
+                    if (fcmToken != null && !fcmToken.isEmpty()) {
+
+                        FcmSendDto fcmSendDto = FcmSendDto.builder()
+                                .token(fcmToken)
+                                .title(nickname + "님의 메세지")
+                                .body(payload)
+                                .target("chat")
+                                .data(battleType + "/" + roomId)
+                                .build();
+                        try {
+                            fcmService.sendMessageTo(fcmSendDto);
+                        } catch (IOException e) {
+                            log.error("Error sending FCM message: ", e);
+                            throw new RuntimeException(e);
+                        }
                     }
                 } else {
                     log.error("Member not found for memberIdx: " + chatMember.getMemberIdx());

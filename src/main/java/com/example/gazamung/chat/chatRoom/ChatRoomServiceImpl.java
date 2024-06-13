@@ -130,11 +130,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public boolean deleteChatRoom(Long chatRoomId) {
+    public boolean deleteChatRoom(Long chatRoomId, Long memberIdx) {
 
         ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND));
         System.out.println("chatroomid = " + chatRoom.getChatRoomId());
+
+        memberRepository.findById(memberIdx).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
 
         chatRoomRepository.delete(chatRoom);
