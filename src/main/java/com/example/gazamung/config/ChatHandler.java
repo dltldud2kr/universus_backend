@@ -268,19 +268,21 @@ public class ChatHandler extends TextWebSocketHandler {
                 // LocalDateTime을 문자열로 변환하여 JSON에 추가합니다.
                 messageNode.put("regDt", formatLocalDateTime(chatMessage.getRegDt()));
                 chatMessageArray.add(messageNode);
-            }
-            //프로필 이미지 값을 가져옴.
-            long memberIdx = chatMessage.getMemberIdx();
-            String profileImgUrl = memberRepository.findById(memberIdx).get().getProfileImgUrl();
+            } else {
+                //프로필 이미지 값을 가져옴.
+                long memberIdx = chatMessage.getMemberIdx();
+                String profileImgUrl = memberRepository.findById(memberIdx).get().getProfileImgUrl();
 
-            ObjectNode messageNode = mapper.createObjectNode();
-            messageNode.put("nickname", chatMessage.getNickname());
-            messageNode.put("content", chatMessage.getContent());
-            messageNode.put("memberIdx", chatMessage.getMemberIdx());
-            messageNode.put("profileImg", profileImgUrl);
-            // LocalDateTime을 문자열로 변환하여 JSON에 추가합니다.
-            messageNode.put("regDt", formatLocalDateTime(chatMessage.getRegDt()));
-            chatMessageArray.add(messageNode);
+                ObjectNode messageNode = mapper.createObjectNode();
+                messageNode.put("nickname", chatMessage.getNickname());
+                messageNode.put("content", chatMessage.getContent());
+                messageNode.put("memberIdx", chatMessage.getMemberIdx());
+                messageNode.put("profileImg", profileImgUrl);
+                // LocalDateTime을 문자열로 변환하여 JSON에 추가합니다.
+                messageNode.put("regDt", formatLocalDateTime(chatMessage.getRegDt()));
+                chatMessageArray.add(messageNode);
+            }
+
         }
         // JSON 배열을 문자열로 직렬화하여 클라이언트에게 전송합니다.
         String chatMessageJson = mapper.writeValueAsString(chatMessageArray);
