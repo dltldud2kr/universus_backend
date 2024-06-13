@@ -35,6 +35,7 @@ public class ClubDto {
     private Long currentMembers;   // 현재 인원
 
     private List<String> clubImageUrls;
+    private Long chatRoomId;
 
     private Long joinedStatus; // 0 미가입, 1 가입
 

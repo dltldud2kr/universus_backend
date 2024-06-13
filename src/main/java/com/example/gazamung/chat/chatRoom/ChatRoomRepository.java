@@ -14,4 +14,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
     ChatRoom findByChatRoomTypeAndDynamicId(int chatRoomType, long dynamicId);
 
 
+
 }

@@ -317,6 +317,7 @@ public class ClubServiceImpl implements ClubService {
         Event event = eventRepository.findById(club.getEventId())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_EVENT));
 
+        ChatRoom chatRoom = chatRoomRepository.findByChatRoomTypeAndDynamicId(3,club.getClubId());
         boolean isClubMember;
         if (club.getMemberIdx() == memberIdx){
             isClubMember = true;
@@ -335,6 +336,7 @@ public class ClubServiceImpl implements ClubService {
                 .eventName(event.getEventName())
                 .regDt(club.getRegDt())
                 .price(club.getPrice())
+                .chatRoomId(chatRoom.getChatRoomId())
                 .maximumMembers(club.getMaximumMembers())
                 .currentMembers(currentMembers + 1) // 모임장 포함
                 .clubImageUrls(clubImage.stream().map(UploadImage::getImageUrl).collect(Collectors.toList()))
