@@ -41,6 +41,9 @@ public enum CustomExceptionCode {
     //채팅
     INVALID_URI("INVALID_URI","올바른 형식의 URI가 아닙니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND_HEADER_DATA("NOT_FOUND_HEADER_DATA","헤더에 memberIdx 데이터 값이 없습니다.", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_CHATROOM("NOT_FOUND_CHATROOM","채팅방을 찾을 수 없습니다." , HttpStatus.BAD_REQUEST),
+    ALREADY_EXIST_CHATROOM("ALREADY_EXIST_CHATROOM","채팅방이 이미 존재합니다." , HttpStatus.BAD_REQUEST),
+
 
     //대학
     NOT_FOUND_UNIVERSITY("NOT_FOUND_UNIVERSITY","존재하지 않는 대학교입니다.", HttpStatus.BAD_REQUEST),
@@ -76,6 +79,7 @@ public enum CustomExceptionCode {
 
     //댓글
     NOT_FOUND_REPLY("NOT_FOUND_REPLY", "댓글을 찾을 수 없습니다.", HttpStatus.BAD_REQUEST);
+
 
 
 

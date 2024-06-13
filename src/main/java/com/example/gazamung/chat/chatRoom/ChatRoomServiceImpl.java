@@ -5,6 +5,7 @@ import com.example.gazamung.chat.chatMember.ChatMember;
 import com.example.gazamung.chat.chatMember.ChatMemberRepository;
 import com.example.gazamung.chat.chatMessage.ChatMessageRepository;
 import com.example.gazamung.chat.dto.DirectMessageReq;
+import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.mapper.ChatMapper;
 import com.example.gazamung.member.entity.Member;
@@ -41,7 +42,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      * @return
      */
     @Override
-    public boolean directMessage(DirectMessageReq dto) {
+    public Map<String, Object> directMessage(DirectMessageReq dto) {
+
+        int count = chatMapper.countChatRoomsByMembersAndType(dto.getSenderIdx(), dto.getReceiverIdx(), 0); // 0: 1:1 채팅
+
+        if (count > 0) {
+            // 이미 1:1 채팅방이 존재함
+            throw new CustomException(CustomExceptionCode.ALREADY_EXIST_CHATROOM);
+        }
 
         Member sender = memberRepository.findById(dto.getSenderIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
@@ -49,15 +57,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         Member receiver = memberRepository.findById(dto.getReceiverIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
-
+        // 생성된 채팅방이 이미 있는 경우
         ChatRoom chatRoom = ChatRoom.builder()
-                .chatRoomType(2)
+                .chatRoomType(0)
                 .build();
         chatRoomRepository.save(chatRoom);
 
         // 상대방의 닉네임 및 프로필사진으로 채팅방명과 사진을 저장.
         ChatMember senderChatMember = ChatMember.builder()
-                .chatRoomType(2)
+                .chatRoomType(0)
                 .chatRoomId(chatRoom.getChatRoomId())
                 .memberIdx(dto.getSenderIdx())
                 .customChatRoomName(receiver.getNickname())
@@ -65,7 +73,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .build();
 
         ChatMember receiverChatMember = ChatMember.builder()
-                .chatRoomType(2)
+                .chatRoomType(0)
                 .chatRoomId(chatRoom.getChatRoomId())
                 .memberIdx(dto.getReceiverIdx())
                 .customChatRoomName(sender.getNickname())
@@ -75,8 +83,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatMemberRepository.save(senderChatMember);
         chatMemberRepository.save(receiverChatMember);
 
-        return true;
+        Map<String, Object> response = new HashMap<>();
+        response.put("chatRoomId", chatRoom.getChatRoomId());
+        return response;
     }
+
+
 
     @Override
     @Transactional

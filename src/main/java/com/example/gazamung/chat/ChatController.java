@@ -54,8 +54,8 @@ public class ChatController {
     @PostMapping("/direct")
     public ResultDTO directMessage(@RequestBody DirectMessageReq dto){
         try {
-            chatRoomService.directMessage(dto);
-            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "1대1 채팅방 생성", null);
+            Map<String, Object> result = chatRoomService.directMessage(dto);
+            return ResultDTO.of(true, ApiResponseCode.SUCCESS.getCode(), "1대1 채팅방 생성", result);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }

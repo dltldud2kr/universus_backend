@@ -23,7 +23,6 @@ public class ChatMember {
     private Long memberIdx;
 
     private int chatRoomType;
-//    private String chatRoomName;
     private String customChatRoomName;
     private String chatRoomImg;
 
