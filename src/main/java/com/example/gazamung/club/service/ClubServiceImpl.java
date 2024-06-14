@@ -61,6 +61,8 @@ public class ClubServiceImpl implements ClubService {
      * @created 24.03.26 이승열
      */
     // @TODO    카테고리 값 엔티티 매핑 추가해야함.  현재 TEST
+    @Override
+    @Transactional
     public Map<String, Object> create(ClubRequest.CreateClubRequestDto dto) {
 
         Member member = memberRepository.findById(dto.getMemberIdx())
@@ -386,6 +388,7 @@ public class ClubServiceImpl implements ClubService {
      * @param memberIdx
      * @title 모임 추천
      * @created 24.05.06 이승열
+     * @modify 24.06.14 이시영
      * @description 사용자의 관심 모임 위주로 랜덤한 5개 모임의 정보 반환
      */
     public List<SuggestClub> suggest(Long memberIdx) {
