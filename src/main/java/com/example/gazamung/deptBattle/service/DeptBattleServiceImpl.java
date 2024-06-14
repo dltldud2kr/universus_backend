@@ -366,6 +366,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         deptBattle.setGuestScore(dto.getGuestScore());
         deptBattle.setHostScore(dto.getHostScore());
         deptBattle.setWinDept(dto.getWinDept());
+        deptBattle.setMatchEndDt(LocalDateTime.now());
         if(dto.getGuestScore() > dto.getHostScore()){
             deptBattle.setLoseDept(deptBattle.getHostDept());
         } else {
@@ -537,6 +538,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         else {
             deptBattle.setGuestScore(null);
             deptBattle.setHostScore(null);
+            deptBattle.setMatchEndDt(null);
             deptBattle.setWinDept(null);
 
 

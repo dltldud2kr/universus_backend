@@ -632,6 +632,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
         univBattle.setGuestScore(dto.getGuestScore());
         univBattle.setHostScore(dto.getHostScore());
         univBattle.setWinUniv(dto.getWinUniv());
+        univBattle.setMatchEndDt(LocalDateTime.now());
         if(dto.getGuestScore() > dto.getHostScore()){
             univBattle.setLoseUniv(univBattle.getHostUniv());
         } else {
@@ -793,6 +794,7 @@ public class UnivBattleServiceImpl implements UnivBattleService {
             univBattle.setGuestScore(null);
             univBattle.setHostScore(null);
             univBattle.setWinUniv(null);
+            univBattle.setMatchEndDt(null);
 
             Member member = memberRepository.findById(univBattle.getHostLeader())
                     .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));

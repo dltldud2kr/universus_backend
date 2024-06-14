@@ -17,6 +17,7 @@
     <select id="findByUnivId" resultType="com.example.gazamung.univBattle.entity.UnivBattle">
         SELECT * FROM univ_battle
         WHERE win_univ = #{univId} OR lose_univ = #{univId}
+        ORDER BY match_end_dt DESC
     </select>
 
 </mapper>
