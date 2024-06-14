@@ -112,7 +112,7 @@ public class UnivBattleController {
     @GetMapping("/list")
     public ResultDTO categoryBattleList(@RequestParam(required = false)int status ){
 
-        List<UnivBattle> univBattleList = univBattleService.uList(status);
+        List<UnivBattle> univBattleList = univBattleService.list(status);
         try {
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "상태별 대항전 리스트 조회 성공.", univBattleList);
         } catch (CustomException e) {

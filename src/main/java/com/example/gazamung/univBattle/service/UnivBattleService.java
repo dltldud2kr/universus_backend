@@ -36,7 +36,7 @@ public interface UnivBattleService {
      * @param status
      * @return
      */
-    List<UnivBattle> uList(int status);
+    List<UnivBattle> list(int status);
 
 
     /**

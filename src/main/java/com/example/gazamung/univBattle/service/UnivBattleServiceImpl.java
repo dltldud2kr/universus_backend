@@ -410,14 +410,14 @@ public class UnivBattleServiceImpl implements UnivBattleService {
     }
 
     @Override
-    public List<UnivBattle> uList(int status) {
+    public List<UnivBattle> list(int status) {
 
         return switch (status) {
-            case 0 -> univBattleRepository.findAll();
-            case 1 -> univBattleRepository.findByMatchStatus(MatchStatus.RECRUIT);
-            case 2 -> univBattleRepository.findByMatchStatus(MatchStatus.WAITING);
-            case 3 -> univBattleRepository.findByMatchStatus(MatchStatus.IN_PROGRESS);
-            case 4 -> univBattleRepository.findByMatchStatus(MatchStatus.COMPLETED);
+            case 0 -> univBattleRepository.findAllByOrderByRegDtDesc();
+            case 1 -> univBattleRepository.findByMatchStatusOrderByRegDtDesc(MatchStatus.RECRUIT);
+            case 2 -> univBattleRepository.findByMatchStatusOrderByRegDtDesc(MatchStatus.WAITING);
+            case 3 -> univBattleRepository.findByMatchStatusOrderByRegDtDesc(MatchStatus.IN_PROGRESS);
+            case 4 -> univBattleRepository.findByMatchStatusOrderByRegDtDesc(MatchStatus.COMPLETED);
             default -> throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         };
 

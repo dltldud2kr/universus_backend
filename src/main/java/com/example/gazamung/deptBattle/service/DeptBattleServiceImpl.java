@@ -216,11 +216,11 @@ public class DeptBattleServiceImpl implements DeptBattleService {
         long univId = member.getUnivId();
 
         return switch (status) {
-            case 0 -> deptBattleRepository.findAllByUnivId(univId);
-            case 1 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.RECRUIT, univId);
-            case 2 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.WAITING, univId);
-            case 3 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.IN_PROGRESS, univId);
-            case 4 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.COMPLETED, univId);
+            case 0 -> deptBattleRepository.findAllByUnivIdOrderByRegDtDesc(univId);
+            case 1 -> deptBattleRepository.findByMatchStatusAndUnivIdOrderByRegDtDesc(MatchStatus.RECRUIT, univId);
+            case 2 -> deptBattleRepository.findByMatchStatusAndUnivIdOrderByRegDtDesc(MatchStatus.WAITING, univId);
+            case 3 -> deptBattleRepository.findByMatchStatusAndUnivIdOrderByRegDtDesc(MatchStatus.IN_PROGRESS, univId);
+            case 4 -> deptBattleRepository.findByMatchStatusAndUnivIdOrderByRegDtDesc(MatchStatus.COMPLETED, univId);
             default -> throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         };
     }

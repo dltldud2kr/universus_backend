@@ -11,4 +11,8 @@ public interface DeptBattleRepository extends JpaRepository<DeptBattle, Long> {
     List<DeptBattle> findByMatchStatusAndUnivId(MatchStatus matchStatus, Long univId);
 
     List<DeptBattle> findAllByUnivId(Long univId);
+
+    List<DeptBattle> findAllByUnivIdOrderByRegDtDesc(long univId);
+
+    List<DeptBattle> findByMatchStatusAndUnivIdOrderByRegDtDesc(MatchStatus matchStatus, long univId);
 }
