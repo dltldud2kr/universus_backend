@@ -208,14 +208,19 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     }
 
     @Override
-    public List<DeptBattle> list(int status) {
+    public List<DeptBattle> list(int status, Long memberIdx) {
+
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() ->new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        long univId = member.getUnivId();
 
         return switch (status) {
-            case 0 -> deptBattleRepository.findAll();
-            case 1 -> deptBattleRepository.findByMatchStatus(MatchStatus.RECRUIT);
-            case 2 -> deptBattleRepository.findByMatchStatus(MatchStatus.WAITING);
-            case 3 -> deptBattleRepository.findByMatchStatus(MatchStatus.IN_PROGRESS);
-            case 4 -> deptBattleRepository.findByMatchStatus(MatchStatus.COMPLETED);
+            case 0 -> deptBattleRepository.findAllByUnivId(univId);
+            case 1 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.RECRUIT, univId);
+            case 2 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.WAITING, univId);
+            case 3 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.IN_PROGRESS, univId);
+            case 4 -> deptBattleRepository.findByMatchStatusAndUnivId(MatchStatus.COMPLETED, univId);
             default -> throw new CustomException(CustomExceptionCode.SERVER_ERROR);
         };
     }
@@ -584,8 +589,11 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     }
 
     @Override
-    public List<DeptBattleListRes> dList(Long univId,Long deptId) {
+    public List<DeptBattleListRes> dList(Long memberIdx,Long deptId) {
 
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        long univId = member.getUnivId();
         List<DeptBattle> deptBattleList = deptBattleMapper.findByDeptAndUnivId(univId,deptId);
 
         List<DeptBattleListRes> deptBattleListResList = new ArrayList<>();

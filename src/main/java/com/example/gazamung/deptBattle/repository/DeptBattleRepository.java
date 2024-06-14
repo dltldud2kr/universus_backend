@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface DeptBattleRepository extends JpaRepository<DeptBattle, Long> {
 
-    List<DeptBattle> findByMatchStatus(MatchStatus matchStatus);
+    List<DeptBattle> findByMatchStatusAndUnivId(MatchStatus matchStatus, Long univId);
+
+    List<DeptBattle> findAllByUnivId(Long univId);
 }

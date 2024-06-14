@@ -41,7 +41,7 @@ public interface DeptBattleService {
      * @param status
      * @return
      */
-    List<DeptBattle> list (int status);
+    List<DeptBattle> list (int status, Long memberIdx);
 
     /**
      * 대항전 정보
@@ -63,5 +63,5 @@ public interface DeptBattleService {
 
     boolean matchResultRes(DeptMatchResultRes dto);
 
-    List<DeptBattleListRes> dList(Long univId, Long deptId);
+    List<DeptBattleListRes> dList(Long memberIdx, Long deptId);
 }

@@ -121,9 +121,9 @@ public class DeptBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/list")
-    public ResultDTO deptBattleList(@RequestParam(required = false)int status ){
+    public ResultDTO deptBattleList(@RequestParam(required = false)int status, @RequestParam Long memberIdx ){
 
-        List<DeptBattle> deptBattleList = deptBattleService.list(status);
+        List<DeptBattle> deptBattleList = deptBattleService.list(status, memberIdx);
         try {
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대항전리스트 조회 성공.", deptBattleList);
         } catch (CustomException e) {
@@ -145,10 +145,10 @@ public class DeptBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/dList")
-    public ResultDTO eachDeptBattleList(@RequestParam Long univId, @RequestParam Long deptId ){
+    public ResultDTO eachDeptBattleList(@RequestParam Long memberIdx, @RequestParam Long deptId ){
 
         try {
-            List<DeptBattleListRes> deptBattleListResList = deptBattleService.dList(univId,deptId);
+            List<DeptBattleListRes> deptBattleListResList = deptBattleService.dList(memberIdx,deptId);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "해당 대항전 매치 리스트 조회 성공.", deptBattleListResList);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
