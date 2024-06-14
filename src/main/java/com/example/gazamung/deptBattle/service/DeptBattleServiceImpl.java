@@ -17,6 +17,7 @@ import com.example.gazamung.deptBattle.repository.DeptBattleRepository;
 import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.fcmSend.FcmSendDto;
 import com.example.gazamung.fcmSend.FcmService;
+import com.example.gazamung.mapper.DeptBattleMapper;
 import com.example.gazamung.mapper.RankMapper;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -24,6 +25,7 @@ import com.example.gazamung.notification.dto.NotifyCreateReq;
 import com.example.gazamung.notification.service.NotificationService;
 import com.example.gazamung.participant.entity.Participant;
 import com.example.gazamung.participant.repository.ParticipantRepository;
+import com.example.gazamung.univBattle.dto.UnivBattleListRes;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import com.example.gazamung.univBattle.service.UnivBattleServiceImpl;
 import com.example.gazamung.university.entity.University;
@@ -54,6 +56,7 @@ public class DeptBattleServiceImpl implements DeptBattleService {
     private final NotificationService notificationService;
     private final RankMapper rankMapper;
     private final ChatMessageRepository chatMessageRepository;
+    private final DeptBattleMapper deptBattleMapper;
 
     // 스케줄러 생성
     private final ScheduledExecutorService scheduler2 = Executors.newScheduledThreadPool(1);
@@ -576,6 +579,44 @@ public class DeptBattleServiceImpl implements DeptBattleService {
 
 
         return true;
+    }
+
+    @Override
+    public List<DeptBattleListRes> dList(Long univId,Long deptId) {
+
+        List<DeptBattle> deptBattleList = deptBattleMapper.findByDeptAndUnivId(univId,deptId);
+
+        List<DeptBattleListRes> deptBattleListResList = new ArrayList<>();
+
+        for (DeptBattle x : deptBattleList){
+            String result = "";
+
+            // 해당 대학의 승패여부 확인
+            if(Objects.equals(x.getWinDept(), univId)){
+                result = "win";
+            } else{
+                result = "lose";
+            }
+
+            DeptBattleListRes deptBattleListRes = DeptBattleListRes.builder()
+                    .deptBattleId(x.getDeptBattleId())
+                    .eventId(x.getEventId())
+                    .hostDeptName(x.getHostDeptName())
+                    .guestDeptName(x.getGuestDeptName())
+                    .univLogo(x.getUnivLogo())
+                    .battleDate(x.getBattleDate())
+                    .matchStartDt(x.getMatchStartDt())
+                    .matchEndDt(x.getMatchEndDt())
+                    .hostScore(x.getHostScore())
+                    .guestScore(x.getGuestScore())
+                    .result(result)
+                    .build();
+
+            deptBattleListResList.add(deptBattleListRes);
+        }
+
+
+        return deptBattleListResList;
     }
 
 

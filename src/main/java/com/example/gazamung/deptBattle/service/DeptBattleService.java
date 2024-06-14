@@ -5,6 +5,7 @@ import com.example.gazamung.deptBattle.entity.DeptBattle;
 import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
 import com.example.gazamung.univBattle.dto.MatchResultRequest;
 import com.example.gazamung.univBattle.dto.MatchResultResponse;
+import com.example.gazamung.univBattle.dto.UnivBattleListRes;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import org.springframework.stereotype.Service;
 
@@ -62,4 +63,5 @@ public interface DeptBattleService {
 
     boolean matchResultRes(DeptMatchResultRes dto);
 
+    List<DeptBattleListRes> dList(Long univId, Long deptId);
 }

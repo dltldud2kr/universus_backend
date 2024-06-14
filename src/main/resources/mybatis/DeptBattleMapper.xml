@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.gazamung.mapper.DeptBattleMapper">
+
+
+
+    <!-- 해당 과의 DeptBattle 목록을 반환하는 쿼리 -->
+    <select id="findByDeptAndUnivId" resultType="com.example.gazamung.deptBattle.entity.DeptBattle">
+        SELECT * FROM dept_battle
+        WHERE (win_dept = #{deptId} OR lose_dept = #{deptId}) AND univ_id = #{univId}
+    </select>
+
+</mapper>

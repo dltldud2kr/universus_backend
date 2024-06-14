@@ -133,7 +133,7 @@ public class UnivBattleController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/ulist")
-    public ResultDTO eachUnivBattleList(@RequestParam(required = false)Long univId ){
+    public ResultDTO eachUnivBattleList(@RequestParam Long univId ){
 
         try {
             List<UnivBattleListRes> univBattleListResList = univBattleService.uList(univId);

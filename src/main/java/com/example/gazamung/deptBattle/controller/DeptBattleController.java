@@ -10,6 +10,7 @@ import com.example.gazamung.exception.CustomException;
 import com.example.gazamung.univBattle.dto.GuestLeaderAttendRequest;
 import com.example.gazamung.univBattle.dto.MatchResultRequest;
 import com.example.gazamung.univBattle.dto.MatchResultResponse;
+import com.example.gazamung.univBattle.dto.UnivBattleListRes;
 import com.example.gazamung.univBattle.entity.UnivBattle;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -107,7 +108,7 @@ public class DeptBattleController {
     }
 
 
-    @Operation(summary = "과 vs 과 대항전 리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
+    @Operation(summary = "과 vs 과 대항전 카테고리별  리스트 ", description = "PARAM 유효값 : 0,1,2,3" +
             "\n### HTTP STATUS 에 따른 조회 결과" +
             "\n- 200: 서버요청 정상 성공 " +
             "\n- 500: 서버에서 요청 처리중 문제가 발생" +
@@ -125,6 +126,30 @@ public class DeptBattleController {
         List<DeptBattle> deptBattleList = deptBattleService.list(status);
         try {
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "대항전리스트 조회 성공.", deptBattleList);
+        } catch (CustomException e) {
+            return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
+        }
+    }
+
+
+    @Operation(summary = "해당 학과 경기 리스트 ", description = "PARAMETER: deptId " +
+            "\n### HTTP STATUS 에 따른 조회 결과" +
+            "\n- 200: 서버요청 정상 성공 " +
+            "\n- 500: 서버에서 요청 처리중 문제가 발생" +
+            "\n### Result Code 에 따른 요청 결과" +
+            "\n- 0 (ALL): 전체 리스트" +
+            "\n- 1 (WAITING): 대기중 리스트" +
+            "\n- 2 (IN_PROGRESS): 진행중 리스트" +
+            "\n- 3 (COMPLETED): 종료 리스트" )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
+    })
+    @GetMapping("/dList")
+    public ResultDTO eachDeptBattleList(@RequestParam Long univId, @RequestParam Long deptId ){
+
+        try {
+            List<DeptBattleListRes> deptBattleListResList = deptBattleService.dList(univId,deptId);
+            return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(), "해당 대항전 매치 리스트 조회 성공.", deptBattleListResList);
         } catch (CustomException e) {
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
         }
