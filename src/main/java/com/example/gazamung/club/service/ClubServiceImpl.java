@@ -390,6 +390,11 @@ public class ClubServiceImpl implements ClubService {
      */
     public List<SuggestClub> suggest(Long memberIdx) {
 
+        Member member = memberRepository.findById(memberIdx)
+                .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        Long univId = member.getUnivId();
+
         // 내가 가입한 클럽 목록 검색
         List<ClubMember> clubMembers = clubMemberRepository.findByMemberIdx(memberIdx);
 
@@ -424,10 +429,10 @@ public class ClubServiceImpl implements ClubService {
         List<Club> clubs;
         // 클럽 멤버가 없고, 모임장인 클럽도 없는 경우 모든 클럽을 대상으로 추천
         if (clubIds.isEmpty() && eventIds.isEmpty()) {
-            clubs = clubRepository.findAll();
+            clubs = clubRepository.findAllByUnivId(univId);
         } else {
             // 추출된 이벤트 ID와 클럽 ID를 사용하여 클럽을 검색
-            clubs = clubRepository.findAllByEventIdInAndClubIdNotIn(eventIds, clubIds);
+            clubs = clubRepository.findAllByEventIdInAndClubIdNotInAndUnivId(eventIds, clubIds, univId);
         }
 
         // 랜덤하게 띄우기 위해 리스트에 담아 이후 shuffle
@@ -459,13 +464,13 @@ public class ClubServiceImpl implements ClubService {
 
         Collections.shuffle(suggestedClubs); // 리스트 섞기
 
-// 5개가 안 되면 나머지를 채우기
+        // 5개가 안 되면 나머지를 채우기
         if (suggestedClubs.size() < 5) {
             List<Long> suggestedClubIds = suggestedClubs.stream()
                     .map(SuggestClub::getClubId)
                     .collect(Collectors.toList());
 
-            List<Club> additionalClubs = clubRepository.findAllByClubIdNotIn(suggestedClubIds);
+            List<Club> additionalClubs = clubRepository.findAllByClubIdNotInAndUnivId(suggestedClubIds, univId);
             Collections.shuffle(additionalClubs);
 
             for (Club additionalClub : additionalClubs) {
@@ -498,10 +503,10 @@ public class ClubServiceImpl implements ClubService {
             }
         }
 
-
         // 최대 5개의 클럽만 반환
         return suggestedClubs.stream().limit(5).collect(Collectors.toList());
     }
+
 
     /**
      * @param request
