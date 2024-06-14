@@ -1,5 +1,6 @@
 package com.example.gazamung.member.entity;
 
+import com.example.gazamung._enum.UserStatus;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -52,6 +53,11 @@ public class Member implements UserDetails {
     private String profileImgUrl;   // 프로필 이미지   (추가)
     private String fcmToken;    // fcm 토큰값
     private String univLogoImg; // 대학 로고 이미지
+    private UserStatus userStatus;
+    // BANNED: 금지된 회원
+    // INACTIVE : 비활성화된 회원
+    // ACTIVE : 활성화된 회원
+    // DEACTIVATED:탈퇴된 회원
 
 
     @ElementCollection(fetch = FetchType.EAGER)

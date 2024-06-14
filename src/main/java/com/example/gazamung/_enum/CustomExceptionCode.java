@@ -18,6 +18,9 @@ public enum CustomExceptionCode {
     SAME_NICKNAME("DUPLICATED_NICKNAME","이미 같은 닉네임을 사용중입니다.", HttpStatus.BAD_REQUEST),
     DIFFERENT_PASSWORD("DIFFERENT_PASSWORD","잘못된 비밀번호입니다.", HttpStatus.BAD_REQUEST),
     CHARACTER_LIMIT("CHARACTER_LIMIT", "글자 수 제한", HttpStatus.BAD_REQUEST),
+    INACTIVE_USER("INACTIVE_USER", "비활성화 된 회원입니다.", HttpStatus.BAD_REQUEST),
+    DEACTIVATED_USER("DEACTIVATED_USER", "탈퇴한 회원입니다.", HttpStatus.BAD_REQUEST),
+    BANNED_USER("BANNED_USER", "관리자에 의해 정지된 회원입니다.", HttpStatus.BAD_REQUEST),
 
 
     //대항전

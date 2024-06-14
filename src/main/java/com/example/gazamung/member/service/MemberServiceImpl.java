@@ -5,6 +5,7 @@ import com.example.gazamung.S3FileUploader.UploadService;
 import com.example.gazamung._enum.AttachmentType;
 import com.example.gazamung._enum.CustomExceptionCode;
 import com.example.gazamung._enum.EmailAuthStatus;
+import com.example.gazamung._enum.UserStatus;
 import com.example.gazamung.auth.JwtTokenProvider;
 import com.example.gazamung.department.entity.Department;
 import com.example.gazamung.department.repository.DepartmentRepository;
@@ -78,6 +79,19 @@ public class MemberServiceImpl implements MemberService {
         // 로그인 정보로 DB 조회  (아이디, 비밀번호)
         Member member = memberRepository.findByEmailAndPassword(email, password)
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+
+        switch (member.getUserStatus()) {
+            case ACTIVE:
+                break;
+            case INACTIVE:
+                throw new CustomException(CustomExceptionCode.INACTIVE_USER);
+            case DEACTIVATED:
+                throw new CustomException(CustomExceptionCode.DEACTIVATED_USER);
+            case BANNED:
+                throw new CustomException(CustomExceptionCode.BANNED_USER);
+            default:
+                throw new IllegalStateException("Unexpected value: " + member.getUserStatus());
+        }
 
         //사용자 인증 정보를 담은 토큰을 생성함. (이메일, 비밀번호)
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(email, password);
@@ -185,6 +199,7 @@ public class MemberServiceImpl implements MemberService {
                     .deptId(dto.getDeptId())        //학과 저장
                     .nickname(dto.getNickname())    // 닉네임
                     .name(dto.getUserName())    // 사용자 이름
+                    .userStatus(UserStatus.ACTIVE)
                     .univId(dto.getUnivId())        // 대학교 ID값
                     .phone(dto.getPhone())  // 휴대폰번호
                     .address(dto.getAddress())  //주소
@@ -383,12 +398,11 @@ public class MemberServiceImpl implements MemberService {
         }
 
 
-        // 연관된 데이터 삭제
-        memberMapper.deleteClubMembersByMemberId(memberIdx);
-        memberMapper.deleteChatMembersByMemberId(memberIdx);
+        // 회원 상태 정지
+        member.setUserStatus(UserStatus.DEACTIVATED);
 
-        // 회원 삭제
-        memberMapper.deleteMemberById(memberIdx);
+        // 별명 변경
+        member.setNickname("알수없음");
 
         return true;
     }
