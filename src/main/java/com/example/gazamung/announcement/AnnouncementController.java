@@ -4,7 +4,6 @@ package com.example.gazamung.announcement;
 import com.example.gazamung._enum.ApiResponseCode;
 import com.example.gazamung.dto.ResultDTO;
 import com.example.gazamung.exception.CustomException;
-import com.example.gazamung.rank.dto.UnivRankRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -57,14 +56,15 @@ public class AnnouncementController {
             @ApiResponse(responseCode = "200", description = "서버 요청 성공"),
     })
     @GetMapping("/read")
-    public ResultDTO read(@RequestParam Long id) {
+    public ResultDTO read(@RequestParam Long idx) {
 
         try{
-            Announcement list = announcementService.read(id);
+            Announcement list = announcementService.read(idx);
             return ResultDTO.of(true, ApiResponseCode.CREATED.getCode(),"공지 상세", list);
         }catch(CustomException e){
             return ResultDTO.of(false, e.getCustomErrorCode().getStatusCode(), e.getDetailMessage(), null);
 
         }
     }
+
 }

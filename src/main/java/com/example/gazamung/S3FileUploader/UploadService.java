@@ -41,11 +41,10 @@ public class UploadService {
     private final UploadRepository uploadRepository;
 
 
-
     /**
-     * @param multipartFile     업로드된 파일 multipartFile 객체
-     * @param memberIdx            사용자 m
-     * @param attachmentType    업로드 타입("REVIEW,GENERAL,CLUB")
+     * @param multipartFile  업로드된 파일 multipartFile 객체
+     * @param memberIdx      사용자 m
+     * @param attachmentType 업로드 타입("REVIEW,GENERAL,CLUB")
      * @return
      * @throws IOException
      * @title 파일 업로드
@@ -53,7 +52,8 @@ public class UploadService {
 
     //@TODO  회원에 대한 예외처리가 필요한지 확인해보기
     @Transactional
-    public List<Map<String, Object>> upload(List<MultipartFile> multipartFile, long memberIdx, AttachmentType attachmentType, long mappedId) {
+    public List<Map<String, Object>> upload(List<MultipartFile> multipartFile, long memberIdx,
+                                            AttachmentType attachmentType, long mappedId) {
 
         try {
             List<UploadImage> saveImageDataList = new ArrayList<>();
@@ -67,13 +67,15 @@ public class UploadService {
                 //업로드 시도한 파일 제한 용량 검증
                 validateFileSize(file);
                 //MultipartFile -> File 객체로 convert
-                File convertFile = convert(file).orElseThrow(() -> new IllegalArgumentException("MultipartFile -> File 전환 실패"));
+                File convertFile = convert(file).orElseThrow(
+                        () -> new IllegalArgumentException("MultipartFile -> File 전환 실패"));
                 //s3에 적재될 유니크한 파일 이름
                 String saveFileName = generateUniqueFileName(file.getName());
                 //실제 파일 이름.
                 String orginFileName = file.getOriginalFilename();
                 //업로드될 버킷 PATH
-                String bucketPath = attachmentType.getType() + "/" + memberIdx + "/" + mappedId + "/" + saveFileName;//적재할 경로 세팅
+                String bucketPath = attachmentType.getType() + "/" + memberIdx + "/" + mappedId + "/"
+                        + saveFileName;//적재할 경로 세팅
                 //업로드 된 이미지 URL
                 String url = putS3(convertFile, bucketPath); //s3에 적재
                 // 로컬에 생성된 File 삭제 (MultipartFile -> File 전환 하며 로컬에 파일 생성됨)
@@ -101,10 +103,10 @@ public class UploadService {
 
 
     /**
-     * @title AttachmentType에 맞는 이미지 데이터를 반환합니다.
      * @param attachmentType {"reivew","general","club"}
-     * @param mappedId {"reviewId","feedId","clubId"}
+     * @param mappedId       {"reviewId","feedId","clubId"}
      * @return [data]
+     * @title AttachmentType에 맞는 이미지 데이터를 반환합니다.
      */
     public List<UploadImage> getImageByAttachmentType(AttachmentType attachmentType, long mappedId) {
         List<UploadImage> byAttachmentTypeAndMappedId = uploadRepository.findByAttachmentTypeAndMappedId(attachmentType.getType(), mappedId);
@@ -112,51 +114,51 @@ public class UploadService {
     }
 
     /**
-     * @title Image pk를 통한 이미지 데이터 반환
      * @param id : db pk
      * @return
+     * @title Image pk를 통한 이미지 데이터 반환
      */
     public Optional<UploadImage> getImageById(Long id) {
         return uploadRepository.findById(id);
     }
 
 
-/**
- * @title S3에 적재된 파일과 맵핑 정보를 데이터베이스에 저장합니다.
- * @param saveImageData 맵핑된 이미지 정보.
- * @param attachmentType
- * @param mappedId
- * @return List<Map<String, Object>>
- */
-private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, AttachmentType attachmentType, long mappedId) {
-    List<UploadImage> existingImages = uploadRepository.findByAttachmentTypeAndMappedId(attachmentType.getType(), mappedId);
+    /**
+     * @param saveImageData  맵핑된 이미지 정보.
+     * @param attachmentType
+     * @param mappedId
+     * @return List<Map < String, Object>>
+     * @title S3에 적재된 파일과 맵핑 정보를 데이터베이스에 저장합니다.
+     */
+    private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, AttachmentType attachmentType, long mappedId) {
+        List<UploadImage> existingImages = uploadRepository.findByAttachmentTypeAndMappedId(attachmentType.getType(), mappedId);
 
-    // 이미 해당 리뷰 또는 피드에 업로드된 이미지가 있는 경우, 모두 삭제
-    if (!existingImages.isEmpty()) {
-        uploadRepository.deleteAll(existingImages);
+        // 이미 해당 리뷰 또는 피드에 업로드된 이미지가 있는 경우, 모두 삭제
+        if (!existingImages.isEmpty()) {
+            uploadRepository.deleteAll(existingImages);
+        }
+
+        // 새로운 이미지들을 저장
+        List<UploadImage> savedImages = uploadRepository.saveAll(saveImageData);
+
+        // 저장된 이미지들의 정보를 결과 리스트에 추가
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        for (UploadImage savedImage : savedImages) {
+            Map<String, Object> image = new HashMap<>();
+            image.put("fileName", savedImage.getFileName());
+            image.put("imageUrl", savedImage.getImageUrl());
+            results.add(image);
+        }
+
+        return results;
     }
-
-    // 새로운 이미지들을 저장
-    List<UploadImage> savedImages = uploadRepository.saveAll(saveImageData);
-
-    // 저장된 이미지들의 정보를 결과 리스트에 추가
-    List<Map<String, Object>> results = new ArrayList<>();
-
-    for (UploadImage savedImage : savedImages) {
-        Map<String, Object> image = new HashMap<>();
-        image.put("fileName", savedImage.getFileName());
-        image.put("imageUrl", savedImage.getImageUrl());
-        results.add(image);
-    }
-
-    return results;
-}
 
     /**
-     * @title S3 업로드 모듈
      * @param uploadFile
      * @param fileName
      * @return
+     * @title S3 업로드 모듈
      */
     private String putS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(
@@ -172,7 +174,7 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
     public void removeDatabaseByReviewIdx(long mappedIdx) {
         try {
             uploadRepository.deleteByMappedId(mappedIdx);
-        } catch(CustomException e) {
+        } catch (CustomException e) {
             System.out.println("Exception removeDatabaseByReviewIdx : " + e);
             log.error("Exception removeDatabaseByReviewIdx : " + e);
             throw new CustomException(CustomExceptionCode.SERVER_ERROR);
@@ -180,8 +182,8 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
     }
 
     /**
-     * @title S3 다중 파일 객체 삭제.
      * @param filePath
+     * @title S3 다중 파일 객체 삭제.
      * @Author 이시영
      */
     public void removeS3Files(String[] filePath) {
@@ -199,8 +201,8 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
     }
 
     /**
-     * @title 버킷에 저장되어있는 단건 파일을 삭제합니다.
      * @param filePath : 파일 이름을 포함하는 버킷 path
+     * @title 버킷에 저장되어있는 단건 파일을 삭제합니다.
      */
     public void removeS3File(String filePath) {
         try {
@@ -222,6 +224,7 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
 
     /**
      * S3 적재전 로컬에 임시 저장되어있는 파일을 삭제합니다.
+     *
      * @param targetFile
      */
     private void removeNewFile(File targetFile) {
@@ -231,10 +234,11 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
             log.info("파일이 삭제되지 못했습니다.");
         }
     }
+
     /**
-     * @title 파일이름이 겹치지 않기 위한 유니크한 파일 이름을 만들어주는 함수.
      * @param originalFileName 업로드하는 파일의 원본 이름
      * @return uuid
+     * @title 파일이름이 겹치지 않기 위한 유니크한 파일 이름을 만들어주는 함수.
      */
     private String generateUniqueFileName(String originalFileName) {
         String extension = "";
@@ -249,10 +253,10 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
     }
 
     /**
-     * @title multipart 파일 객체를 일반 File 객체로 변환
      * @param file
-     * @author 이시영
      * @return
+     * @title multipart 파일 객체를 일반 File 객체로 변환
+     * @author 이시영
      */
     private Optional<File> convert(MultipartFile file) {
         try {
@@ -272,8 +276,8 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
     }
 
     /**
-     * @title 파일의 최대 용량을 초과한 경우 예외 처리
      * @param file
+     * @title 파일의 최대 용량을 초과한 경우 예외 처리
      */
     private void validateFileSize(MultipartFile file) {
         String contentType = file.getContentType();
@@ -296,10 +300,6 @@ private List<Map<String, Object>> saveDB(List<UploadImage> saveImageData, Attach
             }
         }
     }
-
-
-
-
 
 
 }

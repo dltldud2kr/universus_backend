@@ -435,7 +435,7 @@ public class ClubServiceImpl implements ClubService {
             clubs = clubRepository.findAllByUnivId(univId);
         } else {
             // 추출된 이벤트 ID와 클럽 ID를 사용하여 클럽을 검색
-            clubs = clubRepository.findAllByEventIdInAndClubIdNotInAndUnivId(eventIds, clubIds, univId);
+            clubs = clubRepository.findAllByEventIdInAndClubIdInAndUnivId(eventIds, clubIds, univId);
         }
 
         // 랜덤하게 띄우기 위해 리스트에 담아 이후 shuffle

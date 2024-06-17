@@ -74,7 +74,8 @@ public class ReplyServiceImpl implements ReplyService {
 
         Long createMember = univBoard.getMemberIdx();
 
-        Member createMember2 = memberRepository.findById(createMember).orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+        Member createMember2 = memberRepository.findById(createMember).orElseThrow(
+                () -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
         String fcmToken = createMember2.getFcmToken();
 

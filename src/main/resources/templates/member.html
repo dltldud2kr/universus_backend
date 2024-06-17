@@ -1,13 +1,21 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:temporals="http://www.thymeleaf.org/extras/thymeleaf-temporals">
+
 <head>
     <meta charset="UTF-8">
     <title>관리자 페이지 - 회원 관리</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        th {
+            white-space: nowrap;
+        }
+    </style>
 </head>
+
 <body>
 <div class="container">
-    <h1 class="my-4">회원 목록</h1>
+    <h1 class="my-4">회원 관리</h1>
     <table class="table table-bordered table-hover">
         <thead class="table-dark">
         <tr>
@@ -21,7 +29,7 @@
             <th>학교</th>
             <th>학과</th>
             <th>가입일</th>
-            <th></th>
+            <th>액션</th>
         </tr>
         </thead>
         <tbody>
@@ -35,7 +43,9 @@
             <td th:text="${member.address}"></td>
             <td th:text="${universityNames[member.univId]}"></td>
             <td th:text="${departmentNames[member.deptId]}"></td>
-            <td th:text="${member.regDt}"></td>
+            <td>
+                <span th:text="${#temporals.format(member.regDt, 'yyyy-MM-dd HH:mm:ss')}"></span>
+            </td>
             <td>
                 <form th:action="@{'/api/v1/member/withDrawAdmin/' + ${member.memberIdx}}" method="post"
                       onsubmit="return confirm('정말로 탈퇴시키겠습니까?');">

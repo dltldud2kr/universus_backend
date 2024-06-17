@@ -490,7 +490,8 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(dto.getMemberIdx())
                 .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
         try {
-            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+            List<UploadImage> imageByAttachmentType = uploadService.getImageByAttachmentType(AttachmentType.PROFILE,
+                    dto.getMemberIdx());
             String[] removeTarget = new String[imageByAttachmentType.size() + 1];
 
             int removeCount = 0;
@@ -514,10 +515,12 @@ public class MemberServiceImpl implements MemberService {
             }
 
             //새롭게 요청온 업로드 이미지를  버킷에 업로드함.
-            uploadService.upload(dto.getProfileImage(), dto.getMemberIdx(), AttachmentType.PROFILE, dto.getMemberIdx());
+            uploadService.upload(dto.getProfileImage(), dto.getMemberIdx(), AttachmentType.PROFILE,
+                    dto.getMemberIdx());
 
             //업로드된 이미지 정보를 데이터베이스
-            List<UploadImage> profileImages = uploadService.getImageByAttachmentType(AttachmentType.PROFILE, dto.getMemberIdx());
+            List<UploadImage> profileImages = uploadService.getImageByAttachmentType(AttachmentType.PROFILE,
+                    dto.getMemberIdx());
 
             if (!profileImages.isEmpty()){
                 member.setProfileImgUrl(profileImages.get(0).getImageUrl());

@@ -7,7 +7,7 @@
 </head>
 <body>
 <div class="container">
-    <h1 class="my-4">댓글 목록</h1>
+    <h1 class="my-4">댓글 관리</h1>
     <table class="table table-bordered table-hover">
         <thead class="table-dark">
         <tr>
@@ -27,7 +27,7 @@
             <td th:text="${reply.univBoardId}"></td>
             <td th:text="${reply.content}"></td>
             <td th:text="${reply.anonymous}"></td>
-            <td th:text="${reply.lastDt}"></td>
+            <td th:text="${#temporals.format(reply.lastDt, 'yyyy-MM-dd HH:mm:ss')}"></td>
             <td>
                 <form th:action="@{'/api/v1/reply/deleteReplyAdmin/' + ${reply.replyId}}" method="post"
                       onsubmit="return confirm('정말로 삭제하시겠습니까?');">

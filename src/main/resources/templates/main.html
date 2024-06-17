@@ -10,27 +10,33 @@
         body {
             padding-top: 20px;
         }
+
         .sidebar {
             background-color: #f8f9fa;
             padding: 10px;
             border-right: 1px solid #dee2e6;
         }
+
         .sidebar ul {
             padding-left: 0;
         }
+
         .sidebar ul li {
             list-style-type: none;
         }
+
         .sidebar ul li a {
             display: block;
             padding: 5px 10px;
             color: #000;
             text-decoration: none;
         }
+
         .sidebar ul li a:hover {
             background-color: #e9ecef;
             color: #000;
         }
+
         #content {
             padding: 20px;
         }
@@ -51,6 +57,7 @@
                 <li><a href="#" onclick="showMemberList()">회원 관리</a></li>
                 <li><a href="#" onclick="showUnivBoardList()">게시글 관리</a></li>
                 <li><a href="#" onclick="showReplyList()">댓글 관리</a></li>
+                <li><a href="#" onclick="showAnnouncementList()">공지사항 관리</a></li>
                 <!-- 추가 메뉴 항목을 여기 추가할 수 있습니다 -->
             </ul>
         </div>
@@ -66,13 +73,29 @@
             $("#content").html(data);
         });
     }
+
     function showUnivBoardList() {
         $.get("/api/v1/admin/univBoard", function (data) {
             $("#content").html(data);
         });
     }
+
     function showReplyList() {
         $.get("/api/v1/admin/reply", function (data) {
+            $("#content").html(data);
+        });
+    }
+
+    $(document).ready(function () {
+        // URL 파라미터에서 showAnnouncementList 값이 true일 때 함수 실행
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('showAnnouncementList') && urlParams.get('showAnnouncementList') === 'true') {
+            showAnnouncementList();
+        }
+    });
+
+    function showAnnouncementList() {
+        $.get("/api/v1/admin/announcement", function (data) {
             $("#content").html(data);
         });
     }

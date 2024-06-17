@@ -1,5 +1,9 @@
 package com.example.gazamung.admin;
 
+import com.example.gazamung.announcement.Announcement;
+import com.example.gazamung.announcement.AnnouncementCreateReq;
+import com.example.gazamung.announcement.AnnouncementRepository;
+import com.example.gazamung.announcement.AnnouncementService;
 import com.example.gazamung.department.repository.DepartmentRepository;
 import com.example.gazamung.member.entity.Member;
 import com.example.gazamung.member.repository.MemberRepository;
@@ -11,13 +15,12 @@ import com.example.gazamung.university.repository.UniversityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 @Controller
 @RequestMapping("/api/v1/admin")
@@ -28,16 +31,21 @@ public class AdminController {
     private final DepartmentRepository departmentRepository;
     private final UnivBoardRepository univBoardRepository;
     private final ReplyRepository replyRepository;
+    private final AnnouncementRepository announcementRepository;
+    private final AnnouncementService announcementService;
 
     @Autowired
     public AdminController(MemberRepository memberRepository, UniversityRepository universityRepository,
                            DepartmentRepository departmentRepository, UnivBoardRepository univBoardRepository,
-                           ReplyRepository replyRepository) {
+                           ReplyRepository replyRepository, AnnouncementRepository announcementRepository,
+                           AnnouncementService announcementService) {
         this.memberRepository = memberRepository;
         this.universityRepository = universityRepository;
         this.departmentRepository = departmentRepository;
         this.univBoardRepository = univBoardRepository;
         this.replyRepository = replyRepository;
+        this.announcementRepository = announcementRepository;
+        this.announcementService = announcementService;
     }
 
     @GetMapping("/main")
@@ -93,5 +101,37 @@ public class AdminController {
         return "reply";
     }
 
+    @GetMapping("/announcement")
+    public String showAnnouncementList(Model model) {
+        List<Announcement> announcements = announcementRepository.findAll();
+        model.addAttribute("announcements", announcements);
+        return "announcement";
+    }
 
+    @GetMapping("/announcement/create")
+    public String showCreateForm(Model model) {
+        model.addAttribute("announcementCreateReq", new AnnouncementCreateReq());
+        return "createAnnouncement";
+    }
+
+    @PostMapping("/announcement/create")
+    public String createAnnouncement(@ModelAttribute AnnouncementCreateReq request, RedirectAttributes attributes) {
+        announcementService.create(request);
+        attributes.addAttribute("showAnnouncementList", true); // 파라미터 추가
+        return "redirect:/api/v1/admin/main";
+    }
+
+    @PostMapping("/announcement/delete/{idx}")
+    public String deleteAnnouncement(@PathVariable Long idx, RedirectAttributes attributes) {
+        announcementService.delete(idx);
+        attributes.addAttribute("showAnnouncementList", true); // 파라미터 추가
+        return "redirect:/api/v1/admin/main";
+    }
+
+    @GetMapping("/announcement/info/{idx}")
+    public String infoAnnouncement(@PathVariable Long idx, Model model) {
+        Announcement announcement = announcementService.read(idx);
+        model.addAttribute("announcement", announcement);
+        return "infoAnnouncement"; // 공지사항 정보 템플릿 반환
+    }
 }

@@ -96,7 +96,7 @@ public class UnivBoardServiceImpl implements UnivBoardService {
                     .matchDt(post.getMatchDt());
         }
 
-        if(post.getEventId() != null) {
+        if (post.getEventId() != null) {
             event = eventRepository.findById(post.getEventId());
             event.ifPresent(value -> builder.eventName(value.getEventName()));
         }
@@ -161,7 +161,8 @@ public class UnivBoardServiceImpl implements UnivBoardService {
         List<Map<String, Object>> uploadedImages = null;
 
         if (dto.getPostImage() != null && !dto.getPostImage().isEmpty()) {
-            uploadedImages = uploadService.upload(dto.getPostImage(), dto.getMemberIdx(), AttachmentType.POST, savedUnivBoard.getUnivBoardId());
+            uploadedImages = uploadService.upload(dto.getPostImage(), dto.getMemberIdx(),
+                    AttachmentType.POST, savedUnivBoard.getUnivBoardId());
 
             // 업로드된 이미지 중 0번째 이미지를 대표 이미지로 지정
             Long representIdx = null;
@@ -301,10 +302,10 @@ public class UnivBoardServiceImpl implements UnivBoardService {
     public void modifyPost(PostDto dto) {
         try {
             UnivBoard univBoard = univBoardRepository.findById(dto.getUnivBoardId())
-                    .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_BOARD));
 
             memberRepository.findById(dto.getMemberIdx())
-                    .orElseThrow(()-> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
+                    .orElseThrow(() -> new CustomException(CustomExceptionCode.NOT_FOUND_USER));
 
 
             //수정을 요청한 사용자와 작성자가 다른 경우 : (본인인지의 대한 유효성 검사)

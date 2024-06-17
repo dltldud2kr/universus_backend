@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 페이지 - 공지사항 관리</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+  <h1 class="my-4">공지사항 관리</h1>
+  <div class="mb-3">
+    <button class="btn btn-primary" onclick="createAnnouncement()">새 공지사항 작성</button>
+  </div>
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>번호</th>
+      <th>제목</th>
+      <th>작성자</th>
+      <th>작성일</th>
+      <th>수정일</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 공지사항 목록 반복 처리 -->
+    <tr th:each="announcement : ${announcements}">
+      <td th:text="${announcement.idx}"></td>
+      <td th:text="${announcement.title}"></td>
+      <td th:text="${announcement.memberIdx}"></td>
+      <td>
+        <span th:text="${#temporals.format(announcement.regDt, 'yyyy-MM-dd HH:mm:ss')}"></span>
+      </td>
+      <td>
+        <span th:text="${#temporals.format(announcement.udtDt, 'yyyy-MM-dd HH:mm:ss')}"></span>
+      </td>
+      <td>
+        <div class="btn-group" role="group">
+          <form th:action="@{'/api/v1/admin/announcement/info/' + ${announcement.idx}}" method="get">
+            <button type="submit" class="btn btn-primary btn-sm">보기</button>
+          </form>
+          <form th:action="@{'/api/v1/admin/announcement/delete/' + ${announcement.idx}}" method="post"
+                onsubmit="return confirm('정말로 삭제하시겠습니까?');">
+            <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // URL 파라미터에서 showAnnouncementList 값이 true일 때 함수 실행
+    var urlParams = new URLSearchParams(window.location.search);
+    var alreadyExecuted = false; // 이미 실행 여부를 저장할 변수
+
+    if (urlParams.has('showAnnouncementList') && urlParams.get('showAnnouncementList') === 'true' && !alreadyExecuted) {
+      showAnnouncementList();
+      alreadyExecuted = true; // 실행되었음을 표시
+    }
+  });
+
+  function createAnnouncement() {
+    // 새 공지사항 작성 버튼 클릭 시, createAnnouncement 함수 호출하여 내용을 #content에 삽입
+    $.get("/api/v1/admin/announcement/create", function (data) {
+      $("#content").html(data);
+    });
+  }
+
+  function infoAnnouncement(idx) {
+    $.get("/api/v1/admin/announcement/info/" + idx, function (data) {
+      $("#content").html(data);
+    });
+  }
+
+  function showAnnouncementList() {
+    $.get("/api/v1/admin/announcement", function (data) {
+      $("#content").html(data);
+    });
+  }
+</script>
+</body>
+
+</html>
