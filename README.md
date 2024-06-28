@@ -89,8 +89,9 @@
 #### [Web](https://main.lunaweb.dev/universus_flutter_web/)
 ---
 
-## API 문서
+### 💻 API 문서
 #### [Universus API 문서](https://moyoapi.lunaweb.dev/swagger-ui/index.html)
+---
 
 ### ⚙️ 작업 목록
 #### [Front-end](https://lunadev.notion.site/6a7fe3ec90d24d9ea209680b80ab1522?v=74a43034e63842bf90444ad95f2625ae&pvs=4)
