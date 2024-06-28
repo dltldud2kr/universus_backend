@@ -36,3 +36,6 @@ application.properties
 
 ### VS Code ###
 .vscode/
+
+# Firebase Admin SDK JSON 파일 무시
+resources/firebase/universealert-1345f-firebase-adminsdk-j2uur-902548ff11.json
