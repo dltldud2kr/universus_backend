@@ -66,12 +66,12 @@
 
 ---
 
-#### Figma
+#### 🔥 Figma
 [피그마 링크](https://www.figma.com/design/rcohPG5PsVhePBI03CZuTE/UNIVERSUS?node-id=301-10&t=TY9D7atPmJJwQ3dO-0)
 ---
 [![Figma](https://github.com/ejeonghun/UniVersus_flutter/assets/41509711/25fe0015-7e59-4e24-9867-0fcea73a5692)](https://www.figma.com/design/rcohPG5PsVhePBI03CZuTE/UNIVERSUS?node-id=301-10&t=YGfQMFVtVzaEIyDX-1)
 
 ---
-#### ERD
+#### 👉 ERD
 ![ERD](https://github.com/ejeonghun/UniVersus_flutter/assets/41509711/92900437-37e9-43d5-b016-96df9f77159b)
 ---
