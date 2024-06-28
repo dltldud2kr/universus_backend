@@ -54,17 +54,21 @@
 - 클럽 활동 지원
    - 학교 내 클럽 활동을 활성화하여, 학생들이 다양한 스포츠 활동에 참여할 수 있도록 지원
 
-#### Deploy
+#### 🌎 Deploy
 ##### [Web](https://main.lunaweb.dev/universus_flutter_web/)
 ---
-#### 작업 목록
+#### ⚙️ 작업 목록
 ##### [Front-end](https://lunadev.notion.site/6a7fe3ec90d24d9ea209680b80ab1522?v=74a43034e63842bf90444ad95f2625ae&pvs=4)
 ##### [Back-end](https://lunadev.notion.site/a61d46db442446e0ba1e14715a0025ba?v=b346e4186f234c20a3d590e6c7da021d&pvs=4)
 ---
-#### 화면 구성
+#### 🎞 화면 구성 이미지
 ##### [화면 구성](https://github.com/ejeonghun/UniVersus_flutter/wiki/%ED%99%94%EB%A9%B4%EA%B5%AC%EC%84%B1)
 
+---
+
 #### Figma
+[피그마 링크](https://www.figma.com/design/rcohPG5PsVhePBI03CZuTE/UNIVERSUS?node-id=301-10&t=TY9D7atPmJJwQ3dO-0)
+---
 [![Figma](https://github.com/ejeonghun/UniVersus_flutter/assets/41509711/25fe0015-7e59-4e24-9867-0fcea73a5692)](https://www.figma.com/design/rcohPG5PsVhePBI03CZuTE/UNIVERSUS?node-id=301-10&t=YGfQMFVtVzaEIyDX-1)
 
 ---
