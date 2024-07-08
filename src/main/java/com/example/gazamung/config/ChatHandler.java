@@ -27,11 +27,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -182,37 +184,53 @@ public class ChatHandler extends TextWebSocketHandler {
 
         List<String> memberIdxValues = headers.get("memberIdx");
         if (memberIdxValues != null && !memberIdxValues.isEmpty()) {
+            // 헤더에서 memberIdx를 추출
             String memberIdx = memberIdxValues.get(0);
             parseIdx = Long.parseLong(memberIdx);
-
 
             // 추출된 memberIdx 값을 세션의 속성에 저장.
             session.getAttributes().put("memberIdx", memberIdx);
             log.info("WebSocket 연결에 포함된 memberIdx: " + memberIdx);
 
-            String nickname = memberRepository.findById(parseIdx).get().getNickname();
-            String room = extractRoom(session.getUri());
-
-            // 채팅방에 입장 메시지를 브로드캐스트.
-            List<WebSocketSession> roomSessions = chatRooms.get(room);
-            if (roomSessions != null) {
-                // 입장 메시지 생성
-                String entryMessage = nickname + "님이 입장하셨습니다.";
-                TextMessage entryTextMessage = new TextMessage(entryMessage);
-
-                // 해당 채팅방에 참가한 모든 세션에 입장 메시지 전송
-                for (WebSocketSession sess : roomSessions) {
-                    sess.sendMessage(entryTextMessage);
-                }
-            }
-
         } else {
-            // memberIdx 헤더가 없는 경우 예외처리.
-            throw new CustomException(CustomExceptionCode.NOT_FOUND_HEADER_DATA);
+            // 헤더에 memberIdx가 없는 경우, URL에서 추출
+            String query = session.getUri().getQuery();
+            if (query != null) {
+                Map<String, String> queryParams = Arrays.stream(query.split("&"))
+                        .map(param -> param.split("="))
+                        .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+                if (queryParams.containsKey("memberIdx")) {
+                    parseIdx = Long.parseLong(queryParams.get("memberIdx"));
+
+                    // 추출된 memberIdx 값을 세션의 속성에 저장.
+                    session.getAttributes().put("memberIdx", queryParams.get("memberIdx"));
+                    log.info("WebSocket URL에 포함된 memberIdx: " + queryParams.get("memberIdx"));
+                } else {
+                    throw new CustomException(CustomExceptionCode.NOT_FOUND_HEADER_DATA);
+                }
+            } else {
+                throw new CustomException(CustomExceptionCode.NOT_FOUND_HEADER_DATA);
+            }
+        }
+
+        String nickname = memberRepository.findById(parseIdx).get().getNickname();
+        String room = extractRoom(session.getUri());
+
+        // 채팅방에 입장 메시지를 브로드캐스트.
+        List<WebSocketSession> roomSessions = chatRooms.get(room);
+        if (roomSessions != null) {
+            // 입장 메시지 생성
+            String entryMessage = nickname + "님이 입장하셨습니다.";
+            TextMessage entryTextMessage = new TextMessage(entryMessage);
+
+            // 해당 채팅방에 참가한 모든 세션에 입장 메시지 전송
+            for (WebSocketSession sess : roomSessions) {
+                sess.sendMessage(entryTextMessage);
+            }
         }
 
         // 세션의 URI에서 roomId를 추출합니다.
-        String room = extractRoom(session.getUri());
+        room = extractRoom(session.getUri());
 
         String roomId = null;
         int battleType = -1;
@@ -236,7 +254,7 @@ public class ChatHandler extends TextWebSocketHandler {
                 System.err.println("Invalid battleType format: " + battleTypeStr);
             }
         } else {
-            // @TODO 유효한 형식이 아닐 경우.  예외 처리가 필요한 경우 추가하기
+            // @TODO 유효한 형식이 아닐 경우. 예외 처리가 필요한 경우 추가하기
         }
 
         // 해당 roomId에 대한 채팅방이 없으면 새로 생성합니다.
@@ -248,7 +266,7 @@ public class ChatHandler extends TextWebSocketHandler {
         log.info("dynamicId " + dynamicId);
 
         // 채팅방에 현재 세션을 추가합니다.
-        List<WebSocketSession> roomSessions = chatRooms.get(room);
+        roomSessions = chatRooms.get(room);
         roomSessions.add(session);
 
         // 이전 채팅 내용을 DB에서 가져옵니다.
@@ -259,7 +277,7 @@ public class ChatHandler extends TextWebSocketHandler {
         ArrayNode chatMessageArray = mapper.createArrayNode();
         for (ChatMessage chatMessage : chatMessageList) {
 
-            if (chatMessage.getMemberIdx() == null){
+            if (chatMessage.getMemberIdx() == null) {
                 ObjectNode messageNode = mapper.createObjectNode();
                 messageNode.put("nickname", chatMessage.getNickname());
                 messageNode.put("content", chatMessage.getContent());
@@ -282,7 +300,6 @@ public class ChatHandler extends TextWebSocketHandler {
                 messageNode.put("regDt", formatLocalDateTime(chatMessage.getRegDt()));
                 chatMessageArray.add(messageNode);
             }
-
         }
         // JSON 배열을 문자열로 직렬화하여 클라이언트에게 전송합니다.
         String chatMessageJson = mapper.writeValueAsString(chatMessageArray);
@@ -290,6 +307,7 @@ public class ChatHandler extends TextWebSocketHandler {
 
         log.info(session + " 클라이언트 접속 (roomId: " + room + ")");
     }
+
 
 
     /**
