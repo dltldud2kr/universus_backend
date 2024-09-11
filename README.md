@@ -87,6 +87,9 @@
 
 ### 🌎 Deploy
 #### [Web](https://main.lunaweb.dev/universus_flutter_web/)
+## Test Account
+- ID : test@g.yju.ac.kr
+- PW : 1234
 ---
 
 ### 💻 API 명세서
